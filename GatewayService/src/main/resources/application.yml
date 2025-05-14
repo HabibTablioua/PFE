@@ -1,0 +1,29 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: gateway-service
+
+  cloud:
+    gateway:
+      routes:
+        - id: response-iso-service
+          uri: http://localhost:8083
+          predicates:
+            - Path=/api/response/**
+
+        - id: packing-iso-service
+          uri: http://localhost:8082
+          predicates:
+            - Path=/api/packing/**
+
+        - id: depacking-iso-service
+          uri: http://localhost:8085
+          predicates:
+            - Path=/api/depacking/**
+
+        - id: transaction-history-service
+          uri: http://localhost:8084
+          predicates:
+            - Path=/api/history/**

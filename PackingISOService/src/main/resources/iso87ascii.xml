@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE isopackager SYSTEM "D:\PFE\PackingISOService\src\main\resources\iso87ascii-packager-1.0.dtd">
+<isopackager>
+    <isofield id="0" length="4" name="Message Type Indicator" class="org.jpos.iso.IFA_NUMERIC"/>
+    <isofield id="1" length="16" name="Bitmap" class="org.jpos.iso.IFA_BITMAP"/>
+    <isofield id="2" length="19" name="Primary Account Number" class="org.jpos.iso.IFA_LLNUM"/>
+    <isofield id="3" length="6" name="Processing Code" class="org.jpos.iso.IFA_NUMERIC"/>
+    <isofield id="4" length="12" name="Amount, Transaction" class="org.jpos.iso.IFA_NUMERIC"/>
+    <isofield id="5" length="12" name="Amount, Settlement" class="org.jpos.iso.IFA_NUMERIC"/>
+    <isofield id="6" length="12" name="Amount, Cardholder Billing" class="org.jpos.iso.IFA_NUMERIC"/>
+    <isofield id="7" length="10" name="Transmission Date &amp; Time" class="org.jpos.iso.IFA_NUMERIC"/>
+    <isofield id="8" length="8" name="Amount, Cardholder Billing Fee" class="org.jpos.iso.IFA_NUMERIC"/>
+    <isofield id="9" length="8" name="Conversion Rate, Settlement" class="org.jpos.iso.IFA_NUMERIC"/>
+    <isofield id="10" length="8" name="Conversion Rate, Cardholder Billing" class="org.jpos.iso.IFA_NUMERIC"/>
+    <isofield id="11" length="6" name="System Trace Audit Number" class="org.jpos.iso.IFA_NUMERIC"/>
+    <isofield id="12" length="6" name="Time, Local Transaction" class="org.jpos.iso.IFA_NUMERIC"/>
+    <isofield id="13" length="4" name="Date, Local Transaction" class="org.jpos.iso.IFA_NUMERIC"/>
+    <isofield id="14" length="4" name="Date, Expiration" class="org.jpos.iso.IFA_NUMERIC"/>
+    <isofield id="15" length="4" name="Date, Settlement" class="org.jpos.iso.IFA_NUMERIC"/>
+    <isofield id="16" length="4" name="Date, Conversion" class="org.jpos.iso.IFA_NUMERIC"/>
+    <isofield id="17" length="4" name="Date, Capture" class="org.jpos.iso.IFA_NUMERIC"/>
+    <isofield id="18" length="4" name="Merchant Category Code" class="org.jpos.iso.IFA_NUMERIC"/>
+    <isofield id="19" length="3" name="Acquiring Institution Country Code" class="org.jpos.iso.IFA_NUMERIC"/>
+    <isofield id="20" length="3" name="PAN Extended Country Code" class="org.jpos.iso.IFA_NUMERIC"/>
+    <isofield id="21" length="3" name="Forwarding Institution Country Code" class="org.jpos.iso.IFA_NUMERIC"/>
+    <isofield id="22" length="3" name="Point of Service Entry Mode" class="org.jpos.iso.IFA_NUMERIC"/>
+    <isofield id="23" length="3" name="Card Sequence Number" class="org.jpos.iso.IFA_NUMERIC"/>
+    <isofield id="24" length="3" name="Function Code" class="org.jpos.iso.IFA_NUMERIC"/>
+    <isofield id="25" length="2" name="Point of Service Condition Code" class="org.jpos.iso.IFA_NUMERIC"/>
+    <isofield id="26" length="2" name="POS Capture Code" class="org.jpos.iso.IFA_NUMERIC"/>
+    <isofield id="27" length="1" name="Authorizing Identification Response Length" class="org.jpos.iso.IFA_NUMERIC"/>
+    <isofield id="28" length="9" name="Amount, Transaction Fee" class="org.jpos.iso.IFA_NUMERIC"/>
+    <isofield id="29" length="9" name="Amount, Settlement Fee" class="org.jpos.iso.IFA_NUMERIC"/>
+    <isofield id="30" length="9" name="Amount, Transaction Processing Fee" class="org.jpos.iso.IFA_NUMERIC"/>
+    <isofield id="31" length="9" name="Amount, Settlement Processing Fee" class="org.jpos.iso.IFA_NUMERIC"/>
+    <isofield id="32" length="11" name="Acquiring Institution ID Code" class="org.jpos.iso.IFA_LLNUM"/>
+    <isofield id="33" length="11" name="Forwarding Institution ID Code" class="org.jpos.iso.IFA_LLNUM"/>
+    <isofield id="34" length="28" name="Primary Account Number, Extended" class="org.jpos.iso.IFA_LLNUM"/>
+    <isofield id="35" length="37" name="Track 2 Data" class="org.jpos.iso.IFA_LLNUM"/>
+    <isofield id="36" length="104" name="Track 3 Data" class="org.jpos.iso.IFA_LLLCHAR"/>
+    <isofield id="37" length="12" name="Retrieval Reference Number" class="org.jpos.iso.IFA_NUMERIC"/>
+    <isofield id="38" length="6" name="Authorization Identification Response" class="org.jpos.iso.IFA_NUMERIC"/>
+    <isofield id="39" length="2" name="Response Code" class="org.jpos.iso.IFA_NUMERIC"/>
+    <isofield id="40" length="3" name="Service Restriction Code" class="org.jpos.iso.IFA_NUMERIC"/>
+    <isofield id="41" length="8" name="Card Acceptor Terminal Identification" class="org.jpos.iso.IFA_NUMERIC"/>
+    <isofield id="42" length="15" name="Card Acceptor Identification Code" class="org.jpos.iso.IFA_NUMERIC"/>
+    <isofield id="43" length="51" name="Card Acceptor Name/Location" class="org.jpos.iso.IFA_LLCHAR"/>
+    <isofield id="44" length="25" name="Additional Response Data" class="org.jpos.iso.IFA_LLCHAR"/>
+    <isofield id="45" length="76" name="Track 1 Data" class="org.jpos.iso.IFA_LLCHAR"/>
+    <isofield id="46" length="999" name="Additional Data - ISO" class="org.jpos.iso.IFA_LLLCHAR"/>
+    <isofield id="47" length="999" name="Additional Data - National" class="org.jpos.iso.IFA_LLLCHAR"/>
+    <isofield id="48" length="999" name="Additional Data - Private" class="org.jpos.iso.IFA_LLLCHAR"/>
+    <isofield id="49" length="3" name="Currency Code, Transaction" class="org.jpos.iso.IFA_NUMERIC"/>
+</isopackager>

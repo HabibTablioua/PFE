@@ -1,0 +1,104 @@
+package org.example.packingisoservice.Service;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+import org.example.packingisoservice.DTO.IsoFieldsRequest;
+import org.example.packingisoservice.DTO.PackingISOResponse;
+import org.jpos.iso.ISOMsg;
+import org.jpos.iso.packager.GenericPackager;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+
+import java.nio.charset.StandardCharsets;
+import java.util.Map;
+
+
+@Service
+@Slf4j
+@RequiredArgsConstructor
+public class PackingISOService {
+
+    private final RestTemplate restTemplate;
+
+
+    public PackingISOResponse packAscii(IsoFieldsRequest request) {
+        String packed = pack(request, false);
+            saveToHistory(request.getMti(), request.getFields(), packed, "ASCII");
+        sendLogToMonitoring("SUCCESS", "Packing ASCII réussi pour MTI : " + request.getMti());
+        return new PackingISOResponse(packed);
+    }
+
+    public PackingISOResponse packHex(IsoFieldsRequest request) {
+        String packed = pack(request, true);
+            saveToHistory(request.getMti(), request.getFields(), packed, "HEX");
+        sendLogToMonitoring("SUCCESS", "Packing HEX réussi pour MTI : " + request.getMti());
+        return new PackingISOResponse(packed);
+    }
+
+
+    private String pack(IsoFieldsRequest request, boolean hex) {
+        try {
+            GenericPackager packager = new GenericPackager(getClass().getClassLoader().getResourceAsStream("iso87ascii.xml"));
+            ISOMsg isoMsg = new ISOMsg();
+            isoMsg.setPackager(packager);
+            isoMsg.setMTI(request.getMti());
+
+            for (Map.Entry<String, String> entry : request.getFields().entrySet()) {
+                isoMsg.set(Integer.parseInt(entry.getKey()), entry.getValue());
+            }
+
+            byte[] packed = isoMsg.pack();
+            return hex ? bytesToHex(packed) : new String(packed, StandardCharsets.US_ASCII);
+
+        } catch (Exception e) {
+            log.error("Packing error", e);
+            sendLogToMonitoring("ERROR", "Erreur de packing pour MTI : " + request.getMti() + " - " + e.getMessage());
+            throw new RuntimeException("Packing failed", e);
+        }
+    }
+
+    private String bytesToHex(byte[] bytes) {
+        StringBuilder sb = new StringBuilder();
+        for (byte b : bytes) {
+            sb.append(String.format("%02X", b));
+        }
+        return sb.toString();
+    }
+
+    private void saveToHistory(String mti, Map<String, String> fields, String message, String format) {
+        // ici on appelle le microservice d'historique
+        String historyUrl = "http://localhost:8084/history"; // adapte le nom du service et chemin
+
+        Map<String, Object> payload = Map.of(
+                "mti", mti,
+                "fields", fields,
+                "message", message,
+                "format", format,
+                "source", "PackingISOService",
+                "status", "SUCCESS"
+        );
+
+        try {
+            restTemplate.postForObject(historyUrl, payload, Void.class);
+            log.info("✅ Message enregistré dans l’historique.");
+            sendLogToMonitoring("SUCCESS", "Message enregistré dans historique pour MTI : " + mti);
+        } catch (Exception e) {
+            log.warn("⚠️ Échec d’enregistrement dans l’historique : {}", e.getMessage());
+            sendLogToMonitoring("ERROR", "Erreur d'enregistrement historique pour MTI : " + mti + " - " + e.getMessage());
+        }
+    }
+
+    private void sendLogToMonitoring(String level, String message) {
+        try {
+            String url = "http://localhost:8085/logs/save?level=" + level + "&message=" + java.net.URLEncoder.encode(message, "UTF-8");
+            log.info("➡️ Envoi du log vers MonitoringService : {}", url);
+            restTemplate.postForEntity(url, null, String.class);
+        } catch (Exception e) {
+            log.warn("⚠️ Impossible d'envoyer le log au MonitoringService : {}", e.getMessage());
+        }
+    }
+
+}
+
+
