@@ -9,4 +9,3 @@ public class IsoFieldsRequest {
     private String mti;
     private Map<String, String> fields;
 }
-

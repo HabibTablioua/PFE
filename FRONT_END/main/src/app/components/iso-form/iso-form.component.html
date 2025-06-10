@@ -1,0 +1,24 @@
+<button type="button" (click)="showForm = !showForm">
+  {{ showForm ? 'Fermer le formulaire' : 'Nouveau message ISO' }}
+</button>
+
+<div *ngIf="showForm">
+  <form [formGroup]="form">
+    <label>MTI :
+      <input formControlName="mti" maxlength="4" />
+    </label>
+    <div *ngFor="let field of isoFields">
+      <label>
+        {{field.name}} ({{field.id}})
+        <input [formControlName]="field.id" [maxlength]="field.length" />
+      </label>
+    </div>
+    <button type="button" (click)="generate('ascii')">Générer ASCII</button>
+    <button type="button" (click)="generate('hex')">Générer HEXA</button>
+  </form>
+
+  <div *ngIf="result">
+    <h3>Message généré :</h3>
+    <pre>{{result}}</pre>
+  </div>
+</div>

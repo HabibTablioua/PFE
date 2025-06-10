@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 
 @RestController
-@RequestMapping("/packing-iso")
+@RequestMapping("/packing")
 @RequiredArgsConstructor
 public class PackingISOController {
 

@@ -1,0 +1,5 @@
+server:
+  port: 8090
+
+validation-service:
+  base-url: http://localhost:8082

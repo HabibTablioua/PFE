@@ -17,7 +17,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 @RestController
-@RequestMapping("/api/depack")
+@RequestMapping("/depacking")
 public class DepackingISOController {
 
     private final DepackingISOService depackingISOService;

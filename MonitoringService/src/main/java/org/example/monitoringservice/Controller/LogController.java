@@ -35,9 +35,6 @@ public class LogController {
     private static final DateTimeFormatter LOG_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"); // Format que tu veux utiliser
 
 
-
-
-
     @GetMapping
     public ResponseEntity<List<String>> getAllLogs() throws IOException {
         List<String> allLines = Files.readAllLines(Path.of(LOG_FILE_PATH));
