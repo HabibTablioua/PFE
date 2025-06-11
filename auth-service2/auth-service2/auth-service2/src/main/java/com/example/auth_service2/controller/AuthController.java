@@ -33,6 +33,7 @@ public class AuthController {
         String firstname = request.get("firstname");
         String lastname = request.get("lastname");
         String email = request.get("email");
+        if (email != null) email = email.trim();
         String password = request.get("password");
 
         if (firstname == null || lastname == null || email == null || password == null) {
@@ -53,7 +54,8 @@ public class AuthController {
 
         userRepository.save(newUser);
 
-        return ResponseEntity.ok("User registered successfully.");
+        return ResponseEntity.ok(Map.of("message", "User registered successfully"));
+
     }
 
 
@@ -64,9 +66,10 @@ public class AuthController {
         String password = request.get("password");
 
         Optional<User> userOpt = userRepository.findByEmail(email);
-        if (userOpt.isEmpty() || !userOpt.get().getPassword().equals(password)) {
+        if (userOpt.isEmpty() || !passwordEncoder.matches(password, userOpt.get().getPassword())) {
             return ResponseEntity.status(401).body("Invalid email or password");
         }
+
 
         User user = userOpt.get();
         String token = jwtUtil.generateToken(user.getEmail(), user.getRoles());

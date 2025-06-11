@@ -12,9 +12,6 @@ export const PagesRoutes: Routes = [
         { title: 'Starter Page' },
       ],
     },
-  },
-  {
-    path: 'message',
-    loadComponent: () => import('../components/iso-form/iso-form.component').then(m => m.IsoFormComponent),
-  },
+  }
+  // La route 'message' a été supprimée car le composant iso-form n'existe plus
 ];

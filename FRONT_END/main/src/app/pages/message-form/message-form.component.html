@@ -1,0 +1,22 @@
+<div class="p-24">
+  <mat-card>
+    <mat-card-content>
+      <div class="d-flex justify-content-between align-items-center">
+        <mat-card-title>Formulaire de Message ISO</mat-card-title>
+      </div>
+      <form [formGroup]="messageForm" (ngSubmit)="generateMessage()">
+        <div class="row">
+          @for (field of messageForm.controls | keyvalue; track field.key) {
+          <div class="col-md-6 col-lg-4">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>{{ field.key }} - {{ getFieldName(field.key) }}</mat-label>
+              <input matInput [formControlName]="field.key">
+            </mat-form-field>
+          </div>
+          }
+        </div>
+        <button mat-raised-button color="primary" type="submit">Générer le Message</button>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div> 

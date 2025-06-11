@@ -18,6 +18,11 @@ export const routes: Routes = [
           import('./pages/pages.routes').then((m) => m.PagesRoutes),
       },
       {
+        path: 'message-form',
+        loadComponent: () =>
+          import('./pages/message-form/message-form.component').then((m) => m.MessageFormComponent),
+      },
+      {
         path: 'ui-components',
         loadChildren: () =>
           import('./pages/ui-components/ui-components.routes').then(

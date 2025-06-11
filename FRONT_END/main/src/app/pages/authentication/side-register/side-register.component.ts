@@ -53,26 +53,23 @@ export class AppSideRegisterComponent {
       password: this.f['password'].value!
     }).subscribe({
       next: (response) => {
-        console.log('Inscription réussie !', {
-          user: {
-            firstname: this.f['firstname'].value,
-            lastname: this.f['lastname'].value,
-            email: this.f['email'].value
-          },
-          timestamp: new Date().toLocaleString()
-        });
-
-        this.snackBar.open('Inscription réussie ! Redirection vers la page de connexion...', 'Fermer', {
-          duration: 3000,
-          panelClass: ['success-snackbar']
-        });
-        setTimeout(() => {
-          this.router.navigate(['/authentication/side-login']);
-        }, 2000);
+        if (response.status === 200) {
+          this.snackBar.open('Utilisateur enregistré avec succès ! Vous allez être redirigé vers la page de connexion.', 'Fermer', {
+            duration: 3000,
+            panelClass: ['success-snackbar']
+          });
+          setTimeout(() => {
+            window.location.href = 'http://localhost:4200/authentication/login';
+          }, 2000);
+        } else {
+          this.snackBar.open('Une erreur est survenue lors de l\'inscription.', 'Fermer', {
+            duration: 5000,
+            panelClass: ['error-snackbar']
+          });
+        }
       },
       error: (err) => {
-        console.error('Erreur lors de l\'inscription:', err);
-        let errorMessage = 'Une erreur est survenue lors de l\'inscription';
+        let errorMessage = '';
         if (err.status === 409) {
           errorMessage = "Cet email est déjà utilisé. Veuillez en choisir un autre.";
         } else if (err.status === 422) {
