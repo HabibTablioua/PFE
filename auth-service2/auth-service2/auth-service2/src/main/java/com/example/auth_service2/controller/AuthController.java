@@ -5,6 +5,7 @@ import com.example.auth_service2.repository.UserRepository;
 import com.example.auth_service2.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,27 +25,30 @@ public class AuthController {
     @Autowired
     private JwtUtil jwtUtil;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody Map<String, String> request) {
+    public ResponseEntity<?> register(@RequestBody Map<String, String> request){
         String firstname = request.get("firstname");
         String lastname = request.get("lastname");
         String email = request.get("email");
         String password = request.get("password");
 
         if (firstname == null || lastname == null || email == null || password == null) {
-            return ResponseEntity.badRequest().body("All fields are required.");
+            return ResponseEntity.status(422).body("All fields are required.");
         }
 
         // Vérifie si l'email existe déjà
         if (userRepository.findByEmail(email).isPresent()) {
-            return ResponseEntity.badRequest().body("Email already exists.");
+            return ResponseEntity.status(409).body("Email already exists.");
         }
 
         User newUser = new User();
         newUser.setFirstname(firstname);
         newUser.setLastname(lastname);
         newUser.setEmail(email);
-        newUser.setPassword(password); // 🔐 À chiffrer en prod
+        newUser.setPassword(passwordEncoder.encode(password));
         newUser.setRoles(Collections.singletonList("USER"));
 
         userRepository.save(newUser);

@@ -4,20 +4,13 @@ server:
 spring:
   application:
     name: gateway-service
+
   cloud:
     gateway:
       discovery:
         locator:
           enabled: true
           lower-case-service-id: true
-      globalcors:
-        corsConfigurations:
-          '[/**]':
-            allowedOrigins: "http://localhost:4200"
-            allowedMethods: "*"
-            allowedHeaders: "*"
-            allowCredentials: true
-            maxAge: 3600
       routes:
         - id: packingisoservice
           uri: lb://packing-iso-service
@@ -58,6 +51,21 @@ spring:
           filters:
             - StripPrefix=1
 
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins:
+              - "http://localhost:4200/"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowedHeaders:
+              - "*"
+            allowCredentials: true
+
 eureka:
   client:
     register-with-eureka: true
@@ -67,4 +75,4 @@ eureka:
 
 jwt:
   secret: super-ultra-mega-long-secret-key-123456
-  expiration: 86400000  # 24 hours in milliseconds 
+  expiration: 86400000  # 24 hours in milliseconds

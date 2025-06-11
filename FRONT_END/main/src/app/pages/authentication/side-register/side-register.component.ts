@@ -73,7 +73,11 @@ export class AppSideRegisterComponent {
       error: (err) => {
         console.error('Erreur lors de l\'inscription:', err);
         let errorMessage = 'Une erreur est survenue lors de l\'inscription';
-        if (err.error && err.error.message) {
+        if (err.status === 409) {
+          errorMessage = "Cet email est déjà utilisé. Veuillez en choisir un autre.";
+        } else if (err.status === 422) {
+          errorMessage = "Tous les champs sont obligatoires.";
+        } else if (err.error && err.error.message) {
           errorMessage = err.error.message;
         }
         this.snackBar.open(errorMessage, 'Fermer', {
