@@ -1,5 +1,6 @@
 package org.example.packingisoservice.Service;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -7,8 +8,13 @@ import org.example.packingisoservice.DTO.IsoFieldsRequest;
 import org.example.packingisoservice.DTO.PackingISOResponse;
 import org.jpos.iso.ISOMsg;
 import org.jpos.iso.packager.GenericPackager;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
@@ -24,7 +30,8 @@ public class PackingISOService {
 
     public PackingISOResponse packAscii(IsoFieldsRequest request) {
         String packed = pack(request, false);
-            saveToHistory(request.getMti(), request.getFields(), packed, "ASCII");
+        saveToHistory(request.getMti(), request.getFields(), packed, "ASCII");
+        log.info("Packing ISO Response: " + packed);
         sendLogToMonitoring("SUCCESS", "Packing ASCII réussi pour MTI : " + request.getMti());
         return new PackingISOResponse(packed);
     }
@@ -66,6 +73,19 @@ public class PackingISOService {
         return sb.toString();
     }
 
+    private String getAuthTokenFromRequest() {
+        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        if (attributes != null) {
+            HttpServletRequest request = attributes.getRequest();
+            String authHeader = request.getHeader("Authorization");
+            if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                return authHeader;
+            }
+        }
+        return null;
+    }
+
+
     private void saveToHistory(String mti, Map<String, String> fields, String message, String format) {
         // ici on appelle le microservice d'historique
         String historyUrl = "http://localhost:8084/history"; // adapte le nom du service et chemin
@@ -80,7 +100,18 @@ public class PackingISOService {
         );
 
         try {
-            restTemplate.postForObject(historyUrl, payload, Void.class);
+            String token = getAuthTokenFromRequest();
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            if (token != null) {
+                headers.set("Authorization", token);
+            }
+
+            HttpEntity<Map<String, Object>> entity = new HttpEntity<>(payload, headers);
+            restTemplate.postForEntity(historyUrl, entity, Void.class);
+
+            log.info("payload :" + payload.toString());
             log.info("✅ Message enregistré dans l’historique.");
             sendLogToMonitoring("SUCCESS", "Message enregistré dans historique pour MTI : " + mti);
         } catch (Exception e) {
@@ -91,13 +122,34 @@ public class PackingISOService {
 
     private void sendLogToMonitoring(String level, String message) {
         try {
-            String url = "http://localhost:8085/logs/save?level=" + level + "&message=" + java.net.URLEncoder.encode(message, "UTF-8");
-            log.info("➡️ Envoi du log vers MonitoringService : {}", url);
-            restTemplate.postForEntity(url, null, String.class);
+            String url = "http://localhost:8085/logs/save"; // ⚠️ Pas 8088 ! Vérifie que ton MonitoringService tourne bien sur 8085
+
+            // 📦 Payload à envoyer dans le body
+            Map<String, Object> payload = Map.of(
+                    "level", level,
+                    "message", message
+            );
+
+            // 🔐 Récupérer le token JWT depuis la requête
+            String token = getAuthTokenFromRequest();
+
+            // 🧾 Préparer les headers avec le token + content-type
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            if (token != null && !token.isEmpty()) {
+                headers.set("Authorization", token);
+            }
+
+            // 📤 Envoyer la requête POST avec le body JSON et les headers
+            HttpEntity<Map<String, Object>> entity = new HttpEntity<>(payload, headers);
+            restTemplate.postForEntity(url, entity, String.class);
+
+            log.info("✅ Log envoyé au MonitoringService : {} - {}", level, message);
         } catch (Exception e) {
             log.warn("⚠️ Impossible d'envoyer le log au MonitoringService : {}", e.getMessage());
         }
     }
+
 
 }
 

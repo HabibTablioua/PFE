@@ -1,22 +1,62 @@
 <div class="p-24">
   <mat-card>
     <mat-card-content>
-      <div class="d-flex justify-content-between align-items-center">
-        <mat-card-title>Formulaire de Message ISO</mat-card-title>
-      </div>
-      <form [formGroup]="messageForm" (ngSubmit)="generateMessage()">
-        <div class="row">
-          @for (field of messageForm.controls | keyvalue; track field.key) {
-          <div class="col-md-6 col-lg-4">
-            <mat-form-field appearance="outline" class="w-100">
-              <mat-label>{{ field.key }} - {{ getFieldName(field.key) }}</mat-label>
-              <input matInput [formControlName]="field.key">
-            </mat-form-field>
+      <app-header 
+        icon="credit_card"
+        title="ISO 8583 Message Builder"
+        subtitle="Remplissez les champs ISO 8583 et générez un message au format ASCII ou HEX."
+      ></app-header>
+
+      <div *ngIf="showForm">
+        <form [formGroup]="messageForm" (ngSubmit)="generateMessage()">
+          <div class="row">
+            <!-- MTI Combobox -->
+            <div class="col-md-6 col-lg-4">
+              <mat-form-field appearance="outline" class="w-100">
+                <mat-label>Sélectionnez un type de message (MTI)</mat-label>
+                <mat-icon matPrefix>credit_card</mat-icon>
+                <mat-select formControlName="mti" required>
+                  <mat-option *ngFor="let option of mtiOptions" [value]="option.value">
+                    {{ option.viewValue }}
+                  </mat-option>
+                </mat-select>
+                <mat-error *ngIf="messageForm.get('mti')?.hasError('required') && messageForm.get('mti')?.touched">
+                  MTI est requis.
+                </mat-error>
+              </mat-form-field>
+            </div>
+
+            <!-- Other fields -->
+            @for (key of orderedFieldKeys; track key) {
+            <div class="col-md-6 col-lg-4">
+              <mat-form-field appearance="outline" class="w-100">
+                <mat-label>{{ key }} - {{ getFieldName(key) }}</mat-label>
+                <input matInput [formControlName]="key" placeholder="Saisir {{ getFieldName(key) }}">
+              </mat-form-field>
+            </div>
+            }
           </div>
-          }
+          <button mat-raised-button color="primary" type="submit">Générer le Message</button>
+        </form>
+      </div>
+
+      <div *ngIf="!showForm" class="result-container" [@fadeIn]>
+        <h3>Message ISO Généré :</h3>
+        <div class="message-output-box">
+          <pre class="generated-message">{{ generatedMessage }}</pre>
+          <button mat-icon-button color="accent" (click)="copyMessage()" class="copy-button">
+            <mat-icon>content_copy</mat-icon>
+          </button>
         </div>
-        <button mat-raised-button color="primary" type="submit">Générer le Message</button>
-      </form>
+        <div class="action-buttons">
+          <button mat-raised-button color="basic" (click)="resetForm()">
+            Retour
+          </button>
+          <button mat-raised-button color="primary" (click)="editForm()" class="ml-2">
+            Modifier
+          </button>
+        </div>
+      </div>
     </mat-card-content>
   </mat-card>
 </div> 

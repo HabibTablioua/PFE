@@ -18,6 +18,7 @@ import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -346,13 +347,13 @@ public class LogController {
 
 
     @PostMapping("/save")
-    public ResponseEntity<String> saveLog(
-            @RequestParam String level, // SUCCESS, ERROR, INFO, etc.
-            @RequestParam String message
-    ) {
+    public ResponseEntity<String> saveLog(@RequestBody Map<String, String> body) {
+        String level = body.get("level");
+        String message = body.get("message");
         logService.saveLog(level, message);
         return ResponseEntity.ok("Log enregistré avec succès ✅");
     }
+
 
 
 
