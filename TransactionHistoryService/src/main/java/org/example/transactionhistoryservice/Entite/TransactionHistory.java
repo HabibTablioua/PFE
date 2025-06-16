@@ -2,6 +2,7 @@ package org.example.transactionhistoryservice.Entite;
 
 import jakarta.persistence.*;
 import lombok.*;
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 import java.util.Date;
 
@@ -33,6 +34,7 @@ public class TransactionHistory {
 
     @Column(updatable = false)
     @Temporal(TemporalType.TIMESTAMP)
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
     private Date createdAt;
 
     @PrePersist

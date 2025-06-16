@@ -90,6 +90,10 @@ public class TransactionHistoryService {
         repository.deleteById(id);
     }
 
+    public void deleteAll() {
+        repository.deleteAll();
+    }
+
 
 
 

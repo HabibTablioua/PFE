@@ -5,6 +5,7 @@ import { MaterialModule } from 'src/app/material.module';
 import { HttpClient, HttpClientModule, HttpHeaders } from '@angular/common/http';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { AppHeaderComponent } from '../../components/app-header/app-header.component';
+import { trigger, state, style, transition, animate } from '@angular/animations';
 
 @Component({
   selector: 'app-message-form',
@@ -12,6 +13,14 @@ import { AppHeaderComponent } from '../../components/app-header/app-header.compo
   styleUrls: [],
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, MaterialModule, HttpClientModule, MatSnackBarModule, AppHeaderComponent],
+  animations: [
+    trigger('fadeIn', [
+      state('void', style({ opacity: 0 })),
+      transition(':enter, :leave', [
+        animate('0.5s ease-in-out')
+      ])
+    ])
+  ],
   styles: [`
     .result-container {
       margin-top: 20px;
@@ -211,10 +220,13 @@ export class MessageFormComponent implements OnInit {
       const mti = formValue.mti;
       const fields: { [key: string]: string } = {};
 
-      // Collect other fields dynamically
+      // Collect other fields dynamically, only if they are not empty
       for (const key in formValue) {
         if (formValue.hasOwnProperty(key) && key !== 'mti') {
-          fields[key.replace('id', '')] = formValue[key]; // Remove 'id' prefix for backend
+          const fieldValue = formValue[key];
+          if (fieldValue !== null && fieldValue !== undefined && fieldValue !== '') {
+            fields[key.replace('id', '')] = fieldValue;
+          }
         }
       }
 
@@ -250,6 +262,53 @@ export class MessageFormComponent implements OnInit {
     }
   }
 
+  generateHexMessage(): void {
+    if (this.messageForm.valid) {
+      const formValue = this.messageForm.value;
+      const mti = formValue.mti;
+      const fields: { [key: string]: string } = {};
+
+      // Collect other fields dynamically, only if they are not empty
+      for (const key in formValue) {
+        if (formValue.hasOwnProperty(key) && key !== 'mti') {
+          const fieldValue = formValue[key];
+          if (fieldValue !== null && fieldValue !== undefined && fieldValue !== '') {
+            fields[key.replace('id', '')] = fieldValue;
+          }
+        }
+      }
+
+      const requestBody = {
+        mti: mti,
+        fields: fields
+      };
+
+      const token = localStorage.getItem('token');
+
+      const headers = new HttpHeaders({
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      });
+
+      this.http.post('http://localhost:8088/api/packing/pack-hex', requestBody, { headers: headers })
+        .subscribe({
+          next: (response: any) => {
+            console.log('Message HEX généré avec succès:', response);
+            this.snackBar.open('Message HEX généré avec succès!', 'Fermer', { duration: 3000 });
+            this.generatedMessage = response.message; // Assurez-vous que 'message' est la bonne clé
+            this.showForm = false;
+          },
+          error: (error) => {
+            console.error('Erreur lors de la génération du message HEX:', error);
+            this.snackBar.open('Erreur lors de la génération du message HEX.', 'Fermer', { duration: 5000 });
+          }
+        });
+    } else {
+      this.messageForm.markAllAsTouched();
+      this.snackBar.open('Veuillez remplir tous les champs requis.', 'Fermer', { duration: 3000 });
+    }
+  }
+
   getFieldName(key: string): string {
     return this.fieldNames[key] || key;
   }
@@ -270,6 +329,12 @@ export class MessageFormComponent implements OnInit {
   }
 
   editForm(): void {
-    this.showForm = true; // Réafficher le formulaire
+    this.showForm = true;
+    this.generatedMessage = '';
+  }
+
+  clearForm(): void {
+    this.messageForm.reset();
+    this.messageForm.get('mti')?.setValue(''); // Reset MTI explicitly as it has a required validator
   }
 } 

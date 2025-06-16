@@ -66,6 +66,12 @@ public class TransactionHistoryController {
         return ResponseEntity.noContent().build();
     }
 
+    @DeleteMapping("/all")
+    public ResponseEntity<Void> deleteAll() {
+        historyService.deleteAll();
+        return ResponseEntity.noContent().build();
+    }
+
 
 
 }

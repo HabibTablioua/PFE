@@ -23,6 +23,20 @@ export const routes: Routes = [
           import('./pages/message-form/message-form.component').then((m) => m.MessageFormComponent),
       },
       {
+        path: 'iso-depacker',
+        loadComponent: () =>
+          import('./pages/iso-depacker/iso-depacker.component').then(
+            (m) => m.IsoDepackerComponent
+          ),
+      },
+      {
+        path: 'transaction-history',
+        loadComponent: () =>
+          import('./pages/transaction-history/transaction-history.component').then(
+            (m) => m.TransactionHistoryComponent
+          ),
+      },
+      {
         path: 'ui-components',
         loadChildren: () =>
           import('./pages/ui-components/ui-components.routes').then(

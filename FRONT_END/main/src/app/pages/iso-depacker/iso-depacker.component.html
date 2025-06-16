@@ -1,0 +1,46 @@
+<app-header
+  title="Dépaqueter un message ISO 8583"
+  subtitle="Collez votre message ISO (ASCII ou HEX) pour analyser ses champs."
+  icon="description"
+></app-header>
+
+<div class="depacker-container">
+  <div class="depack-button-section" *ngIf="!showDepackerArea">
+    <button mat-raised-button color="primary" (click)="toggleDepackerArea()">
+      <mat-icon>cloud_download</mat-icon> Dépaqueter un message ISO
+    </button>
+  </div>
+
+  <div *ngIf="showDepackerArea" class="depack-form-area" @fadeIn>
+    <mat-form-field appearance="outline" class="w-full">
+      <mat-label>Message ISO (ASCII ou HEX)</mat-label>
+      <textarea matInput
+                rows="8"
+                placeholder="Collez votre message ISO ici..."
+                [(ngModel)]="isoMessage"
+                class="depack-textarea"></textarea>
+    </mat-form-field>
+
+    <div class="action-buttons justify-content-start">
+      <button mat-raised-button color="primary" (click)="analyzeMessage()">
+        <mat-icon>search</mat-icon> Analyser
+      </button>
+      <button mat-stroked-button color="basic" (click)="resetDepacker()">
+        <mat-icon>refresh</mat-icon> Réinitialiser
+      </button>
+      <button mat-stroked-button color="warn" (click)="toggleDepackerArea()">
+        <mat-icon>cancel</mat-icon> Annuler
+      </button>
+    </div>
+
+    <div *ngIf="depackedResult" class="result-area" @fadeIn>
+      <h3>Résultat de l'analyse :</h3>
+      <pre class="generated-message">{{ depackedResult }}</pre>
+      <div class="action-buttons justify-content-end mt-3">
+        <button mat-button color="accent" (click)="copyResult()">
+          <mat-icon>content_copy</mat-icon> Copier le résultat
+        </button>
+      </div>
+    </div>
+  </div>
+</div> 

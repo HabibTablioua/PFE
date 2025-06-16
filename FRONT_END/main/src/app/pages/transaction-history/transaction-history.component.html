@@ -1,0 +1,158 @@
+<app-header
+  title="Historique des Transactions ISO 8583"
+  subtitle="Consultez et filtrez l'historique de vos messages ISO générés et dépaquetés."
+  icon="receipt_long"
+></app-header>
+
+<div class="history-container">
+  <div class="history-button-section" *ngIf="!showHistoryArea">
+    <button mat-raised-button color="primary" (click)="toggleHistoryArea()">
+      <mat-icon>history</mat-icon> Historique des Transactions
+    </button>
+  </div>
+
+  <div *ngIf="showHistoryArea" @fadeIn>
+    <div class="history-button-section" *ngIf="!showFilterForm">
+      <button mat-raised-button color="primary" (click)="showFilter()">
+        <mat-icon>filter_alt</mat-icon> Filtrage
+      </button>
+    </div>
+
+    <div class="filter-card" *ngIf="showFilterForm" @fadeIn>
+      <form [formGroup]="filterForm" (ngSubmit)="applyFilter()" class="filter-form">
+        <mat-form-field appearance="outline">
+          <mat-label>MTI</mat-label>
+          <mat-select formControlName="mti">
+            <mat-option *ngFor="let option of mtiOptions" [value]="option.value">
+              {{ option.viewValue }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Format</mat-label>
+          <mat-select formControlName="format">
+            <mat-option *ngFor="let option of formatOptions" [value]="option.value">
+              {{ option.viewValue }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Source</mat-label>
+          <mat-select formControlName="source">
+            <mat-option *ngFor="let option of sourceOptions" [value]="option.value">
+              {{ option.viewValue }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Date de début</mat-label>
+          <input matInput [matDatepicker]="startDatePicker" formControlName="startDate">
+          <mat-datepicker-toggle matSuffix [for]="startDatePicker"></mat-datepicker-toggle>
+          <mat-datepicker #startDatePicker></mat-datepicker>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Date de fin</mat-label>
+          <input matInput [matDatepicker]="endDatePicker" formControlName="endDate">
+          <mat-datepicker-toggle matSuffix [for]="endDatePicker"></mat-datepicker-toggle>
+          <mat-datepicker #endDatePicker></mat-datepicker>
+        </mat-form-field>
+
+        <div class="filter-actions">
+          <button mat-raised-button color="primary" type="submit"><mat-icon>search</mat-icon> Rechercher</button>
+          <button mat-raised-button color="warn" type="button" (click)="resetFilter()"><mat-icon>clear_all</mat-icon> Réinitialiser</button>
+          <button mat-raised-button color="accent" type="button" (click)="showFilterForm = false;"><mat-icon>visibility_off</mat-icon> Masquer le filtre</button>
+          <button mat-raised-button color="accent" type="button" (click)="toggleHistoryArea()"><mat-icon>arrow_back</mat-icon> Masquer</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="transaction-table-container">
+      <table mat-table [dataSource]="dataSource" matSort [@detailExpand]="expandedElement ? 'expanded' : 'collapsed'"
+             multiTemplateDataRows class="mat-elevation-z2">
+
+        <!-- ID Column -->
+        <ng-container matColumnDef="id">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header> ID </th>
+          <td mat-cell *matCellDef="let element"> {{element.id}} </td>
+        </ng-container>
+
+        <!-- MTI Column -->
+        <ng-container matColumnDef="mti">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header> MTI </th>
+          <td mat-cell *matCellDef="let element"> {{element.mti}} </td>
+        </ng-container>
+
+        <!-- Format Column -->
+        <ng-container matColumnDef="format">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header> Format </th>
+          <td mat-cell *matCellDef="let element"> {{element.format}} </td>
+        </ng-container>
+
+        <!-- Date Column -->
+        <ng-container matColumnDef="date">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header> Date </th>
+          <td mat-cell *matCellDef="let element"> {{formatDate(element.createdAt)}} </td>
+        </ng-container>
+
+        <!-- Status Column -->
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header> Statut </th>
+          <td mat-cell *matCellDef="let element">
+            <span class="status-badge" [ngClass]="getStatusClass(element.status.toUpperCase())">
+              <mat-icon class="status-icon"
+                [ngClass]="element.status.toUpperCase() === 'SUCCESS' ? 'text-green-700' : 'text-red-700'">
+                {{ element.status.toUpperCase() === 'SUCCESS' ? 'check_circle' : 'cancel' }}
+              </mat-icon>
+              {{ element.status.toUpperCase() === 'SUCCESS' ? 'Succès' : 'Échec' }}
+            </span>
+          </td>
+        </ng-container>
+
+        <!-- Detail Column -->
+        <ng-container matColumnDef="detail">
+          <th mat-header-cell *matHeaderCellDef> Détail </th>
+          <td mat-cell *matCellDef="let element">
+            <button mat-icon-button (click)="showTransactionDetail(element)">
+              <mat-icon>{{expandedElement === element ? 'expand_less' : 'expand_more'}}</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <!-- Actions Column -->
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef> Actions </th>
+          <td mat-cell *matCellDef="let element">
+            <button mat-icon-button color="warn" (click)="deleteTransaction(element.id); $event.stopPropagation();">
+              <mat-icon style="color: red;">delete</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <!-- Expanded Detail Row -->
+        <ng-container matColumnDef="expandedDetail">
+          <td mat-cell *matCellDef="let element" [attr.colspan]="displayedColumns.length">
+            <div class="transaction-detail-content" *ngIf="element.id === expandedElement?.id" @detailExpand>
+              <pre>{{element.messageContent || element.fieldsJson}}</pre>
+              <button mat-icon-button color="accent" (click)="copyDetail(element.messageContent || element.fieldsJson || '')" class="copy-detail-button">
+                <mat-icon>content_copy</mat-icon>
+              </button>
+            </div>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let element; columns: displayedColumns;" class="element-row"
+            [class.expanded-row]="expandedElement === element"
+            (click)="showTransactionDetail(element)">
+        </tr>
+        <tr mat-row *matRowDef="let row; columns: ['expandedDetail']" class="detail-row"></tr>
+      </table>
+
+      <mat-paginator [pageSizeOptions]="[10, 25, 50]" showFirstLastButtons></mat-paginator>
+    </div>
+  </div>
+</div> 

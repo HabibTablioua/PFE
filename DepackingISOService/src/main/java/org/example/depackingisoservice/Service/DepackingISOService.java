@@ -25,31 +25,30 @@ public class DepackingISOService {
             GenericPackager packager = new GenericPackager(is);
             ISOMsg isoMsg = new ISOMsg();
             isoMsg.setPackager(packager);
-            isoMsg.unpack(isoMessage.getBytes(StandardCharsets.US_ASCII));
+
+            // 🔍 Détection auto : si la string est HEX, on la convertit en ASCII
+            byte[] bytes;
+            if (isoMessage.matches("[0-9A-Fa-f]+") && isoMessage.length() % 2 == 0) {
+                bytes = hexToBytes(isoMessage);
+            } else {
+                bytes = isoMessage.getBytes(StandardCharsets.US_ASCII);
+            }
+
+            isoMsg.unpack(bytes);
 
             StringBuilder output = new StringBuilder("✅ ISO8583 Message Décomposé :\n");
             for (int i = 0; i <= isoMsg.getMaxField(); i++) {
                 if (isoMsg.hasField(i)) {
                     String value = isoMsg.getString(i);
-
-                    // Masquer PAN (champ 2)
-                    if (i == 2 && value.length() > 6) {
+                    if (i == 2 && value.length() > 6)
                         value = value.substring(0, 6) + "******" + value.substring(value.length() - 4);
-                    }
-
-                    // Masquer Track 2 Data (champ 35)
                     if (i == 35 && value.contains("=")) {
                         String[] parts = value.split("=");
-                        if (parts[0].length() > 6) {
+                        if (parts[0].length() > 6)
                             value = parts[0].substring(0, 6) + "******" + parts[0].substring(parts[0].length() - 4) + "=" + parts[1];
-                        }
                     }
-
-                    // Masquer Track 3 Data (champ 36)
-                    if (i == 36) {
+                    if (i == 36)
                         value = "[MASKED TRACK 3 DATA]";
-                    }
-
                     output.append(String.format("Champ (%d): %s%n", i, value));
                 }
             }
@@ -61,6 +60,18 @@ public class DepackingISOService {
             return "Erreur lors du dépackaging : " + e.getMessage();
         }
     }
+
+    // 🔄 Fonction pour convertir HEX vers ASCII bytes
+    private byte[] hexToBytes(String hex) {
+        int len = hex.length();
+        byte[] data = new byte[len / 2];
+        for (int i = 0; i < len; i += 2) {
+            data[i / 2] = (byte) ((Character.digit(hex.charAt(i), 16) << 4)
+                    + Character.digit(hex.charAt(i+1), 16));
+        }
+        return data;
+    }
+
 
 
     public List<FieldData> getFields(String isoMessage) throws Exception {

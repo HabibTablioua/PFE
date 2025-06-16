@@ -36,7 +36,9 @@
             </div>
             }
           </div>
-          <button mat-raised-button color="primary" type="submit">Générer le Message</button>
+          <button mat-raised-button color="primary" type="button" (click)="generateMessage()">Générer le Message (ASCII)</button>
+          <button mat-raised-button color="accent" type="button" (click)="generateHexMessage()" class="ml-2">Générer le Message (HEX)</button>
+          <button mat-raised-button color="warn" type="button" (click)="clearForm()" class="ml-2">Vider les champs</button>
         </form>
       </div>
 

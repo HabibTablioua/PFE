@@ -15,6 +15,16 @@ export const navItems: NavItem[] = [
     route: '/message-form',
   },
   {
+    displayName: 'Depack Message',
+    iconName: 'box',
+    route: '/iso-depacker',
+  },
+  {
+    displayName: 'Historique des Transactions',
+    iconName: 'history',
+    route: '/transaction-history',
+  },
+  {
     displayName: 'Analytical',
     iconName: 'aperture',
     route: 'https://modernize-angular-main.netlify.app/dashboards/dashboard1',
