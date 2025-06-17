@@ -28,14 +28,21 @@
 
     .menu-list-item {
       height: 45px;
-      padding: 8px 10px !important;
+      padding: 8px 16px !important;
       margin-bottom: 2px;
+      border-radius: 8px !important;
+      transition: all 0.2s ease-in-out !important;
+      overflow: hidden !important;
 
       &:before,
       &:focus {
         z-index: -1;
       }
 
+      &:hover {
+        transform: scale(1.05);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2) !important;
+      }
 
       .item-chip {
         height: 18px;
@@ -46,12 +53,20 @@
       }
 
       &.activeMenu {
-        background-color: var(--mat-sys-primary);
+        background: linear-gradient(to right, #B71C1C, #F57C00, #FBC02D) !important;
+        color: white !important;
+        font-weight: 500 !important;
 
-        .mdc-list-item__primary-text {
-          color: $white !important;
+        .mdc-list-item__background,
+        .mdc-list-item__ripple,
+        .mat-mdc-list-item-base::before,
+        .mat-mdc-list-item-base::after {
+          background-color: transparent !important;
+          opacity: 0 !important;
         }
 
+        .mdc-list-item__primary-text,
+        .mdc-list-item__secondary-text,
         .mat-mdc-list-item-icon {
           color: $white !important;
         }

@@ -1,90 +1,97 @@
-<!-- Created with Jaspersoft Studio version 7.0.2.final using JasperReports Library version 7.0.2-31532122640f516c6d17238ae0e41a08113d5ac0  -->
-<jasperReport name="ValidationHistoryReport" language="java" pageWidth="595" pageHeight="842" columnWidth="535" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="93a40230-d7af-4715-9c22-22e878dc61bd">
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="ValidationRecordAdapter"/>
-	<query language="sql"><![CDATA[]]></query>
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports"
+			  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+			  xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports
+                                  http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+			  name="TransactionHistoryReport" pageWidth="595" pageHeight="842" columnWidth="535"
+			  leftMargin="30" rightMargin="30" topMargin="20" bottomMargin="20" uuid="b1adf0f2-97dc-4a7b-8bcb-3cf4b82c1f75">
+
+	<!-- Champs utilisés dans le rapport -->
+	<field name="id" class="java.lang.Long"/>
 	<field name="mti" class="java.lang.String"/>
-	<field name="validationStatus" class="java.lang.String"/>
-	<field name="responseCode" class="java.lang.String"/>
-	<field name="timestamp" class="java.lang.String"/>
+	<field name="message" class="java.lang.String"/>
+	<field name="format" class="java.lang.String"/>
 	<field name="status" class="java.lang.String"/>
-	<field name="username" class="java.lang.String"/>
-	<field name="transactionId" class="java.lang.String"/>
-	<background/>
-	<title height="72">
-		<element kind="frame" uuid="d88c6209-3b97-4418-88bf-6fd99213ddc9" mode="Opaque" x="-20" y="-20" width="595" height="92" backcolor="#006699">
-			<element kind="staticText" uuid="f3910a28-311b-4997-ace8-e56b693f4c23" x="20" y="20" width="234" height="43" forecolor="#FFFFFF" fontSize="16.0" bold="true">
-				<text><![CDATA[ISO8583 Transaction Details]]></text>
-			</element>
-			<element kind="staticText" uuid="8bb29a20-e3fb-49fe-9729-a63b90df8311" x="395" y="43" width="180" height="20" forecolor="#FFFFFF" fontSize="14.0" bold="false" hTextAlign="Right">
-				<text><![CDATA[Add a description here]]></text>
-			</element>
-		</element>
+	<field name="createdAt" class="java.time.LocalDateTime"/>
+
+	<!-- Titre du rapport -->
+	<title>
+		<band height="50">
+			<staticText>
+				<reportElement x="0" y="10" width="535" height="30"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="18" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Transaction History Report]]></text>
+			</staticText>
+		</band>
 	</title>
-	<pageHeader height="36">
-		<element kind="staticText" uuid="3e85afab-9188-465b-a48f-9318b63e6acd" x="0" y="6" width="60" height="26">
-			<text><![CDATA[Date/Heure]]></text>
-		</element>
-		<element kind="textField" uuid="049768be-67fa-45dc-a42d-292ba1a2a080" x="120" y="9" width="70" height="21" pattern="dd/MM/yyyy HH:mm">
-			<expression><![CDATA[$F{timestamp}]]></expression>
-		</element>
-	</pageHeader>
-	<columnHeader height="62">
-		<element kind="line" uuid="a7425692-54ca-40cd-adad-c4c37956b646" x="-20" y="50" width="595" height="1" forecolor="#666666"/>
-		<element kind="staticText" uuid="b7f6d82a-b518-4108-b224-cec0f470c9ff" x="0" y="-6" width="59" height="27">
-			<text><![CDATA[Validation]]></text>
-		</element>
-		<element kind="textField" uuid="a92e0a81-b62d-4614-abbd-fc0b565cb557" x="100" y="0" width="90" height="21">
-			<expression><![CDATA[$F{validationStatus}]]></expression>
-		</element>
-		<element kind="staticText" uuid="4ab310fb-35c6-4979-b205-9090d8316995" x="-10" y="21" width="100" height="30">
-			<text><![CDATA[TansactionId]]></text>
-		</element>
-		<element kind="textField" uuid="af52f5e8-a5f1-435a-a14e-c194efb24eb9" x="120" y="21" width="100" height="30">
-			<expression><![CDATA[$F{transactionId}]]></expression>
-		</element>
-		<property name="com.jaspersoft.studio.unit.height" value="px"/>
+
+	<!-- En-têtes de colonnes -->
+	<columnHeader>
+		<band height="30">
+			<textField>
+				<reportElement x="0" y="5" width="50" height="20"/>
+				<textElement><font isBold="true"/></textElement>
+				<textFieldExpression><![CDATA["ID"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="50" y="5" width="60" height="20"/>
+				<textElement><font isBold="true"/></textElement>
+				<textFieldExpression><![CDATA["MTI"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="110" y="5" width="180" height="20"/>
+				<textElement><font isBold="true"/></textElement>
+				<textFieldExpression><![CDATA["Message"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="290" y="5" width="80" height="20"/>
+				<textElement><font isBold="true"/></textElement>
+				<textFieldExpression><![CDATA["Format"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="370" y="5" width="60" height="20"/>
+				<textElement><font isBold="true"/></textElement>
+				<textFieldExpression><![CDATA["Status"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="430" y="5" width="105" height="20"/>
+				<textElement><font isBold="true"/></textElement>
+				<textFieldExpression><![CDATA["Created At"]]></textFieldExpression>
+			</textField>
+		</band>
 	</columnHeader>
+
+	<!-- Détails des données -->
 	<detail>
-		<band height="115">
-			<element kind="line" uuid="de37d79e-1ff5-4617-b3c1-196364830d4d" positionType="FixRelativeToBottom" x="0" y="40" width="555" height="1"/>
-			<element kind="textField" uuid="54f1b543-3291-4d8a-8cc8-8f1ac84c745d" x="10" y="30" width="60" height="21">
-				<expression><![CDATA[$F{mti}]]></expression>
-			</element>
-			<element kind="textField" uuid="f294599c-042c-4e4c-aece-8e6da913fb9a" x="395" y="30" width="70" height="22">
-				<expression><![CDATA[$F{status}]]></expression>
-			</element>
-			<element kind="textField" uuid="b29a9a28-cf98-4a5d-a5c0-928d59fb0ea2" x="495" y="30" width="100" height="30">
-				<expression><![CDATA[$F{username}]]></expression>
-			</element>
-			<element kind="textField" uuid="c88d2f67-cec4-497b-b761-d06d1d1b69ee" x="190" y="30" width="90" height="20">
-				<expression><![CDATA[$F{responseCode}]]></expression>
-			</element>
-			<element kind="staticText" uuid="e77654b0-eb19-4861-9958-dd775cc8fbee" x="190" y="-12" width="70" height="26">
-				<text><![CDATA[Code Réponse]]></text>
-			</element>
-			<element kind="staticText" uuid="ce9f33fd-a7d2-4368-acc2-2116cdffb3ab" x="10" y="-3" width="60" height="28">
-				<text><![CDATA[MTI]]></text>
-			</element>
-			<element kind="staticText" uuid="beeb1421-7c9a-467f-9f7c-238a6dd9f66a" x="390" y="-2" width="80" height="26">
-				<text><![CDATA[StatusTechnique]]></text>
-			</element>
-			<element kind="staticText" uuid="43d15fbc-edb5-4dda-88c0-3ae4066626ff" x="495" y="-3" width="60" height="26">
-				<text><![CDATA[Utilisateur]]></text>
-			</element>
-			<property name="com.jaspersoft.studio.unit.height" value="px"/>
+		<band height="20">
+			<textField>
+				<reportElement x="0" y="0" width="50" height="20"/>
+				<textFieldExpression><![CDATA[$F{id}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="50" y="0" width="60" height="20"/>
+				<textFieldExpression><![CDATA[$F{mti}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="110" y="0" width="180" height="20"/>
+				<textFieldExpression><![CDATA[$F{message}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="290" y="0" width="80" height="20"/>
+				<textFieldExpression><![CDATA[$F{format}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="370" y="0" width="60" height="20"/>
+				<textFieldExpression><![CDATA[$F{status}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="430" y="0" width="105" height="20"/>
+				<textFieldExpression><![CDATA[$F{createdAt}]]></textFieldExpression>
+			</textField>
 		</band>
 	</detail>
-	<columnFooter/>
-	<pageFooter height="17">
-		<element kind="textField" uuid="2c21f30a-b939-4a33-9488-bc26def5880b" mode="Opaque" x="0" y="4" width="515" height="13" backcolor="#E6E6E6" hTextAlign="Right">
-			<expression><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></expression>
-		</element>
-		<element kind="textField" uuid="e1d3f0c9-f315-4690-a8db-5dd6b1bf000e" mode="Opaque" x="515" y="4" width="40" height="13" backcolor="#E6E6E6" evaluationTime="Report">
-			<expression><![CDATA[" " + $V{PAGE_NUMBER}]]></expression>
-		</element>
-		<element kind="textField" uuid="b8dce54a-4424-4709-ab32-2b4d46c78d14" x="0" y="4" width="100" height="13" pattern="EEEEE dd MMMMM yyyy">
-			<expression><![CDATA[new java.util.Date()]]></expression>
-		</element>
-	</pageFooter>
-	<summary/>
+
 </jasperReport>
+4

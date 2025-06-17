@@ -9,6 +9,7 @@ import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { trigger, state, style, transition, animate } from '@angular/animations';
+import { SelectionModel } from '@angular/cdk/collections';
 
 interface Transaction {
   id: string;
@@ -128,6 +129,48 @@ interface Transaction {
       background-color: #90caf9; /* Darker blue on hover */
     }
 
+    .download-actions-container {
+      display: flex;
+      flex-direction: row;
+      gap: 10px;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+      margin-top: 20px; /* Add some space above the download buttons */
+      padding: 24px; /* Match filter-card padding */
+      background-color: #f5f5f5; /* Match filter-card background */
+      border-radius: 16px; /* Match filter-card border-radius */
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05); /* Match filter-card shadow */
+    }
+
+    .download-actions-container button {
+      flex: 1;
+      min-width: 150px; /* Minimum width for buttons */
+      padding: 12px 16px; /* Homogeneous padding */
+      text-align: center;
+      white-space: nowrap; /* Prevent text truncation */
+      border-radius: 8px; /* Rounded corners */
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Light shadow */
+      transition: all 0.3s ease-in-out; /* Smooth hover animation */
+    }
+
+    .download-actions-container button.mat-raised-button {
+      background-color: #e0f2f7; /* Soft background color (light blue) */
+      color: #0d47a1; /* Blue text color */
+    }
+
+    .download-actions-container button.mat-raised-button:hover {
+      background-color: #bbdefb; /* hover:bg-blue-50 equivalent, slightly darker blue */
+      transform: translateY(-2px); /* Slight lift on hover */
+      box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15); /* Slightly stronger shadow on hover */
+    }
+
+    .delete-all-button-container {
+      display: flex;
+      justify-content: flex-start;
+      margin-bottom: 15px;
+      padding: 0 15px; /* Add some horizontal padding to align with table */
+    }
+
     .transaction-table-container {
       overflow-x: auto;
       margin-top: 20px;
@@ -234,6 +277,41 @@ interface Transaction {
         flex-direction: column;
       }
     }
+
+    .filter-buttons-container {
+      display: flex;
+      flex-direction: row;
+      gap: 10px;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+      margin-top: 20px; /* Add some space above the filter buttons */
+      padding: 24px; /* Match filter-card padding */
+      background-color: #f5f5f5; /* Match filter-card background */
+      border-radius: 16px; /* Match filter-card border-radius */
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05); /* Match filter-card shadow */
+    }
+
+    .filter-buttons-container button {
+      flex: 1;
+      min-width: 150px; /* Minimum width for buttons */
+      padding: 12px 16px; /* Homogeneous padding */
+      text-align: center;
+      white-space: nowrap; /* Prevent text truncation */
+      border-radius: 8px; /* Rounded corners */
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Light shadow */
+      transition: all 0.3s ease-in-out; /* Smooth hover animation */
+    }
+
+    .filter-buttons-container button.mat-raised-button {
+      background-color: #e0f2f7; /* Soft background color (light blue) */
+      color: #0d47a1; /* Blue text color */
+    }
+
+    .filter-buttons-container button.mat-raised-button:hover {
+      background-color: #bbdefb; /* hover:bg-blue-50 equivalent, slightly darker blue */
+      transform: translateY(-2px); /* Slight lift on hover */
+      box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15); /* Slightly stronger shadow on hover */
+    }
   `]
 })
 export class TransactionHistoryComponent implements OnInit {
@@ -242,6 +320,7 @@ export class TransactionHistoryComponent implements OnInit {
   filterForm: FormGroup;
   transactions: Transaction[] = [];
   dataSource: MatTableDataSource<Transaction>;
+  selection = new SelectionModel<Transaction>(true, []);
   expandedElement: Transaction | null = null;
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
@@ -270,12 +349,11 @@ export class TransactionHistoryComponent implements OnInit {
   ];
 
   sourceOptions = [
-    { value: '', viewValue: 'Toutes' },
-    { value: 'PackingISOService', viewValue: 'Packing ISO Service' },
-    { value: 'ResponseISOService', viewValue: 'Response ISO Service' },
+    { value: 'FRONTEND', viewValue: 'FRONTEND' },
+    { value: 'BACKEND', viewValue: 'BACKEND' },
   ];
 
-  displayedColumns: string[] = ['id', 'mti', 'format', 'date', 'status', 'detail', 'actions'];
+  displayedColumns: string[] = ['select', 'id', 'mti', 'format', 'date', 'status', 'detail', 'actions'];
 
   constructor(private fb: FormBuilder, private http: HttpClient, private snackBar: MatSnackBar) {
     this.filterForm = this.fb.group({
@@ -293,16 +371,7 @@ export class TransactionHistoryComponent implements OnInit {
   }
 
   ngAfterViewInit() {
-    this.dataSource.paginator = this.paginator;
-    this.dataSource.sort = this.sort;
-    // Set custom sorting for date if needed (assuming date is string, convert to Date for proper sort)
-    this.dataSource.sortingDataAccessor = (item, property) => {
-      if (property === 'date') {
-        return new Date(item.createdAt).getTime();
-      }
-      return (item as any)[property];
-    };
-    this.sort.sortChange.subscribe(() => this.paginator.firstPage()); // Reset pagination when sorting
+
   }
 
   toggleHistoryArea(): void {
@@ -332,8 +401,8 @@ export class TransactionHistoryComponent implements OnInit {
     if (formValue.mti) params = params.append('mti', formValue.mti);
     if (formValue.format) params = params.append('format', formValue.format);
     if (formValue.source) params = params.append('source', formValue.source);
-    if (formValue.startDate) params = params.append('startDate', formValue.startDate.toISOString());
-    if (formValue.endDate) params = params.append('endDate', formValue.endDate.toISOString());
+    if (formValue.startDate) params = params.append('startDate', this.formatDateForApi(formValue.startDate));
+    if (formValue.endDate) params = params.append('endDate', this.formatDateForApi(formValue.endDate));
 
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${token}`
@@ -341,10 +410,18 @@ export class TransactionHistoryComponent implements OnInit {
 
     this.http.get<Transaction[]>('http://localhost:8088/api/history', { headers: headers, params: params })
       .subscribe({
-        next: (response: Transaction[]) => {
-          // Sort by date descending by default
-          this.transactions = response.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        next: (data) => {
+          this.transactions = data;
           this.dataSource.data = this.transactions;
+          if (this.dataSource.paginator) {
+            this.dataSource.paginator.firstPage();
+          }
+          if (this.paginator) {
+            this.dataSource.paginator = this.paginator;
+          }
+          if (this.sort) {
+            this.dataSource.sort = this.sort;
+          }
           this.snackBar.open('Historique chargé avec succès !', 'Fermer', { duration: 3000 });
         },
         error: (error) => {
@@ -357,8 +434,18 @@ export class TransactionHistoryComponent implements OnInit {
   }
 
   applyFilter(): void {
+    const formValue = this.filterForm.value;
+
+    // Check if all filter fields are empty
+    const isFormEmpty = !formValue.mti && !formValue.format && !formValue.source && !formValue.startDate && !formValue.endDate;
+
+    if (isFormEmpty) {
+      this.snackBar.open('Veuillez spécifier au moins un critère de recherche.', 'Fermer', { duration: 3000 });
+      return;
+    }
+
     this.fetchTransactions();
-    this.showFilterForm = false;
+    // this.showFilterForm = false; // Commented out to keep filter form visible
   }
 
   resetFilter(): void {
@@ -398,6 +485,16 @@ export class TransactionHistoryComponent implements OnInit {
     return new Date(dateString).toLocaleDateString('fr-FR', options);
   }
 
+  private formatDateForApi(date: Date): string {
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    const seconds = date.getSeconds().toString().padStart(2, '0');
+    return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
+  }
+
   deleteTransaction(id: string): void {
     if (confirm('Êtes-vous sûr de vouloir supprimer cette transaction ?')) {
       const token = localStorage.getItem('token');
@@ -422,5 +519,174 @@ export class TransactionHistoryComponent implements OnInit {
           }
         });
     }
+  }
+
+  deleteAllTransactions(): void {
+    if (confirm('Êtes-vous sûr de vouloir supprimer toutes les transactions ?')) {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        this.snackBar.open('Authentification requise pour supprimer toutes les transactions.', 'Fermer', { duration: 3000 });
+        return;
+      }
+
+      const headers = new HttpHeaders({
+        'Authorization': `Bearer ${token}`
+      });
+
+      this.http.delete('http://localhost:8088/api/history/all', { headers: headers })
+        .subscribe({
+          next: () => {
+            this.snackBar.open('Toutes les transactions supprimées avec succès !', 'Fermer', { duration: 3000 });
+            this.fetchTransactions(); // Refresh the table
+          },
+          error: (error) => {
+            console.error('Erreur lors de la suppression de toutes les transactions:', error);
+            this.snackBar.open('Erreur lors de la suppression de toutes les transactions.', 'Fermer', { duration: 5000 });
+          }
+        });
+    }
+  }
+
+  downloadPdfReport(): void {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      this.snackBar.open('Token d\'authentification non trouvé. Veuillez vous connecter.', 'Fermer', { duration: 3000 });
+      return;
+    }
+
+    if (this.selection.selected.length === 0) {
+      this.snackBar.open('Veuillez sélectionner au moins une transaction pour générer le rapport PDF.', 'Fermer', { duration: 3000 });
+      return;
+    }
+
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json' // Important for sending request body
+    });
+
+    this.snackBar.open('Génération du rapport PDF...', 'Fermer');
+
+    // Change from GET to POST and send selected transactions in the body
+    this.http.post(`http://localhost:8088/api/history/export/pdf`, this.selection.selected, { headers, responseType: 'blob' }).subscribe({
+      next: (response: Blob) => {
+        const fileURL = URL.createObjectURL(response);
+        const a = document.createElement('a');
+        a.href = fileURL;
+        a.download = `rapport_transactions_${new Date().toISOString().split('T')[0]}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(fileURL);
+        this.snackBar.open('Rapport PDF téléchargé avec succès !', 'Fermer', { duration: 3000 });
+        this.selection.clear(); // Clear selection after successful download
+      },
+      error: (error) => {
+        this.snackBar.open('Erreur lors du téléchargement du rapport PDF.', 'Fermer', { duration: 3000 });
+        console.error('Erreur de téléchargement PDF:', error);
+      }
+    });
+  }
+
+  downloadExcelReport(): void {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      this.snackBar.open('Token d\'authentification non trouvé. Veuillez vous connecter.', 'Fermer', { duration: 3000 });
+      return;
+    }
+
+    if (this.selection.selected.length === 0) {
+      this.snackBar.open('Veuillez sélectionner au moins une transaction pour générer le rapport Excel.', 'Fermer', { duration: 3000 });
+      return;
+    }
+
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json' // Important for sending request body
+    });
+
+    this.snackBar.open('Génération du rapport Excel...', 'Fermer');
+
+    // Change from GET to POST and send selected transactions in the body
+    this.http.post(`http://localhost:8088/api/history/export/excel`, this.selection.selected, { headers, responseType: 'blob' }).subscribe({
+      next: (response: Blob) => {
+        const fileURL = URL.createObjectURL(response);
+        const a = document.createElement('a');
+        a.href = fileURL;
+        a.download = `rapport_transactions_${new Date().toISOString().split('T')[0]}.xlsx`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(fileURL);
+        this.snackBar.open('Rapport Excel téléchargé avec succès !', 'Fermer', { duration: 3000 });
+        this.selection.clear(); // Clear selection after successful download
+      },
+      error: (error) => {
+        this.snackBar.open('Erreur lors du téléchargement du rapport Excel.', 'Fermer', { duration: 3000 });
+        console.error('Erreur de téléchargement Excel:', error);
+      }
+    });
+  }
+
+  downloadCsvReport(): void {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      this.snackBar.open('Token d\'authentification non trouvé. Veuillez vous connecter.', 'Fermer', { duration: 3000 });
+      return;
+    }
+
+    if (this.selection.selected.length === 0) {
+      this.snackBar.open('Veuillez sélectionner au moins une transaction pour générer le rapport CSV.', 'Fermer', { duration: 3000 });
+      return;
+    }
+
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json' // Important for sending request body
+    });
+
+    this.snackBar.open('Génération du rapport CSV...', 'Fermer');
+
+    // Change from GET to POST and send selected transactions in the body
+    this.http.post(`http://localhost:8088/api/history/export/csv`, this.selection.selected, { headers, responseType: 'blob' }).subscribe({
+      next: (response: Blob) => {
+        const fileURL = URL.createObjectURL(response);
+        const a = document.createElement('a');
+        a.href = fileURL;
+        a.download = `rapport_transactions_${new Date().toISOString().split('T')[0]}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(fileURL);
+        this.snackBar.open('Rapport CSV téléchargé avec succès !', 'Fermer', { duration: 3000 });
+        this.selection.clear(); // Clear selection after successful download
+      },
+      error: (error) => {
+        this.snackBar.open('Erreur lors du téléchargement du rapport CSV.', 'Fermer', { duration: 3000 });
+        console.error('Erreur de téléchargement CSV:', error);
+      }
+    });
+  }
+
+  isAllSelected() {
+    const numSelected = this.selection.selected.length;
+    const numRows = this.dataSource.data.length;
+    return numSelected === numRows;
+  }
+
+  /** Selects all rows if they are not all selected; otherwise clear selection. */
+  masterToggle() {
+    if (this.isAllSelected()) {
+      this.selection.clear();
+    } else {
+      this.dataSource.data.forEach(row => this.selection.select(row));
+    }
+  }
+
+  /** The label for the checkbox on the passed row */
+  checkboxLabel(row?: Transaction): string {
+    if (!row) {
+      return `${this.isAllSelected() ? 'select' : 'deselect'} all`;
+    }
+    return `${this.selection.isSelected(row) ? 'deselect' : 'select'} row ${row.id + 1}`;
   }
 } 

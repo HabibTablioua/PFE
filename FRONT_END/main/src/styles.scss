@@ -6,6 +6,25 @@ body {
     margin: 0;
 }
 
+// Styles for active sidebar button
+.mat-list-item.activeMenu {
+  background: linear-gradient(to right, #B71C1C, #F57C00, #FBC02D) !important;
+  color: white !important;
+  font-weight: 500 !important;
+  border-radius: 8px !important; /* rounded-lg */
+  padding: 8px 16px !important; /* px-4 py-2 */
+  transition: all 0.2s ease-in-out !important;
+  
+  .mat-icon {
+    color: white !important; /* Icon white */
+  }
+
+  &:hover {
+    transform: scale(1.05); /* hover:scale-105 */
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2) !important; /* hover:shadow-lg */
+  }
+}
+
 // Styles pour les messages de notification
 .success-snackbar {
   background: #4caf50 !important;

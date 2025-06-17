@@ -61,18 +61,48 @@
           <mat-datepicker #endDatePicker></mat-datepicker>
         </mat-form-field>
 
-        <div class="filter-actions">
-          <button mat-raised-button color="primary" type="submit"><mat-icon>search</mat-icon> Rechercher</button>
-          <button mat-raised-button color="warn" type="button" (click)="resetFilter()"><mat-icon>clear_all</mat-icon> Réinitialiser</button>
-          <button mat-raised-button color="accent" type="button" (click)="showFilterForm = false;"><mat-icon>visibility_off</mat-icon> Masquer le filtre</button>
-          <button mat-raised-button color="accent" type="button" (click)="toggleHistoryArea()"><mat-icon>arrow_back</mat-icon> Masquer</button>
-        </div>
       </form>
+
+      <div class="filter-buttons-container" *ngIf="showFilterForm" @fadeIn>
+        <button mat-raised-button color="primary" type="submit" (click)="applyFilter()"><mat-icon>search</mat-icon> Rechercher</button>
+        <button mat-raised-button color="warn" type="button" (click)="resetFilter()"><mat-icon>clear_all</mat-icon> Réinitialiser</button>
+        <button mat-raised-button color="accent" type="button" (click)="showFilterForm = false;"><mat-icon>visibility_off</mat-icon> Masquer le filtre</button>
+        <button mat-raised-button color="accent" type="button" (click)="toggleHistoryArea()"><mat-icon>arrow_back</mat-icon> Masquer</button>
+      </div>
+
+    </div>
+
+    <div class="download-actions-container" *ngIf="showFilterForm" @fadeIn>
+      <button mat-raised-button color="primary" type="button" (click)="downloadPdfReport()"><mat-icon>download</mat-icon> Télécharger PDF</button>
+      <button mat-raised-button color="primary" type="button" (click)="downloadExcelReport()"><mat-icon>download</mat-icon> Télécharger Excel</button>
+      <button mat-raised-button color="primary" type="button" (click)="downloadCsvReport()"><mat-icon>download</mat-icon> Télécharger CSV</button>
+    </div>
+
+    <div class="delete-all-button-container" *ngIf="transactions.length > 0">
+      <button mat-raised-button color="warn" type="button" (click)="deleteAllTransactions()">
+        <mat-icon>delete_forever</mat-icon> Supprimer tout
+      </button>
     </div>
 
     <div class="transaction-table-container">
       <table mat-table [dataSource]="dataSource" matSort [@detailExpand]="expandedElement ? 'expanded' : 'collapsed'"
              multiTemplateDataRows class="mat-elevation-z2">
+
+        <!-- Checkbox Column -->
+        <ng-container matColumnDef="select">
+          <th mat-header-cell *matHeaderCellDef>
+            <mat-checkbox (change)="$event ? masterToggle() : null"
+                          [checked]="selection.hasValue() && isAllSelected()"
+                          [indeterminate]="selection.hasValue() && !isAllSelected()"
+                          [aria-label]="checkboxLabel()"></mat-checkbox>
+          </th>
+          <td mat-cell *matCellDef="let row">
+            <mat-checkbox (click)="$event.stopPropagation()"
+                          (change)="$event ? selection.toggle(row) : null"
+                          [checked]="selection.isSelected(row)"
+                          [aria-label]="checkboxLabel(row)"></mat-checkbox>
+          </td>
+        </ng-container>
 
         <!-- ID Column -->
         <ng-container matColumnDef="id">
@@ -138,7 +168,7 @@
             <div class="transaction-detail-content" *ngIf="element.id === expandedElement?.id" @detailExpand>
               <pre>{{element.messageContent || element.fieldsJson}}</pre>
               <button mat-icon-button color="accent" (click)="copyDetail(element.messageContent || element.fieldsJson || '')" class="copy-detail-button">
-                <mat-icon>content_copy</mat-icon>
+                <mat-icon style="color: white;">content_copy</mat-icon>
               </button>
             </div>
           </td>

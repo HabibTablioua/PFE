@@ -3,16 +3,31 @@ package org.example.transactionhistoryservice.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import net.sf.jasperreports.engine.*;
+import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.example.transactionhistoryservice.DTO.TransactionHistoryRequest;
 import org.example.transactionhistoryservice.Entite.TransactionHistory;
 import org.example.transactionhistoryservice.Repository.OperationTypeRepository;
 import org.example.transactionhistoryservice.Repository.TransactionHistoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import jakarta.persistence.criteria.Predicate;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -94,7 +109,153 @@ public class TransactionHistoryService {
         repository.deleteAll();
     }
 
+    public List<TransactionHistory> getFilteredTransactions(
+            String mti,
+            String format,
+            String source,
+            LocalDateTime startDate,
+            LocalDateTime endDate) {
 
+        Specification<TransactionHistory> spec = (root, query, criteriaBuilder) -> {
+            List<Predicate> predicates = new ArrayList<>();
 
+            if (mti != null && !mti.isEmpty()) {
+                predicates.add(criteriaBuilder.equal(root.get("mti"), mti));
+            }
+            if (format != null && !format.isEmpty()) {
+                predicates.add(criteriaBuilder.equal(root.get("format"), format));
+            }
+            if (source != null && !source.isEmpty()) {
+                predicates.add(criteriaBuilder.equal(root.get("source"), source));
+            }
+            if (startDate != null && endDate != null) {
+                predicates.add(criteriaBuilder.between(root.get("createdAt"), startDate, endDate));
+            } else if (startDate != null) {
+                predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("createdAt"), startDate));
+            } else if (endDate != null) {
+                predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("createdAt"), endDate));
+            }
+
+            return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+        };
+
+        return repository.findAll(spec);
+    }
+
+    @Service
+    public static class PdfExportService {
+
+        public byte[] generatePdf(List<TransactionHistory> transactions) throws Exception {
+            // Convert transactions to a format suitable for the report
+            List<Map<String, Object>> reportData = transactions.stream()
+                .map(tx -> {
+                    Map<String, Object> data = new HashMap<>();
+                    data.put("mti", tx.getMti());
+                    data.put("validationStatus", tx.getStatus());
+                    data.put("responseCode", tx.getOperationType() != null ? tx.getOperationType().getCode() : "N/A");
+                    data.put("timestamp", tx.getCreatedAt());
+                    data.put("status", tx.getStatus());
+                    data.put("transactionId", tx.getId().toString());
+                    return data;
+                })
+                .collect(Collectors.toList());
+
+            JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource(reportData);
+
+            // Load and compile the report
+            JasperReport jasperReport = JasperCompileManager
+                    .compileReport(getClass().getResourceAsStream("/reports/transaction_report.jrxml"));
+
+            // Set up parameters
+            Map<String, Object> parameters = new HashMap<>();
+            parameters.put("createdBy", "TransactionHistoryService");
+            parameters.put("TransactionDataset", dataSource);
+
+            // Fill and export the report
+            JasperPrint print = JasperFillManager.fillReport(jasperReport, parameters, dataSource);
+            return JasperExportManager.exportReportToPdf(print);
+        }
+    }
+
+    @Service
+    public static class ExcelExportService {
+
+        public byte[] generateExcel(List<TransactionHistory> transactions) throws IOException {
+            Workbook workbook = new XSSFWorkbook();
+            Sheet sheet = workbook.createSheet("Transaction History");
+
+            // Create header row
+            String[] headers = {"ID", "MTI", "Format", "Source", "Status", "Date", "Message Content"};
+            Row headerRow = sheet.createRow(0);
+            for (int i = 0; i < headers.length; i++) {
+                Cell cell = headerRow.createCell(i);
+                cell.setCellValue(headers[i]);
+            }
+
+            // Populate data rows
+            int rowNum = 1;
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            for (TransactionHistory tx : transactions) {
+                Row row = sheet.createRow(rowNum++);
+                row.createCell(0).setCellValue(tx.getId() != null ? tx.getId().toString() : "");
+                row.createCell(1).setCellValue(tx.getMti() != null ? tx.getMti() : "");
+                row.createCell(2).setCellValue(tx.getFormat() != null ? tx.getFormat() : "");
+                row.createCell(3).setCellValue(tx.getSource() != null ? tx.getSource() : "");
+                row.createCell(4).setCellValue(tx.getStatus() != null ? tx.getStatus() : "");
+                row.createCell(5).setCellValue(tx.getCreatedAt() != null ? formatter.format(tx.getCreatedAt()) : "");
+                row.createCell(6).setCellValue(tx.getMessage() != null ? tx.getMessage() : "");
+            }
+
+            // Auto-size columns
+            for (int i = 0; i < headers.length; i++) {
+                sheet.autoSizeColumn(i);
+            }
+
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            workbook.write(outputStream);
+            workbook.close();
+            return outputStream.toByteArray();
+        }
+    }
+
+    @Service
+    public static class CsvExportService {
+
+        public byte[] generateCsv(List<TransactionHistory> transactions) throws IOException {
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            PrintWriter writer = new PrintWriter(outputStream);
+
+            // Write CSV header
+            writer.println("ID,MTI,Format,Source,Status,Date,Message Content");
+
+            // Write data rows
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            for (TransactionHistory tx : transactions) {
+                writer.printf("%s,%s,%s,%s,%s,%s,%s\n",
+                        tx.getId() != null ? tx.getId().toString() : "",
+                        tx.getMti() != null ? escapeCsv(tx.getMti()) : "",
+                        tx.getFormat() != null ? escapeCsv(tx.getFormat()) : "",
+                        tx.getSource() != null ? escapeCsv(tx.getSource()) : "",
+                        tx.getStatus() != null ? escapeCsv(tx.getStatus()) : "",
+                        tx.getCreatedAt() != null ? formatter.format(tx.getCreatedAt()) : "",
+                        tx.getMessage() != null ? escapeCsv(tx.getMessage()) : ""
+                );
+            }
+
+            writer.flush();
+            return outputStream.toByteArray();
+        }
+
+        private String escapeCsv(String value) {
+            if (value == null) {
+                return "";
+            }
+            // Enclose in double quotes if it contains comma, double quote or newline
+            if (value.contains(",") || value.contains("\"") || value.contains("\n")) {
+                return "\"" + value.replace("\"", "\"\"") + "\"";
+            }
+            return value;
+        }
+    }
 
 }
