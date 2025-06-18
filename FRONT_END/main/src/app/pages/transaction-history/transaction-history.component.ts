@@ -362,6 +362,7 @@ export class TransactionHistoryComponent implements OnInit {
       source: [''],
       startDate: [null],
       endDate: [null],
+      searchTerm: [''],
     });
     this.dataSource = new MatTableDataSource(this.transactions);
   }
@@ -403,6 +404,7 @@ export class TransactionHistoryComponent implements OnInit {
     if (formValue.source) params = params.append('source', formValue.source);
     if (formValue.startDate) params = params.append('startDate', this.formatDateForApi(formValue.startDate));
     if (formValue.endDate) params = params.append('endDate', this.formatDateForApi(formValue.endDate));
+    if (formValue.searchTerm) params = params.append('searchTerm', formValue.searchTerm);
 
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${token}`
@@ -436,8 +438,8 @@ export class TransactionHistoryComponent implements OnInit {
   applyFilter(): void {
     const formValue = this.filterForm.value;
 
-    // Check if all filter fields are empty
-    const isFormEmpty = !formValue.mti && !formValue.format && !formValue.source && !formValue.startDate && !formValue.endDate;
+    // Check if all filter fields are empty (including new searchTerm)
+    const isFormEmpty = !formValue.mti && !formValue.format && !formValue.source && !formValue.startDate && !formValue.endDate && !formValue.searchTerm;
 
     if (isFormEmpty) {
       this.snackBar.open('Veuillez spécifier au moins un critère de recherche.', 'Fermer', { duration: 3000 });
@@ -457,6 +459,7 @@ export class TransactionHistoryComponent implements OnInit {
       source: '',
       startDate: null,
       endDate: null,
+      searchTerm: '', // Reset search term
     });
     this.fetchTransactions(); // Fetch all transactions again after reset
     this.showFilterForm = false;
@@ -521,27 +524,37 @@ export class TransactionHistoryComponent implements OnInit {
     }
   }
 
-  deleteAllTransactions(): void {
-    if (confirm('Êtes-vous sûr de vouloir supprimer toutes les transactions ?')) {
+  deleteSelectedTransactions(): void {
+    if (this.selection.selected.length === 0) {
+      this.snackBar.open('Veuillez sélectionner les transactions à supprimer.', 'Fermer', { duration: 3000 });
+      return;
+    }
+
+    if (confirm('Êtes-vous sûr de vouloir supprimer les transactions sélectionnées ?')) {
       const token = localStorage.getItem('token');
       if (!token) {
-        this.snackBar.open('Authentification requise pour supprimer toutes les transactions.', 'Fermer', { duration: 3000 });
+        this.snackBar.open('Authentification requise pour supprimer les transactions.', 'Fermer', { duration: 3000 });
         return;
       }
 
+      const selectedIds = this.selection.selected.map(tx => tx.id);
+
       const headers = new HttpHeaders({
-        'Authorization': `Bearer ${token}`
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
       });
 
-      this.http.delete('http://localhost:8088/api/history/all', { headers: headers })
+      // Make a POST request to a new batch delete endpoint with selected IDs
+      this.http.post('http://localhost:8088/api/history/delete-batch', selectedIds, { headers: headers })
         .subscribe({
           next: () => {
-            this.snackBar.open('Toutes les transactions supprimées avec succès !', 'Fermer', { duration: 3000 });
+            this.snackBar.open('Transactions sélectionnées supprimées avec succès !', 'Fermer', { duration: 3000 });
             this.fetchTransactions(); // Refresh the table
+            this.selection.clear(); // Clear selection
           },
           error: (error) => {
-            console.error('Erreur lors de la suppression de toutes les transactions:', error);
-            this.snackBar.open('Erreur lors de la suppression de toutes les transactions.', 'Fermer', { duration: 5000 });
+            console.error('Erreur lors de la suppression des transactions sélectionnées:', error);
+            this.snackBar.open('Erreur lors de la suppression des transactions sélectionnées.', 'Fermer', { duration: 5000 });
           }
         });
     }

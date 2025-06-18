@@ -86,6 +86,12 @@ public class JwtAuthenticationGatewayFilterFactory extends AbstractGatewayFilter
                 String userId = claims.getSubject();
                 List<String> roles = claims.get("roles", List.class);
 
+                // Validate extracted user information
+                if (userId == null || userId.isEmpty() || roles == null || roles.isEmpty()) {
+                    log.error("User ID or roles are missing or empty in JWT claims. User ID: {}, Roles: {}", userId, roles);
+                    return onError(exchange, "Invalid user information in token", HttpStatus.UNAUTHORIZED);
+                }
+
                 log.info("Token validated successfully for user: {}", userId);
                 log.info("User roles: {}", roles);
 

@@ -61,6 +61,11 @@
           <mat-datepicker #endDatePicker></mat-datepicker>
         </mat-form-field>
 
+        <mat-form-field appearance="outline">
+          <mat-label>Rechercher par mot-clé</mat-label>
+          <input matInput formControlName="searchTerm" placeholder="Saisissez un mot-clé">
+        </mat-form-field>
+
       </form>
 
       <div class="filter-buttons-container" *ngIf="showFilterForm" @fadeIn>
@@ -79,8 +84,9 @@
     </div>
 
     <div class="delete-all-button-container" *ngIf="transactions.length > 0">
-      <button mat-raised-button color="warn" type="button" (click)="deleteAllTransactions()">
-        <mat-icon>delete_forever</mat-icon> Supprimer tout
+      <button mat-raised-button color="warn" type="button" (click)="deleteSelectedTransactions()">
+        <mat-icon>delete</mat-icon>
+        Supprimer tout
       </button>
     </div>
 

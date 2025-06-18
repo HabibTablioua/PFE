@@ -45,9 +45,10 @@ public class TransactionHistoryController {
             @RequestParam(required = false) String format,
             @RequestParam(required = false) String source,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate,
+            @RequestParam(required = false) String searchTerm
     ) {
-        return historyService.getFilteredTransactions(mti, format, source, startDate, endDate);
+        return historyService.getFilteredTransactions(mti, format, source, startDate, endDate, searchTerm);
     }
 
     @GetMapping("/search")
@@ -56,9 +57,10 @@ public class TransactionHistoryController {
             @RequestParam(required = false) String format,
             @RequestParam(required = false) String source,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime start,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime end
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime end,
+            @RequestParam(required = false) String searchTerm
     ) {
-        return historyService.getFilteredTransactions(mti, format, source, start, end);
+        return historyService.getFilteredTransactions(mti, format, source, start, end, searchTerm);
     }
 
     @GetMapping("/{id}")
@@ -84,6 +86,12 @@ public class TransactionHistoryController {
     @DeleteMapping("/all")
     public ResponseEntity<Void> deleteAll() {
         historyService.deleteAll();
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/delete-batch")
+    public ResponseEntity<Void> deleteTransactionsByIds(@RequestBody List<Long> ids) {
+        historyService.deleteByIds(ids);
         return ResponseEntity.noContent().build();
     }
 

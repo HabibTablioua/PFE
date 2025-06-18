@@ -1,28 +1,113 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, BehaviorSubject } from 'rxjs';
+import { tap } from 'rxjs/operators';
+import { environment } from '../../environments/environment';
+
+export interface User {
+  id?: number;
+  firstname: string;
+  lastname: string;
+  email: string;
+  password?: string;
+  role?: string;
+}
+
+export interface LoginResponse {
+  token: string;
+  user: User;
+}
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = 'http://localhost:8088/api/auth'; // URL du gateway
+  private authUrl = environment.authUrl;
+  private currentUserSubject = new BehaviorSubject<User | null>(null);
+  public currentUser$ = this.currentUserSubject.asObservable();
 
-  constructor(private http: HttpClient) { }
-
-  register(userData: any): Observable<any> {
-    return this.http.post(`${this.apiUrl}/register`, userData, { observe: 'response' });
+  constructor(private http: HttpClient) {
+    // Vérifier s'il y a un utilisateur stocké au démarrage
+    this.loadStoredUser();
   }
 
-  login(credentials: any): Observable<any> {
-    return this.http.post(`${this.apiUrl}/login`, credentials);
+  private loadStoredUser(): void {
+    const userStr = localStorage.getItem('currentUser');
+    if (userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        this.currentUserSubject.next(user);
+      } catch (error) {
+        console.error('Erreur lors du chargement de l\'utilisateur stocké:', error);
+        localStorage.removeItem('currentUser');
+      }
+    }
+  }
+
+  register(userData: any): Observable<any> {
+    return this.http.post(`${this.authUrl}/register`, userData, { observe: 'response' });
+  }
+
+  login(credentials: any): Observable<LoginResponse> {
+    return this.http.post<LoginResponse>(`${this.authUrl}/login`, credentials)
+      .pipe(
+        tap(response => {
+          localStorage.setItem('token', response.token);
+          localStorage.setItem('currentUser', JSON.stringify(response.user));
+          this.currentUserSubject.next(response.user);
+        })
+      );
   }
 
   logout(): void {
     localStorage.removeItem('token');
+    localStorage.removeItem('currentUser');
+    this.currentUserSubject.next(null);
   }
 
   isAuthenticated(): boolean {
     return !!localStorage.getItem('token');
+  }
+
+  getCurrentUser(): Observable<User | null> {
+    return this.currentUser$;
+  }
+
+  getCurrentUserValue(): User | null {
+    return this.currentUserSubject.value;
+  }
+
+  hasRole(role: string): boolean {
+    const user = this.getCurrentUserValue();
+    return user?.role === role;
+  }
+
+  isAdmin(): boolean {
+    return this.hasRole('ADMIN');
+  }
+
+  // Méthodes de gestion des utilisateurs (déplacées vers UserService)
+  getUsers(): Observable<User[]> {
+    return this.http.get<User[]>(`${this.authUrl}/users`);
+  }
+
+  getUserById(id: number): Observable<User> {
+    return this.http.get<User>(`${this.authUrl}/users/${id}`);
+  }
+
+  createUser(user: User): Observable<User> {
+    return this.http.post<User>(`${this.authUrl}/register`, user);
+  }
+
+  updateUser(id: number, user: User): Observable<User> {
+    return this.http.put<User>(`${this.authUrl}/users/${id}`, user);
+  }
+
+  deleteUser(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.authUrl}/users/${id}`);
+  }
+
+  deleteMultipleUsers(ids: number[]): Observable<void> {
+    return this.http.post<void>(`${this.authUrl}/users/delete-multiple`, { ids });
   }
 } 

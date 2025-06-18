@@ -25,6 +25,11 @@ export const navItems: NavItem[] = [
     route: '/transaction-history',
   },
   {
+    displayName: 'Users',
+    iconName: 'users',
+    route: '/users',
+  },
+  {
     displayName: 'Analytical',
     iconName: 'aperture',
     route: 'https://modernize-angular-main.netlify.app/dashboards/dashboard1',

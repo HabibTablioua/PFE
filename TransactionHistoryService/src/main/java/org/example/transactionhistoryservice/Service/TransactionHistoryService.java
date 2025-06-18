@@ -109,12 +109,17 @@ public class TransactionHistoryService {
         repository.deleteAll();
     }
 
+    public void deleteByIds(List<Long> ids) {
+        repository.deleteAllById(ids);
+    }
+
     public List<TransactionHistory> getFilteredTransactions(
             String mti,
             String format,
             String source,
             LocalDateTime startDate,
-            LocalDateTime endDate) {
+            LocalDateTime endDate,
+            String searchTerm) {
 
         Specification<TransactionHistory> spec = (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
@@ -134,6 +139,34 @@ public class TransactionHistoryService {
                 predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("createdAt"), startDate));
             } else if (endDate != null) {
                 predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("createdAt"), endDate));
+            }
+
+            if (searchTerm != null && !searchTerm.isEmpty()) {
+                String trimmedSearchTerm = searchTerm.trim(); // Trim leading/trailing spaces
+                
+                // Try to parse searchTerm as a Long for ID search
+                try {
+                    Long id = Long.parseLong(trimmedSearchTerm);
+                    predicates.add(criteriaBuilder.equal(root.get("id"), id));
+                    // If it's a valid ID, only search by ID and return early
+                    return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+                } catch (NumberFormatException e) {
+                    // Not a valid number, proceed with text-based search
+                    String lowerCaseSearchTerm = "%" + trimmedSearchTerm.toLowerCase() + "%";
+                    List<Predicate> textSearchPredicates = new ArrayList<>();
+
+                    textSearchPredicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("mti")), lowerCaseSearchTerm));
+                    textSearchPredicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("format")), lowerCaseSearchTerm));
+                    textSearchPredicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("source")), lowerCaseSearchTerm));
+                    // No lower() for CLOB fields like 'message' and 'fieldsJson'
+                    textSearchPredicates.add(criteriaBuilder.like(root.get("message"), lowerCaseSearchTerm));
+                    textSearchPredicates.add(criteriaBuilder.like(root.get("fieldsJson"), lowerCaseSearchTerm));
+                    textSearchPredicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("status")), lowerCaseSearchTerm));
+
+                    if (!textSearchPredicates.isEmpty()) {
+                        predicates.add(criteriaBuilder.or(textSearchPredicates.toArray(new Predicate[0])));
+                    }
+                }
             }
 
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
