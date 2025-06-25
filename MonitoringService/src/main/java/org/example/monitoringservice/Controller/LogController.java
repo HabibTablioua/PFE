@@ -6,6 +6,7 @@ import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfWriter;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.example.monitoringservice.Entity.LogEntry;
 import org.example.monitoringservice.Service.LogService;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
@@ -20,12 +21,20 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.Objects;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.example.monitoringservice.Repository.LogEntryRepository;
+import java.util.Collections;
+import java.time.format.DateTimeParseException;
+import java.time.LocalDate;
 
 @RestController
 @RequestMapping("/logs")
 @Slf4j
 public class LogController {
     private final LogService logService;
+    @Autowired
+    private LogEntryRepository logEntryRepository;
 
     public LogController(LogService logService) {
         this.logService = logService;
@@ -36,10 +45,137 @@ public class LogController {
     private static final DateTimeFormatter LOG_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"); // Format que tu veux utiliser
 
 
+    // DTO pour le log structuré
+    class LogDto {
+        private String id;
+        private String date;
+        private String level;
+        private String message;
+        private String details;
+        // Getters & setters
+        public String getId() { return id; }
+        public void setId(String id) { this.id = id; }
+        public String getDate() { return date; }
+        public void setDate(String date) { this.date = date; }
+        public String getLevel() { return level; }
+        public void setLevel(String level) { this.level = level; }
+        public String getMessage() { return message; }
+        public void setMessage(String message) { this.message = message; }
+        public String getDetails() { return details; }
+        public void setDetails(String details) { this.details = details; }
+        // Génère un identifiant unique basé sur le contenu du log
+        public void generateId() {
+            this.id = Integer.toHexString(java.util.Objects.hash(date, level, message, details));
+        }
+    }
+
     @GetMapping
-    public ResponseEntity<List<String>> getAllLogs() throws IOException {
+    public ResponseEntity<Map<String, Object>> getAllLogs(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String startDate,
+            @RequestParam(required = false) String endDate,
+            @RequestParam(required = false) String level
+    ) throws IOException {
         List<String> allLines = Files.readAllLines(Path.of(LOG_FILE_PATH));
-        return ResponseEntity.ok(allLines);
+        Collections.reverse(allLines); // Inverse la liste pour avoir les plus récents en premier
+        
+        List<LogDto> filteredLogs = allLines.stream()
+            .map(this::parseLogLine)
+            .filter(Objects::nonNull)
+            .filter(log -> {
+                // Filtre par mot-clé
+                if (keyword != null && !keyword.isEmpty()) {
+                    boolean keywordMatch = (log.getMessage() != null && log.getMessage().toLowerCase().contains(keyword.toLowerCase())) ||
+                                         (log.getDetails() != null && log.getDetails().toLowerCase().contains(keyword.toLowerCase()));
+                    if (!keywordMatch) return false;
+                }
+                
+                // Filtre par niveau
+                if (level != null && !level.isEmpty()) {
+                    if (!log.getLevel().equalsIgnoreCase(level)) return false;
+                }
+
+                // Filtre par date (corrigé)
+                if (startDate != null || endDate != null) {
+                    try {
+                        // On ne prend que la partie date du log (AAAA-MM-JJ)
+                        LocalDate logDate = LocalDate.parse(log.getDate().substring(0, 10));
+
+                        if (startDate != null && !startDate.isEmpty()) {
+                            LocalDate start = LocalDate.parse(startDate);
+                            if (logDate.isBefore(start)) return false;
+                        }
+                        if (endDate != null && !endDate.isEmpty()) {
+                            LocalDate end = LocalDate.parse(endDate);
+                            if (logDate.isAfter(end)) return false;
+                        }
+                    } catch (DateTimeParseException e) {
+                        return false; // Exclut les logs qui n'ont pas une date valide
+                    }
+                }
+                
+                return true;
+            })
+            .collect(Collectors.toList());
+    
+        int total = filteredLogs.size();
+        int fromIndex = Math.min(page * size, total);
+        int toIndex = Math.min(fromIndex + size, total);
+        List<LogDto> pagedLogs = filteredLogs.subList(fromIndex, toIndex);
+
+        Map<String, Object> response = new java.util.HashMap<>();
+        response.put("logs", pagedLogs);
+        response.put("total", total);
+        response.put("page", page);
+        response.put("size", size);
+        return ResponseEntity.ok(response);
+    }
+
+    // Méthode utilitaire pour parser une ligne brute
+    private LogDto parseLogLine(String line) {
+        try {
+            if (line.length() < 23) return null; // Garde-fou pour les lignes vides ou trop courtes
+
+            LogDto dto = new LogDto();
+            // Extrait la date, gère les formats avec ou sans 'T'
+            dto.setDate(line.substring(0, 19).replace("T", " "));
+
+            String rest = line.substring(20).trim();
+
+            // Différencie les logs système (avec nom de thread) des logs métiers
+            int threadStart = rest.indexOf('[');
+            int threadEnd = rest.indexOf(']');
+
+            if (threadStart == 0 && threadEnd > threadStart) {
+                // Log système : "[thread] NIVEAU classe - détails"
+                dto.setMessage(rest.substring(1, threadEnd)); // Nom du thread comme message
+
+                String afterThread = rest.substring(threadEnd + 1).trim();
+                String[] parts = afterThread.split(" ", 2);
+                
+                dto.setLevel(parts.length > 0 ? parts[0] : "UNKNOWN");
+                dto.setDetails(parts.length > 1 ? parts[1] : "");
+            } else {
+                // Log métier : "NIVEAU - message"
+                String[] parts = rest.split(" - ", 2);
+                dto.setLevel(parts.length > 0 ? parts[0] : "UNKNOWN");
+                dto.setMessage(parts.length > 1 ? parts[1] : rest); // Affiche le reste si pas de " - "
+                dto.setDetails(""); // Pas de détails séparés pour ce format
+            }
+            dto.generateId();
+            return dto;
+        } catch (Exception e) {
+            // En cas d'erreur de parsing, on retourne un log "brut" pour ne pas perdre l'information
+            LogDto rawDto = new LogDto();
+            rawDto.setDate("N/A");
+            rawDto.setLevel("RAW");
+            rawDto.setMessage(line);
+            rawDto.setDetails("");
+            rawDto.generateId();
+            return rawDto;
+        }
     }
 
     @GetMapping("/errors")
@@ -353,6 +489,45 @@ public class LogController {
         logService.saveLog(level, message);
         return ResponseEntity.ok("Log enregistré avec succès ✅");
     }
+
+
+    @GetMapping("/db")
+    public ResponseEntity<List<LogEntry>> getLogsFromDatabase() {
+        return ResponseEntity.ok(logService.getAllLogsFromDatabase());
+    }
+
+    // Suppression simple
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteLog(@PathVariable Long id) {
+        logEntryRepository.deleteById(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    // Suppression multiple
+    @PostMapping("/delete-batch")
+    public ResponseEntity<?> deleteLogsBatch(@RequestBody java.util.List<String> ids) {
+        try {
+            java.util.List<String> allLines = java.nio.file.Files.readAllLines(java.nio.file.Path.of(LOG_FILE_PATH));
+            java.util.List<LogDto> allLogs = allLines.stream()
+                .map(this::parseLogLine)
+                .filter(java.util.Objects::nonNull)
+                .toList();
+
+            java.util.List<String> filteredLines = new java.util.ArrayList<>();
+            for (int i = 0; i < allLogs.size(); i++) {
+                LogDto log = allLogs.get(i);
+                if (log.getId() == null || !ids.contains(log.getId())) {
+                    filteredLines.add(allLines.get(i));
+                }
+            }
+            java.nio.file.Files.write(java.nio.file.Path.of(LOG_FILE_PATH), filteredLines);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Erreur lors de la suppression : " + e.getMessage());
+        }
+    }
+
+
 
 
 

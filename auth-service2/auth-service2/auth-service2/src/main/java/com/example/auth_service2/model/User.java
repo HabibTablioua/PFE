@@ -36,5 +36,8 @@ public class User {
 
     @ElementCollection(fetch = FetchType.EAGER)
     private List<String> roles;
+
+
+    private String status = "offline"; // ✅ Nouveau champ avec valeur par défaut
 }
 

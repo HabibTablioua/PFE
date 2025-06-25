@@ -52,7 +52,7 @@ export class UsersComponent implements OnInit {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
 
-  displayedColumns: string[] = ['select', 'id', 'firstname', 'lastname', 'email', 'roles', 'actions'];
+  displayedColumns: string[] = ['select', 'id', 'firstname', 'lastname', 'email', 'status', 'roles', 'actions'];
   dataSource = new MatTableDataSource<User>([]);
   
   isLoading = false;
@@ -74,6 +74,7 @@ export class UsersComponent implements OnInit {
   filterMode = 'all'; // 'all', 'firstname', 'lastname', 'email'
   showFilterPanel = false;
   filterRole = '';
+  filterStatus = '';
 
   hidePassword = true;
 
@@ -112,8 +113,8 @@ export class UsersComponent implements OnInit {
     this.isLoading = true;
     this.userService.getUsers().subscribe({
       next: (users) => {
-        // Trier par ID décroissant (plus récent en haut)
-        users.sort((a, b) => (b.id ?? 0) - (a.id ?? 0));
+        // Trier par ID croissant (plus petit en haut)
+        users.sort((a, b) => (a.id ?? 0) - (b.id ?? 0));
         this.dataSource.data = users;
         this.isLoading = false;
       },
@@ -133,16 +134,22 @@ export class UsersComponent implements OnInit {
     this.filterRole = '';
     this.filterMode = 'all';
     this.searchTerm = '';
+    this.filterStatus = '';
     this.applyFilter();
   }
 
   applyFilter(event?: Event): void {
     let filterValue = this.searchTerm.trim().toLowerCase();
     const selectedRole = this.filterRole;
+    const selectedStatus = this.filterStatus;
 
     this.dataSource.filterPredicate = (data: User, filter: string) => {
       // Filtrage par rôle (tableau)
       if (selectedRole && (!data.roles || !data.roles.includes(selectedRole))) {
+        return false;
+      }
+      // Filtrage par statut
+      if (selectedStatus && data.status !== selectedStatus) {
         return false;
       }
       // Filtrage par mode

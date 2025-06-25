@@ -38,7 +38,7 @@ public class PackingISOService {
 
     public PackingISOResponse packHex(IsoFieldsRequest request) {
         String packed = pack(request, true);
-            saveToHistory(request.getMti(), request.getFields(), packed, "HEX");
+        saveToHistory(request.getMti(), request.getFields(), packed, "HEX");
         sendLogToMonitoring("SUCCESS", "Packing HEX réussi pour MTI : " + request.getMti());
         return new PackingISOResponse(packed);
     }
@@ -88,7 +88,7 @@ public class PackingISOService {
 
     private void saveToHistory(String mti, Map<String, String> fields, String message, String format) {
         // ici on appelle le microservice d'historique
-        String historyUrl = "http://localhost:8084/history"; // adapte le nom du service et chemin
+        String url = "http://localhost:8088/api/history"; // adapte le nom du service et chemin
 
         Map<String, Object> payload = Map.of(
                 "mti", mti,
@@ -100,16 +100,19 @@ public class PackingISOService {
         );
 
         try {
+            // 🔐 Récupérer le token JWT depuis la requête
             String token = getAuthTokenFromRequest();
 
+            // 🧾 Préparer les headers avec le token + content-type
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
-            if (token != null) {
+            if (token != null && !token.isEmpty()) {
                 headers.set("Authorization", token);
             }
 
+            // 📤 Envoyer la requête POST avec le body JSON et les headers
             HttpEntity<Map<String, Object>> entity = new HttpEntity<>(payload, headers);
-            restTemplate.postForEntity(historyUrl, entity, Void.class);
+            restTemplate.postForEntity(url, entity, String.class);
 
             log.info("payload :" + payload.toString());
             log.info("✅ Message enregistré dans l’historique.");
@@ -120,9 +123,10 @@ public class PackingISOService {
         }
     }
 
+
     private void sendLogToMonitoring(String level, String message) {
         try {
-            String url = "http://localhost:8085/logs/save"; // ⚠️ Pas 8088 ! Vérifie que ton MonitoringService tourne bien sur 8085
+            String url = "http://localhost:8088/api/logs/save"; // ⚠️ Pas 8088 ! Vérifie que ton MonitoringService tourne bien sur 8085
 
             // 📦 Payload à envoyer dans le body
             Map<String, Object> payload = Map.of(

@@ -1,0 +1,140 @@
+<div class="page-header">
+  <div class="icon-background">
+    <mat-icon class="header-icon">show_chart</mat-icon>
+  </div>
+  <div>
+    <h1 class="page-title">Monitoring des Logs</h1>
+    <p class="page-subtitle">Visualisez, filtrez et gérez les journaux d'événements de l'application.</p>
+  </div>
+</div>
+
+<div class="logs-table-container">
+  <div class="table-header-actions">
+    <button mat-raised-button
+            color="warn"
+            class="delete-selected-btn"
+            (click)="confirmDeleteSelectedLogs()"
+            [disabled]="selectedLogs.length === 0">
+      <mat-icon>delete_sweep</mat-icon>
+      Supprimer la sélection
+    </button>
+    <button class="hps-gradient-btn" (click)="toggleFilterPanel()">
+      <mat-icon>filter_alt</mat-icon> Filtrage
+    </button>
+  </div>
+
+  <div *ngIf="showFilterPanel" class="filter-panel-v2">
+    <div class="filter-inputs">
+      <mat-form-field appearance="outline">
+        <mat-label>Date début</mat-label>
+        <input matInput [matDatepicker]="picker1" [(ngModel)]="startDate" />
+        <mat-datepicker-toggle matSuffix [for]="picker1"></mat-datepicker-toggle>
+        <mat-datepicker #picker1></mat-datepicker>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Date fin</mat-label>
+        <input matInput [matDatepicker]="picker2" [(ngModel)]="endDate" />
+        <mat-datepicker-toggle matSuffix [for]="picker2"></mat-datepicker-toggle>
+        <mat-datepicker #picker2></mat-datepicker>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Statut</mat-label>
+        <mat-select [(ngModel)]="level">
+          <mat-option value="">Tous</mat-option>
+          <mat-option value="SUCCESS">SUCCESS</mat-option>
+          <mat-option value="ERROR">ERROR</mat-option>
+          <mat-option value="FAILED">FAILED</mat-option>
+          <mat-option value="INFO">INFO</mat-option>
+          <mat-option value="DEBUG">DEBUG</mat-option>
+          <mat-option value="WARN">WARN</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Rechercher</mat-label>
+        <input matInput [(ngModel)]="keyword" placeholder="Rechercher par mot-clé...">
+      </mat-form-field>
+    </div>
+    <div class="filter-actions">
+      <button class="filter-btn search" (click)="filterLogs()">
+        <mat-icon>search</mat-icon> Rechercher
+      </button>
+      <button class="filter-btn reset" (click)="resetFilters()">
+        <mat-icon>refresh</mat-icon> Réinitialiser
+      </button>
+      <button class="filter-btn hide" (click)="toggleFilterPanel()">
+        <mat-icon>visibility_off</mat-icon> Masquer le filtre
+      </button>
+    </div>
+  </div>
+
+  <table class="styled-logs-table">
+    <thead>
+      <tr>
+        <th><input type="checkbox" [checked]="allSelected()" (change)="toggleSelectAll()" /></th>
+        <th>Date</th>
+        <th>Niveau</th>
+        <th>Message</th>
+        <th>Détail</th>
+        <th>Statut</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let log of logs; let i = index">
+        <td><input type="checkbox" [checked]="isSelected(log)" (change)="toggleSelect(log)" /></td>
+        <td>{{ log.date }}</td>
+        <td>{{ log.level }}</td>
+        <td>{{ log.message }}</td>
+        <td>
+          <button mat-icon-button (click)="toggleDetails(i)">
+            <mat-icon>{{ log.showDetails ? 'expand_less' : 'expand_more' }}</mat-icon>
+          </button>
+          <div *ngIf="log.showDetails">{{ log.details }}</div>
+        </td>
+        <td>
+          <ng-container [ngSwitch]="log.level">
+            <span *ngSwitchCase="'SUCCESS'" class="status-badge success">
+              <mat-icon>check_circle</mat-icon> Succès
+            </span>
+            <span *ngSwitchCase="'ERROR'" class="status-badge error">
+              <mat-icon>error</mat-icon> Erreur
+            </span>
+            <span *ngSwitchCase="'INFO'" class="status-badge info">
+              <mat-icon>info</mat-icon> Info
+            </span>
+            <span *ngSwitchCase="'WARNING'" class="status-badge warning">
+              <mat-icon>warning</mat-icon> Alerte
+            </span>
+            <span *ngSwitchCase="'WARN'" class="status-badge warning">
+              <mat-icon>warning</mat-icon> Warn
+            </span>
+            <span *ngSwitchCase="'DEBUG'" class="status-badge debug">
+              <mat-icon>bug_report</mat-icon> Debug
+            </span>
+            <span *ngSwitchCase="'FAILED'" class="status-badge failed">
+              <mat-icon>cancel</mat-icon> Échec
+            </span>
+            <span *ngSwitchCase="'CRITICAL'" class="status-badge critical">
+              <mat-icon>priority_high</mat-icon> Critique
+            </span>
+            <span *ngSwitchDefault class="status-badge default">
+              <mat-icon>label</mat-icon> {{ log.level | titlecase }}
+            </span>
+  </ng-container>
+        </td>
+        <td>
+          <button mat-icon-button color="warn" (click)="confirmDeleteLog(log)">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </td>
+      </tr>
+    </tbody>
+</table>
+</div>
+
+<mat-paginator
+  [length]="total"
+  [pageSize]="size"
+  [pageSizeOptions]="[10, 20, 50, 100]"
+  (page)="onPaginateChange($event)">
+</mat-paginator>

@@ -1,0 +1,49 @@
+:host {
+  min-height: 100vh;
+  min-width: 100vw;
+  background-image: url('/assets/images/backgrounds/PAYMENTS.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  display: block;
+}
+
+.blank-layout-container,
+.bg-light {
+  background: transparent !important;
+}
+
+.login-bg {
+  position: relative;
+  width: 100%;
+  min-height: 500px;
+  background-image: url('/assets/images/backgrounds/PAYMENTS.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 0;
+  overflow: hidden; /* important pour l'overlay */
+}
+
+.login-bg::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4); /* overlay noir à 40% d'opacité */
+  border-radius: 16px;
+  z-index: 1;
+}
+
+.login-bg > * {
+  position: relative;
+  z-index: 2;
+}
+
+.cardWithShadow.boxed-auth {
+  background: rgba(255,255,255,0.85) !important; /* blanc semi-transparent */
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08); /* ombre douce */
+} 

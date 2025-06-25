@@ -1,0 +1,22 @@
+<div class="custom-modal-overlay">
+  <div class="custom-dialog">
+    <div class="dialog-header">
+      <i-tabler name="trash" class="dialog-icon"></i-tabler>
+      <span class="dialog-title">Suppression des utilisateurs sélectionnés</span>
+    </div>
+    <div class="dialog-content">
+      <p>Êtes-vous certain de vouloir supprimer les utilisateurs suivants&nbsp;?</p>
+      <ul class="user-list">
+        <li *ngFor="let name of data.userNames">• {{ name }}</li>
+      </ul>
+      <div class="alert-message">
+        <i-tabler name="alert-triangle" class="alert-icon"></i-tabler>
+        <span><em>Cette action est irréversible.</em></span>
+      </div>
+    </div>
+    <div class="dialog-actions">
+      <button mat-stroked-button class="cancel-btn" (click)="onCancel()">Annuler</button>
+      <button mat-flat-button class="delete-btn" (click)="onConfirm()">Supprimer tous</button>
+    </div>
+  </div>
+</div> 

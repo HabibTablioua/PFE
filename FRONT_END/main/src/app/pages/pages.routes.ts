@@ -1,5 +1,7 @@
 import { Routes } from '@angular/router';
 import { StarterComponent } from './starter/starter.component';
+import { LogsMonitoringComponent } from './logs-monitoring/logs-monitoring.component';
+import { AuthGuard } from '../guards/auth.guard';
 
 export const PagesRoutes: Routes = [
   {
@@ -12,6 +14,14 @@ export const PagesRoutes: Routes = [
         { title: 'Starter Page' },
       ],
     },
-  }
+  },
+  {
+    path: 'logs-monitoring',
+    component: LogsMonitoringComponent,
+    canActivate: [AuthGuard],
+    data: {
+      title: 'Monitoring des Logs',
+    },
+  },
   // La route 'message' a été supprimée car le composant iso-form n'existe plus
 ];

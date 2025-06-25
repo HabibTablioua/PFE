@@ -58,6 +58,14 @@
             </mat-select>
           </mat-form-field>
           <mat-form-field appearance="outline">
+            <mat-label>Statut</mat-label>
+            <mat-select [(ngModel)]="filterStatus" (selectionChange)="applyFilter()">
+              <mat-option value="">Tous</mat-option>
+              <mat-option value="online">En ligne</mat-option>
+              <mat-option value="offline">Hors ligne</mat-option>
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
             <mat-label>Filtrer par</mat-label>
             <mat-select [(ngModel)]="filterMode">
               <mat-option value="all">Tous</mat-option>
@@ -75,10 +83,10 @@
           <button mat-flat-button class="gradient-btn" (click)="applyFilter()">
             <mat-icon>search</mat-icon> Rechercher
           </button>
-          <button mat-stroked-button (click)="resetFilters()">
+          <button mat-flat-button class="orange-btn" (click)="resetFilters()">
             <mat-icon>refresh</mat-icon> Réinitialiser
           </button>
-          <button mat-stroked-button color="accent" (click)="toggleFilterPanel()">
+          <button mat-flat-button class="yellow-btn" (click)="toggleFilterPanel()">
             <mat-icon>visibility_off</mat-icon> Masquer le filtre
           </button>
         </div>
@@ -157,6 +165,34 @@
                     <i-tabler name="mail" class="email-icon"></i-tabler>
                     {{ user.email }}
                   </div>
+                </td>
+              </ng-container>
+
+              <!-- Colonne Status -->
+              <ng-container matColumnDef="status">
+                <th mat-header-cell *matHeaderCellDef class="status-header">
+                  <i-tabler name="activity" class="column-icon"></i-tabler>
+                  Status
+                </th>
+                <td mat-cell *matCellDef="let user">
+                  <span
+                    class="status-badge"
+                    [ngClass]="{
+                      'badge-online': user.status === 'online',
+                      'badge-offline': user.status === 'offline'
+                    }"
+                    matTooltip="{{ user.status === 'online' ? 'Utilisateur connecté' : (user.lastActive ? 'Dernière activité il y a ' + user.lastActive : 'Utilisateur déconnecté') }}">
+                    <span
+                      class="status-dot"
+                      [ngClass]="{
+                        'dot-online': user.status === 'online',
+                        'dot-offline': user.status === 'offline'
+                      }"
+                    ></span>
+                    <span class="status-text" [ngClass]="{'offline-text': user.status === 'offline'}">
+                      {{ user.status === 'online' ? 'En ligne' : 'Hors ligne' }}
+                    </span>
+                  </span>
                 </td>
               </ng-container>
 
@@ -242,7 +278,7 @@
         <!-- Message si aucun utilisateur -->
         @if (!isLoading && dataSource.data.length === 0) {
           <div class="no-data-container">
-            <i-tabler name="users-off" class="no-data-icon"></i-tabler>
+            <i-tabler name="users" class="no-data-icon"></i-tabler>
             <h3>Aucun utilisateur trouvé</h3>
             <p>Commencez par ajouter votre premier utilisateur</p>
             <button 

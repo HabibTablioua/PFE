@@ -12,6 +12,7 @@ import org.example.transactionhistoryservice.Entite.TransactionHistory;
 import org.example.transactionhistoryservice.Repository.OperationTypeRepository;
 import org.example.transactionhistoryservice.Repository.TransactionHistoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
@@ -172,7 +173,7 @@ public class TransactionHistoryService {
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         };
 
-        return repository.findAll(spec);
+        return repository.findAll(spec, Sort.by(Sort.Direction.DESC, "createdAt"));
     }
 
     @Service

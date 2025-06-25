@@ -15,6 +15,7 @@ export interface User {
   createdAt?: Date;
   updatedAt?: Date;
   isActive?: boolean;
+  status?: 'online' | 'offline' | string;
 }
 
 export interface UserResponse {

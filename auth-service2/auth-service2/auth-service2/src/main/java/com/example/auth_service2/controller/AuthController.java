@@ -72,8 +72,33 @@ public class AuthController {
 
 
         User user = userOpt.get();
+
+        // ✅ Mettre le status à online
+        user.setStatus("online");
+        userRepository.save(user);
+
         String token = jwtUtil.generateToken(user.getEmail(), user.getRoles());
         return ResponseEntity.ok(Collections.singletonMap("token", token));
     }
+
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(@RequestBody Map<String, String> request) {
+        String email = request.get("email");
+
+        Optional<User> userOpt = userRepository.findByEmail(email);
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+
+            // ✅ Mettre le status à offline
+            user.setStatus("offline");
+            userRepository.save(user);
+
+            return ResponseEntity.ok(Map.of("message", "User logged out successfully"));
+        }
+
+        return ResponseEntity.status(404).body("User not found");
+    }
+
 
 }

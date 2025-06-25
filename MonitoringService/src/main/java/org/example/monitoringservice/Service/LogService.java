@@ -6,6 +6,10 @@ import org.example.monitoringservice.Repository.LogEntryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;  // ✅ Ajoute ça
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -41,20 +45,39 @@ public class LogService {
     }
 
     private List<String> fetchAllLogs() {
-        // Simule : ici tu peux faire un select dans ta table historique.
-        List<String> fakeLogs = new ArrayList<>();
-        fakeLogs.add("2025-04-28T17:30:00 SUCCESS - Transaction MTI 0200 validée");
-        fakeLogs.add("2025-04-28T17:35:00 ERROR - Transaction MTI 0200 refusée (fonds insuffisants)");
-        return fakeLogs;
+        return logEntryRepository.findAll()
+                .stream()
+                .map(entry -> String.format("%s %s - %s",
+                        entry.getDateTime().toString(),
+                        entry.getLevel(),
+                        entry.getMessage()))
+                .collect(Collectors.toList());
     }
+
 
     public void saveLog(String level, String message) {
         LogEntry entry = new LogEntry();
         entry.setDateTime(LocalDateTime.now());
         entry.setLevel(level);
         entry.setMessage(message);
-
         logEntryRepository.save(entry);
+
+        // Optionnel : écrire dans le fichier log aussi
+        try {
+            Files.writeString(Path.of("D:/PFE/logs/iso-logs.log"),
+                    String.format("%s %s - %s\n", LocalDateTime.now(), level, message),
+                    java.nio.file.StandardOpenOption.CREATE,
+                    java.nio.file.StandardOpenOption.APPEND);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
+
+
+    public List<LogEntry> getAllLogsFromDatabase() {
+        return logEntryRepository.findAll();
+    }
+
+
 
 }
