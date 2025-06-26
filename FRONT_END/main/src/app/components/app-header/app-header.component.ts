@@ -1,7 +1,7 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
-import { trigger, state, style, animate, transition } from '@angular/animations';
+import { trigger, style, animate, transition } from '@angular/animations';
 
 @Component({
   selector: 'app-header',
@@ -18,8 +18,13 @@ import { trigger, state, style, animate, transition } from '@angular/animations'
     ])
   ]
 })
-export class AppHeaderComponent {
+export class AppHeaderComponent implements OnInit {
   @Input() title: string = '';
   @Input() subtitle: string = '';
-  @Input() icon: string = 'info'; // Default icon
+  @Input() icon: string = 'info';
+
+  constructor() {}
+
+  ngOnInit() {
+  }
 } 

@@ -1,0 +1,67 @@
+.notification-dropdown {
+  min-width: 320px !important;
+  max-width: 320px !important;
+  padding: 0 !important;
+}
+
+.notification-dropdown .mat-mdc-menu-content {
+  padding: 0 !important;
+}
+
+.scroll-area {
+  height: auto;
+  max-height: 280px;
+}
+
+.notification-item {
+  height: auto !important;
+  padding-top: 12px !important;
+  padding-bottom: 12px !important;
+  line-height: 1.5 !important;
+  white-space: normal !important;
+  opacity: 0.6; /* Read notifications are less visible */
+  transition: opacity 0.3s, background-color 0.3s;
+}
+
+.notification-item.unread {
+  background-color: rgba(86, 103, 255, 0.08); /* A light primary color background for unread items */
+  opacity: 1; /* Unread notifications are fully visible */
+}
+
+/* Increase icon size */
+.notification-item i-tabler {
+  width: 36px;
+  height: 36px;
+}
+
+.notification-item .mat-icon {
+  /* This rule is no longer used, but kept for reference if you switch back */
+  display: none;
+}
+
+.notification-item:hover {
+  background-color: #f5f5f5;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 8px;
+  flex-shrink: 0;
+}
+
+.status-dot.status-success { background-color: #4CAF50; } /* Green */
+.status-dot.status-error { background-color: #F44336; } /* Red */
+.status-dot.status-info { background-color: #2196F3; } /* Blue */
+
+.delete-btn {
+  color: #e53935 !important; /* Material Red */
+  transition: all 0.2s ease;
+}
+
+.delete-btn:hover {
+  color: #c62828 !important; /* Darker Red */
+  background-color: rgba(229, 57, 53, 0.1) !important;
+  transform: scale(1.1) rotate(10deg);
+} 

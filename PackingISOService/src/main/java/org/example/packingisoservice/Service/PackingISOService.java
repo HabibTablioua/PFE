@@ -33,6 +33,10 @@ public class PackingISOService {
         saveToHistory(request.getMti(), request.getFields(), packed, "ASCII");
         log.info("Packing ISO Response: " + packed);
         sendLogToMonitoring("SUCCESS", "Packing ASCII réussi pour MTI : " + request.getMti());
+
+        // 🔔 Envoi de notification
+        sendNotificationToNotificationService("Le message pour MTI " + request.getMti() + " a été généré avec succès.");
+
         return new PackingISOResponse(packed);
     }
 
@@ -40,6 +44,10 @@ public class PackingISOService {
         String packed = pack(request, true);
         saveToHistory(request.getMti(), request.getFields(), packed, "HEX");
         sendLogToMonitoring("SUCCESS", "Packing HEX réussi pour MTI : " + request.getMti());
+
+        // 🔔 Envoi de notification
+        sendNotificationToNotificationService("Le message pour MTI " + request.getMti() + " a été généré avec succès.");
+
         return new PackingISOResponse(packed);
     }
 
@@ -115,10 +123,10 @@ public class PackingISOService {
             restTemplate.postForEntity(url, entity, String.class);
 
             log.info("payload :" + payload.toString());
-            log.info("✅ Message enregistré dans l’historique.");
+            log.info("✅ Message enregistré dans l'historique.");
             sendLogToMonitoring("SUCCESS", "Message enregistré dans historique pour MTI : " + mti);
         } catch (Exception e) {
-            log.warn("⚠️ Échec d’enregistrement dans l’historique : {}", e.getMessage());
+            log.warn("⚠️ Échec d'enregistrement dans l'historique : {}", e.getMessage());
             sendLogToMonitoring("ERROR", "Erreur d'enregistrement historique pour MTI : " + mti + " - " + e.getMessage());
         }
     }
@@ -153,6 +161,33 @@ public class PackingISOService {
             log.warn("⚠️ Impossible d'envoyer le log au MonitoringService : {}", e.getMessage());
         }
     }
+
+    private void sendNotificationToNotificationService(String message) {
+        try {
+            String url = "http://localhost:8088/api/notifications"; // Vérifie bien le port du Gateway
+
+            Map<String, String> payload = Map.of(
+                    "message", message
+            );
+
+            // 🔐 Récupérer le token JWT depuis la requête
+            String token = getAuthTokenFromRequest();
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            if (token != null && !token.isEmpty()) {
+                headers.set("Authorization", token);
+            }
+
+            HttpEntity<Map<String, String>> entity = new HttpEntity<>(payload, headers);
+            restTemplate.postForEntity(url, entity, String.class);
+
+            log.info("✅ Notification envoyée au NotificationService : {}", message);
+        } catch (Exception e) {
+            log.warn("⚠️ Impossible d'envoyer la notification : {}", e.getMessage());
+        }
+    }
+
 
 
 }

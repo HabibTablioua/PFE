@@ -64,10 +64,19 @@ public class LogService {
 
         // Optionnel : écrire dans le fichier log aussi
         try {
-            Files.writeString(Path.of("D:/PFE/logs/iso-logs.log"),
-                    String.format("%s %s - %s\n", LocalDateTime.now(), level, message),
-                    java.nio.file.StandardOpenOption.CREATE,
-                    java.nio.file.StandardOpenOption.APPEND);
+            Path logFilePath = Path.of("D:/PFE/logs/iso-logs.log");
+            // Crée le dossier s'il n'existe pas
+            Files.createDirectories(logFilePath.getParent());
+            // Crée le fichier s'il n'existe pas
+            if (!Files.exists(logFilePath)) {
+                Files.createFile(logFilePath);
+            }
+            Files.writeString(
+                logFilePath,
+                String.format("%s %s - %s\n", LocalDateTime.now(), level, message),
+                java.nio.file.StandardOpenOption.CREATE,
+                java.nio.file.StandardOpenOption.APPEND
+            );
         } catch (IOException e) {
             e.printStackTrace();
         }
