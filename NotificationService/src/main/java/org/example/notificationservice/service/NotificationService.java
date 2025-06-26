@@ -40,5 +40,10 @@ public class NotificationService {
         log.info("✅ Notification supprimée : ID {}", id);
     }
 
+    public void deleteAllNotifications() {
+        notificationRepository.deleteAll();
+        log.info("✅ Toutes les notifications ont été supprimées.");
+    }
+
 }
 

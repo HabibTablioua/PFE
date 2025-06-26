@@ -21,6 +21,7 @@ public class SecurityConfig {
                         .pathMatchers("/api/depacking/**").permitAll()
                         .pathMatchers("/api/history/**").permitAll()
                         .pathMatchers("/api/notifications/**").permitAll()
+                        .pathMatchers("/api/response-iso/**").permitAll()
                         .pathMatchers("/api/logs/**").permitAll()
                         .anyExchange().authenticated()
                 );

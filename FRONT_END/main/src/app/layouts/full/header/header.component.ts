@@ -99,4 +99,10 @@ export class HeaderComponent implements OnInit {
   get badgeColor(): string {
     return this.notifications.some(n => !n.read && n.type === 'error') ? 'warn' : 'primary';
   }
+
+  deleteAllNotifications(): void {
+    this.notificationService.deleteAllNotifications().subscribe(() => {
+      this.notifications = [];
+    });
+  }
 }

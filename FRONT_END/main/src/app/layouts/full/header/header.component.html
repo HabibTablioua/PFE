@@ -13,7 +13,16 @@
     <div class="d-flex align-items-center p-x-12">
       <h6 class="f-s-16 f-w-600 m-b-0">Notifications</h6>
       <span class="flex-1-auto"></span>
-      <button mat-flat-button color="primary" (click)="markAllAsRead()" [disabled]="unreadCount === 0">Marquer tout comme lu</button>
+      <div class="notification-actions">
+        <button mat-flat-button color="primary" (click)="markAllAsRead()" [disabled]="unreadCount === 0">
+          <i-tabler name="circle-check" class="action-icon"></i-tabler>
+          Tout lu
+        </button>
+        <button mat-flat-button color="warn" (click)="deleteAllNotifications()">
+          <i-tabler name="trash" class="action-icon"></i-tabler>
+          Supprimer tout
+        </button>
+      </div>
     </div>
 
     <mat-divider class="m-t-12"></mat-divider>
@@ -30,7 +39,6 @@
 
         <div class="d-flex align-items-center w-100 justify-content-between">
           <div class="d-flex align-items-center">
-            <span class="status-dot" [ngClass]="'status-' + notif.type"></span>
             <i-tabler
               [name]="notif.type === 'success' ? 'circle-check' : (notif.type === 'error' ? 'alert-circle' : 'info-circle')"
               [ngClass]="{

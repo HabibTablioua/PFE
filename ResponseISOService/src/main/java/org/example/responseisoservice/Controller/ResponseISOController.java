@@ -14,26 +14,29 @@
     import org.springframework.web.bind.annotation.RequestBody;
     import org.springframework.web.bind.annotation.RequestMapping;
     import org.springframework.web.bind.annotation.RestController;
+    import org.springframework.web.bind.annotation.GetMapping;
     import java.io.InputStream;
     import java.nio.charset.StandardCharsets;
+    import org.example.responseisoservice.Entity.ResponseISOHistory;
+    import org.example.responseisoservice.repository.ResponseISOHistoryRepository;
+    import java.util.List;
 
     @RestController
     @RequestMapping("/response-iso")
     public class ResponseISOController {
 
         private final ResponseISOService responseISOService;
+        private final ResponseISOHistoryRepository historyRepository;
 
-
-
-        public ResponseISOController(ResponseISOService responseISOService) {
+        public ResponseISOController(ResponseISOService responseISOService, ResponseISOHistoryRepository historyRepository) {
             this.responseISOService = responseISOService;
+            this.historyRepository = historyRepository;
         }
 
         @PostMapping(value = "/process", produces = MediaType.APPLICATION_JSON_VALUE)
         public ResponseISOResponse processISO(@RequestBody ResponseISORequest request) {
             return responseISOService.processISO(request);
         }
-
 
         @PostMapping(value = "/download/json", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
         public ResponseEntity<byte[]> downloadAsJson(@RequestBody ResponseISORequest request) {
@@ -49,7 +52,6 @@
                 return ResponseEntity.status(500).body(("Erreur JSON : " + e.getMessage()).getBytes());
             }
         }
-
 
         @PostMapping(value = "/download/txt", produces = MediaType.TEXT_PLAIN_VALUE)
         public ResponseEntity<byte[]> downloadAsTxt(@RequestBody ResponseISORequest request) {
@@ -72,8 +74,6 @@
                     .body(xml.getBytes(StandardCharsets.UTF_8));
         }
 
-
-
         @PostMapping(value = "/download/csv", produces = "text/csv")
         public ResponseEntity<byte[]> downloadAsCsv(@RequestBody ResponseISORequest request) {
             ResponseISOResponse response = responseISOService.processISO(request);
@@ -83,7 +83,6 @@
                     .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=response-iso.csv")
                     .body(csv.getBytes(StandardCharsets.UTF_8));
         }
-
 
         @PostMapping(value = "/download/raw", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
         public ResponseEntity<byte[]> downloadRaw(@RequestBody ResponseISORequest request) throws Exception {
@@ -124,6 +123,11 @@
                 return ResponseEntity.status(500)
                         .body(("Erreur lors du traitement ISO : " + e.getMessage()).getBytes());
             }
+        }
+
+        @GetMapping("/history")
+        public List<ResponseISOHistory> getAllHistory() {
+            return historyRepository.findAll();
         }
 
     }

@@ -11,6 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.example.responseisoservice.Entity.ResponseISOHistory;
+import org.example.responseisoservice.repository.ResponseISOHistoryRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.InputStream;
 import java.net.URLEncoder;
@@ -22,95 +25,104 @@ import java.util.Map;
 public class ResponseISOService {
     private static final Logger log = LoggerFactory.getLogger(ResponseISOService.class);
 
+    private final RestTemplate restTemplate;
     @Autowired
-    private RestTemplate restTemplate;
+    private ResponseISOHistoryRepository historyRepository;
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    public ResponseISOService(RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
+    }
+
+    // --- Mapping ISO processing codes to actions ---
+    private static class ResponseAction {
+        String mti;
+        String code39;
+        Map<Integer, String> extraFields;
+        ResponseAction(String mti, String code39) {
+            this(mti, code39, new HashMap<>());
+        }
+        ResponseAction(String mti, String code39, int extraField, String extraValue) {
+            this(mti, code39, Map.of(extraField, extraValue));
+        }
+        ResponseAction(String mti, String code39, Map<Integer, String> extraFields) {
+            this.mti = mti;
+            this.code39 = code39;
+            this.extraFields = extraFields;
+        }
+    }
+    private static final Map<String, ResponseAction> RESPONSE_MAP = Map.ofEntries(
+        Map.entry("000000", new ResponseAction("0210", "00")),
+        Map.entry("310000", new ResponseAction("0210", "00", 54, "BAL:0000000500 MAD")),
+        Map.entry("200000", new ResponseAction("0210", "00")),
+        Map.entry("200001", new ResponseAction("0210", "51")),
+        Map.entry("200002", new ResponseAction("0210", "54")),
+        Map.entry("200003", new ResponseAction("0210", "43")),
+        Map.entry("500000", new ResponseAction("0210", "00")),
+        Map.entry("500001", new ResponseAction("0210", "13")),
+        Map.entry("900000", new ResponseAction("0210", "05")),
+        Map.entry("900001", new ResponseAction("0210", "96")),
+        Map.entry("200007", new ResponseAction("0210", "57")),
+        Map.entry("200008", new ResponseAction("0210", "55")),
+        Map.entry("200009", new ResponseAction("0210", "56")),
+        Map.entry("200010", new ResponseAction("0210", "63")),
+        Map.entry("300000", new ResponseAction("0210", "41")),
+        Map.entry("300001", new ResponseAction("0210", "15")),
+        Map.entry("300002", new ResponseAction("0210", "40")),
+        Map.entry("300003", new ResponseAction("0210", "62")),
+        Map.entry("300004", new ResponseAction("0210", "47")),
+        Map.entry("600005", new ResponseAction("0210", "91")),
+        Map.entry("600006", new ResponseAction("0210", "68")),
+        Map.entry("600007", new ResponseAction("0210", "68")),
+        Map.entry("600008", new ResponseAction("0210", "92")),
+        Map.entry("700000", new ResponseAction("0210", "00")),
+        Map.entry("700001", new ResponseAction("0210", "94")),
+        Map.entry("700002", new ResponseAction("0210", "58")),
+        Map.entry("700003", new ResponseAction("0210", "05")),
+        Map.entry("700004", new ResponseAction("0210", "13")),
+        Map.entry("999998", new ResponseAction("0210", "96")),
+        Map.entry("999997", new ResponseAction("0210", "30")),
+        Map.entry("999996", new ResponseAction("0210", "30")),
+        Map.entry("999995", new ResponseAction("0210", "30")),
+        Map.entry("999994", new ResponseAction("0210", "91")),
+        Map.entry("600000", new ResponseAction("0210", "17")),
+        Map.entry("600001", new ResponseAction("0210", "30")),
+        Map.entry("600002", new ResponseAction("0210", "30")),
+        Map.entry("800000", new ResponseAction("0210", "14")),
+        Map.entry("800001", new ResponseAction("0210", "57")),
+        Map.entry("800002", new ResponseAction("0210", "58"))
+    );
 
     public ResponseISOResponse processISO(ResponseISORequest request) {
         ResponseISOResponse response = new ResponseISOResponse();
-
         try {
+            if (request == null || request.getIsoMessage() == null || request.getIsoMessage().isEmpty()) {
+                throw new IllegalArgumentException("Le message ISO ne doit pas être vide.");
+            }
             log.info("📨 Traitement de la transaction ISO ID: {}", request.getTransactionId());
-
             InputStream packagerStream = getClass().getClassLoader().getResourceAsStream("iso87ascii-packager.xml");
-
             if (packagerStream == null) {
                 throw new RuntimeException("❌ Fichier iso87ascii-packager.xml non trouvé dans le classpath !");
             }
-
             GenericPackager packager = new GenericPackager(packagerStream);
-
-
             ISOMsg isoMsg = new ISOMsg();
             isoMsg.setPackager(packager);
             isoMsg.unpack(request.getIsoMessage().getBytes());
-
-            String processingCode = isoMsg.getString(3); // Champ 3 : Processing Code
+            String processingCode = isoMsg.getString(3);
             log.info("🔍 Code de traitement (champ 3) : {}", processingCode);
-            sendLogToMonitoring("INFO", "Code de traitement reçu : " + processingCode);
-
-            switch (processingCode) {
-                // 💳 Transactions classiques
-                case "000000": log.info("💳 Achat"); isoMsg.setMTI("0210"); isoMsg.set(39, "00"); break;
-                case "310000": log.info("💰 Solde"); isoMsg.setMTI("0210"); isoMsg.set(39, "00"); isoMsg.set(54, "BAL:0000000500 MAD"); break;
-                case "200000": log.info("🏧 Retrait"); isoMsg.setMTI("0210"); isoMsg.set(39, "00"); break;
-                case "500000": log.info("🔁 Recharge"); isoMsg.setMTI("0210"); isoMsg.set(39, "00"); break;
-
-                // 💸 Erreurs de transaction
-                case "200001": log.info("❌ Fonds insuffisants"); isoMsg.setMTI("0210"); isoMsg.set(39, "51"); break;
-                case "200002": log.info("📅 Carte expirée"); isoMsg.setMTI("0210"); isoMsg.set(39, "54"); break;
-                case "200003": log.info("🔒 Carte bloquée"); isoMsg.setMTI("0210"); isoMsg.set(39, "43"); break;
-                case "500001": log.info("❌ Montant invalide"); isoMsg.setMTI("0210"); isoMsg.set(39, "13"); break;
-                case "900000": log.info("🚫 Transaction refusée"); isoMsg.setMTI("0210"); isoMsg.set(39, "05"); break;
-                case "900001": log.info("💥 Erreur système"); isoMsg.setMTI("0210"); isoMsg.set(39, "96"); break;
-
-                // 🛑 Erreurs de sécurité
-                case "200007": log.info("🔐 Interdite pour cette carte"); isoMsg.setMTI("0210"); isoMsg.set(39, "57"); break;
-                case "200008": log.info("🔐 PIN manquant"); isoMsg.setMTI("0210"); isoMsg.set(39, "55"); break;
-                case "200009": log.info("🔐 Erreur de sécurité carte"); isoMsg.setMTI("0210"); isoMsg.set(39, "56"); break;
-                case "200010": log.info("🔐 Mauvais cryptogramme"); isoMsg.setMTI("0210"); isoMsg.set(39, "63"); break;
-
-                // 🏦 Erreurs de compte
-                case "300000": log.info("🚫 Compte bloqué"); isoMsg.setMTI("0210"); isoMsg.set(39, "41"); break;
-                case "300001": log.info("❌ Compte inexistant"); isoMsg.setMTI("0210"); isoMsg.set(39, "15"); break;
-                case "300002": log.info("🛑 Compte fermé"); isoMsg.setMTI("0210"); isoMsg.set(39, "40"); break;
-                case "300003": log.info("🔐 Compte restreint"); isoMsg.setMTI("0210"); isoMsg.set(39, "62"); break;
-                case "300004": log.info("💱 Devise non autorisée"); isoMsg.setMTI("0210"); isoMsg.set(39, "47"); break;
-
-                // 🌐 Problèmes de réseau
-                case "600005": log.info("📡 Acquéreur indisponible"); isoMsg.setMTI("0210"); isoMsg.set(39, "91"); break;
-                case "600006": log.info("⌛ Pas de réponse système"); isoMsg.setMTI("0210"); isoMsg.set(39, "68"); break;
-                case "600007": log.info("⏳ Timeout dépassé"); isoMsg.setMTI("0210"); isoMsg.set(39, "68"); break;
-                case "600008": log.info("📍 Routage introuvable"); isoMsg.setMTI("0210"); isoMsg.set(39, "92"); break;
-
-                // 📲 Opérations spéciales
-                case "700000": log.info("🛍️ Cashback"); isoMsg.setMTI("0210"); isoMsg.set(39, "00"); break;
-                case "700001": log.info("♻️ Double retrait détecté"); isoMsg.setMTI("0210"); isoMsg.set(39, "94"); break;
-                case "700002": log.info("🚫 Terminal non autorisé"); isoMsg.setMTI("0210"); isoMsg.set(39, "58"); break;
-                case "700003": log.info("🚫 Politique interne"); isoMsg.setMTI("0210"); isoMsg.set(39, "05"); break;
-                case "700004": log.info("📅 Date invalide"); isoMsg.setMTI("0210"); isoMsg.set(39, "13"); break;
-
-                // 🧪 Cas techniques et tests
-                case "999998": log.info("🧪 Test erreur forcée"); isoMsg.setMTI("0210"); isoMsg.set(39, "96"); break;
-                case "999997": log.info("📄 MTI invalide"); isoMsg.setMTI("0210"); isoMsg.set(39, "30"); break;
-                case "999996": log.info("📄 Bitmap invalide"); isoMsg.setMTI("0210"); isoMsg.set(39, "30"); break;
-                case "999995": log.info("📄 Mauvais champ formaté"); isoMsg.setMTI("0210"); isoMsg.set(39, "30"); break;
-                case "999994": log.info("🧪 Test surcharge système"); isoMsg.setMTI("0210"); isoMsg.set(39, "91"); break;
-
-                // ❌ Autres
-                case "600000": log.info("❎ Annulation par client"); isoMsg.setMTI("0210"); isoMsg.set(39, "17"); break;
-                case "600001": log.info("⚠️ Format incorrect"); isoMsg.setMTI("0210"); isoMsg.set(39, "30"); break;
-                case "600002": log.info("📉 Champ manquant"); isoMsg.setMTI("0210"); isoMsg.set(39, "30"); break;
-                case "800000": log.info("❌ Carte invalide"); isoMsg.setMTI("0210"); isoMsg.set(39, "14"); break;
-                case "800001": log.info("🚨 Carte suspecte"); isoMsg.setMTI("0210"); isoMsg.set(39, "57"); break;
-                case "800002": log.info("⛔ Terminal interdit"); isoMsg.setMTI("0210"); isoMsg.set(39, "58"); break;
-
-                // 🎯 Défaut (fallback)
-                default:
+            ResponseAction action = RESPONSE_MAP.get(processingCode);
+            if (action != null) {
+                isoMsg.setMTI(action.mti);
+                isoMsg.set(39, action.code39);
+                if (action.extraFields != null) {
+                    action.extraFields.forEach(isoMsg::set);
+                }
+                log.info("Traitement code {} appliqué (MTI={}, 39={})", processingCode, action.mti, action.code39);
+            } else {
                     log.warn("❌ Code traitement non reconnu : {}", processingCode);
                     isoMsg.setMTI("0210");
-                    isoMsg.set(39, "12"); // Transaction invalide
-                    sendLogToMonitoring("WARN", "Code traitement inconnu : " + processingCode);
-                    break;
+                isoMsg.set(39, "12");
             }
             log.info("✅ Message ISO reçu décomposé :");
             for (int i = 0; i <= isoMsg.getMaxField(); i++) {
@@ -123,7 +135,6 @@ public class ResponseISOService {
             String responseIsoMessage = new String(packed);
 
             log.info("📦 Message ISO réponse généré : {}", responseIsoMessage);
-            sendLogToMonitoring("SUCCESS", "Message ISO réponse généré pour MTI : " + isoMsg.getMTI());
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
@@ -156,7 +167,6 @@ public class ResponseISOService {
             }
 
             log.info("📬 Réponse du PackingISOService : {}", packingResponse.getBody());
-            sendLogToMonitoring("INFO", "Réponse envoyée à PackingISOService");
 
             saveToHistory("0210", fields, responseIsoMessage, "RAW", "SUCCESS");
 
@@ -168,19 +178,16 @@ public class ResponseISOService {
                     ? "Transaction approuvée."
                     : "Transaction échouée : " + reason);
 
-            sendLogToMonitoring("SUCCESS", "Réponse ISO traitée avec succès pour ID: " + request.getTransactionId());
 
         } catch (ISOException e) {
             log.error("❌ Erreur de traitement ISO: {}", e.getMessage());
             response.setStatus("FAILED");
             response.setMessage("Erreur de traitement ISO : " + e.getMessage());
-            sendLogToMonitoring("ERROR", "Erreur de traitement ISO : " + e.getMessage());
 
         } catch (Exception ex) {
             log.error("❌ Autre erreur : {}", ex.getMessage());
             response.setStatus("FAILED");
-            response.setMessage("Erreur lors de l’envoi de la réponse ISO : " + ex.getMessage());
-            sendLogToMonitoring("ERROR", "Erreur envoi vers PackingISOService : " + ex.getMessage());
+            response.setMessage("Erreur lors de l'envoi de la réponse ISO : " + ex.getMessage());
         }
 
         return response;
@@ -222,44 +229,19 @@ public class ResponseISOService {
 
     private void saveToHistory(String mti, Map<String, String> fields, String messageIso, String format, String status) {
         try {
-            String url = "http://localhost:8085/history";
-
-            Map<String, Object> payload = Map.of(
-                    "mti", mti,
-                    "fields", fields,
-                    "message", messageIso,
-                    "format", format,
-                    "source", "ResponseISOService",
-                    "status", status
-            );
-
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            HttpEntity<Map<String, Object>> entity = new HttpEntity<>(payload, headers);
-
-            RestTemplate restTemplate = new RestTemplate();
-            ResponseEntity<Void> response = restTemplate.postForEntity(url, entity, Void.class);
-
-            if (response.getStatusCode().is2xxSuccessful()) {
-                log.info("🗃️ Réponse ISO enregistrée avec succès dans TransactionHistoryService.");
-            } else {
-                log.warn("⚠️ Échec de l'enregistrement de la réponse ISO. Statut : {}", response.getStatusCode());
-            }
-
+            ResponseISOHistory history = new ResponseISOHistory();
+            history.setMti(mti);
+            history.setFields(objectMapper.writeValueAsString(fields));
+            history.setMessageIso(messageIso);
+            history.setFormat(format);
+            history.setStatus(status);
+            history.setCreatedAt(java.time.LocalDateTime.now());
+            historyRepository.save(history);
+            log.info("🗃️ Réponse ISO enregistrée avec succès dans la base de données.");
         } catch (Exception e) {
-            log.error("❌ Erreur lors de l'enregistrement de la réponse ISO dans TransactionHistoryService : {}", e.getMessage(), e);
+            log.error("❌ Erreur lors de l'enregistrement de la réponse ISO dans la base de données : {}", e.getMessage(), e);
         }
     }
 
-    private void sendLogToMonitoring(String level, String message) {
-        try {
-            String safeMessage = message.length() > 1000 ? message.substring(0, 1000) : message;
-            String url = "http://localhost:8085/logs/save?level=" + level + "&message=" + URLEncoder.encode(safeMessage, "UTF-8");
 
-            restTemplate.postForEntity(url, null, String.class);
-            log.info("📤 Log envoyé au MonitoringService : {}", message);
-        } catch (Exception e) {
-            log.warn("⚠️ Échec de l'envoi du log : {}", e.getMessage());
-        }
-    }
 }

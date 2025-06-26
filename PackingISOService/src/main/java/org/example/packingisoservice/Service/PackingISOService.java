@@ -11,6 +11,7 @@ import org.jpos.iso.packager.GenericPackager;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -33,10 +34,9 @@ public class PackingISOService {
         saveToHistory(request.getMti(), request.getFields(), packed, "ASCII");
         log.info("Packing ISO Response: " + packed);
         sendLogToMonitoring("SUCCESS", "Packing ASCII réussi pour MTI : " + request.getMti());
-
-        // 🔔 Envoi de notification
         sendNotificationToNotificationService("Le message pour MTI " + request.getMti() + " a été généré avec succès.");
-
+        // Envoi automatique via Gateway
+        sendToResponseISOService(packed, request.getMti(), "ASCII", Map.of());
         return new PackingISOResponse(packed);
     }
 
@@ -44,10 +44,9 @@ public class PackingISOService {
         String packed = pack(request, true);
         saveToHistory(request.getMti(), request.getFields(), packed, "HEX");
         sendLogToMonitoring("SUCCESS", "Packing HEX réussi pour MTI : " + request.getMti());
-
-        // 🔔 Envoi de notification
         sendNotificationToNotificationService("Le message pour MTI " + request.getMti() + " a été généré avec succès.");
-
+        // Envoi automatique via Gateway
+        sendToResponseISOService(packed, request.getMti(), "HEX", Map.of());
         return new PackingISOResponse(packed);
     }
 
@@ -185,6 +184,39 @@ public class PackingISOService {
             log.info("✅ Notification envoyée au NotificationService : {}", message);
         } catch (Exception e) {
             log.warn("⚠️ Impossible d'envoyer la notification : {}", e.getMessage());
+        }
+    }
+
+    private void sendToResponseISOService(String isoMessage, String transactionId, String format, Map<String, Object> meta) {
+        try {
+            String url = "http://localhost:8080/response-iso/process"; // Passe par le Gateway
+
+            Map<String, Object> payload = Map.of(
+                "isoMessage", isoMessage,
+                "transactionId", transactionId,
+                "format", format,
+                "meta", meta
+            );
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            String token = getAuthTokenFromRequest();
+            if (token != null && !token.isEmpty()) {
+                headers.set("Authorization", token);
+            }
+
+            HttpEntity<Map<String, Object>> entity = new HttpEntity<>(payload, headers);
+
+            ResponseEntity<String> response = restTemplate.postForEntity(url, entity, String.class);
+
+            if (response.getStatusCode().is2xxSuccessful()) {
+                log.info("✅ Réponse reçue de ResponseISOService : {}", response.getBody());
+            } else {
+                log.warn("❌ Erreur lors de l'appel à ResponseISOService : {}", response.getStatusCode());
+            }
+        } catch (Exception e) {
+            log.warn("⚠️ Impossible d'envoyer le message à ResponseISOService : {}", e.getMessage());
         }
     }
 
