@@ -16,12 +16,13 @@ public class SecurityConfig {
             .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .authorizeExchange(auth -> auth
                         .pathMatchers("/api/auth/**").permitAll()
+                        .pathMatchers("/api/response/**").permitAll()
                         .pathMatchers("/api/users/**").permitAll()
+                        .pathMatchers("/api/incidents/**").permitAll()
                         .pathMatchers("/api/packing/**").permitAll()
                         .pathMatchers("/api/depacking/**").permitAll()
                         .pathMatchers("/api/history/**").permitAll()
                         .pathMatchers("/api/notifications/**").permitAll()
-                        .pathMatchers("/api/response-iso/**").permitAll()
                         .pathMatchers("/api/logs/**").permitAll()
                         .anyExchange().authenticated()
                 );

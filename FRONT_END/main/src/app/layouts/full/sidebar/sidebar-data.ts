@@ -35,6 +35,11 @@ export const navItems: NavItem[] = [
     route: '/users',
   },
   {
+    displayName: 'Gestion Incidents',
+    iconName: 'tool',
+    route: '/dashboard/incidents',
+  },
+  {
     navCap: 'Auth',
   },
   {

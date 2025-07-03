@@ -1,0 +1,16 @@
+<div class="incident-form-title">Déclarer un incident</div>
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="incident-form">
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Titre</mat-label>
+    <input matInput formControlName="title" required>
+    <mat-error *ngIf="form.get('title')?.hasError('required')">Titre obligatoire</mat-error>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Description</mat-label>
+    <textarea matInput formControlName="description" rows="4" required></textarea>
+    <mat-error *ngIf="form.get('description')?.hasError('required')">Description obligatoire</mat-error>
+  </mat-form-field>
+
+  <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid">Envoyer</button>
+</form> 

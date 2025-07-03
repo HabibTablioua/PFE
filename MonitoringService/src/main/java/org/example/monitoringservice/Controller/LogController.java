@@ -16,15 +16,16 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.Objects;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.example.monitoringservice.Repository.LogEntryRepository;
-import java.util.Collections;
+
 import java.time.format.DateTimeParseException;
 import java.time.LocalDate;
 
@@ -529,7 +530,21 @@ public class LogController {
 
 
 
+    @GetMapping("/api/logs")
+    public List<Map<String, String>> getLogs() throws Exception {
+        Path logPath = Paths.get("logs/iso-logs.log"); // adapte le chemin si besoin
+        List<String> lines = Files.readAllLines(logPath);
 
+        // Suppose que chaque ligne est du type : [2024-05-01 12:00:00] [INFO] Message
+        return lines.stream().map(line -> {
+            Map<String, String> entry = new HashMap<>();
+            String[] parts = line.split(" ", 4);
+            entry.put("timestamp", parts.length > 1 ? parts[0] + " " + parts[1] : "");
+            entry.put("level", parts.length > 2 ? parts[2].replace("[", "").replace("]", "") : "");
+            entry.put("message", parts.length > 3 ? parts[3] : line);
+            return entry;
+        }).collect(Collectors.toList());
+    }
 
 
 

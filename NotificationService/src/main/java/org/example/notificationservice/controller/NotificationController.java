@@ -2,6 +2,8 @@ package org.example.notificationservice.controller;
 
 import org.example.notificationservice.Entity.Notification;
 import org.example.notificationservice.service.NotificationService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,6 +14,8 @@ import java.util.Map;
 @RequestMapping("/notifications")
 public class NotificationController {
 
+    private static final Logger log = LoggerFactory.getLogger(NotificationController.class);
+
     private final NotificationService notificationService;
 
     public NotificationController(NotificationService notificationService) {
@@ -21,6 +25,7 @@ public class NotificationController {
 
     @PostMapping
     public ResponseEntity<String> sendNotification(@RequestBody Map<String, String> notification) {
+        log.info("✅ Notification reçue : {}", notification.get("message"));
         notificationService.saveNotification(notification.get("message"));
         return ResponseEntity.ok("Notification envoyée avec succès !");
     }

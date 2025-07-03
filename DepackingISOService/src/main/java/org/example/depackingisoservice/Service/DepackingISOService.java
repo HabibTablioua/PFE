@@ -1,5 +1,6 @@
 package org.example.depackingisoservice.Service;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.example.depackingisoservice.DTO.FieldData;
 import org.jpos.iso.ISOException;
 import org.jpos.iso.ISOMsg;
@@ -7,18 +8,31 @@ import org.jpos.iso.packager.GenericPackager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 
 @Service
 public class DepackingISOService {
 
     private static final Logger log = LoggerFactory.getLogger(DepackingISOService.class);
+
+    private final RestTemplate restTemplate;
+
+    public DepackingISOService(RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
+    }
 
     public String depackIsoMessage(String isoMessage) {
         try (InputStream is = getClass().getResourceAsStream("/iso87ascii-packager.xml")) {
@@ -53,6 +67,8 @@ public class DepackingISOService {
                 }
             }
             log.info(output.toString());
+            // Appel notification via RestTemplate
+            sendNotificationToNotificationService("L'utilisateur a dépacké un message avec succès.");
             return output.toString();
 
         } catch (ISOException | IOException e) {
@@ -136,5 +152,38 @@ public class DepackingISOService {
         }
     }
 
+    // Envoi notification avec RestTemplate et token JWT
+    private void sendNotificationToNotificationService(String message) {
+        try {
+            String url = "http://localhost:8088/api/notifications"; // Vérifie bien le port du Gateway
+            Map<String, String> payload = Map.of("message", message);
+            // 🔐 Récupérer le token JWT depuis la requête
+            String token = getAuthTokenFromRequest();
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            if (token != null && !token.isEmpty()) {
+                headers.set("Authorization", token);
+            }
+            HttpEntity<Map<String, String>> entity = new HttpEntity<>(payload, headers);
+            restTemplate.postForEntity(url, entity, String.class);
+            log.info("✅ Notification envoyée au NotificationService : {}", message);
+        } catch (Exception e) {
+            log.warn("⚠️ Impossible d'envoyer la notification : {}", e.getMessage());
+        }
+    }
+
+    // Méthode à implémenter pour récupérer le token JWT depuis la requête
+    private String getAuthTokenFromRequest() {
+        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        if (attributes != null) {
+            HttpServletRequest request = attributes.getRequest();
+            String authHeader = request.getHeader("Authorization");
+            if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                return authHeader;
+            }
+        }
+        return null;
+    }
 
 }
+

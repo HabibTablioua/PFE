@@ -22,7 +22,7 @@
     import java.util.List;
 
     @RestController
-    @RequestMapping("/response-iso")
+    @RequestMapping("/response")
     public class ResponseISOController {
 
         private final ResponseISOService responseISOService;
@@ -128,6 +128,13 @@
         @GetMapping("/history")
         public List<ResponseISOHistory> getAllHistory() {
             return historyRepository.findAll();
+        }
+
+        @GetMapping("/history/last")
+        public ResponseISOHistory getLastHistory() {
+            List<ResponseISOHistory> all = historyRepository.findAll();
+            if (all.isEmpty()) return null;
+            return all.get(all.size() - 1);
         }
 
     }

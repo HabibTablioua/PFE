@@ -125,6 +125,12 @@ public class ResponseISOService {
                 isoMsg.set(39, "12");
             }
             log.info("✅ Message ISO reçu décomposé :");
+            Map<String, String> fields = new HashMap<>();
+            for (int i = 0; i <= isoMsg.getMaxField(); i++) {
+                if (isoMsg.hasField(i)) {
+                    fields.put(String.valueOf(i), isoMsg.getString(i));
+                }
+            }
             for (int i = 0; i <= isoMsg.getMaxField(); i++) {
                 if (isoMsg.hasField(i)) {
                     log.info("Champ ({}) : {}", i, isoMsg.getString(i));
@@ -135,38 +141,6 @@ public class ResponseISOService {
             String responseIsoMessage = new String(packed);
 
             log.info("📦 Message ISO réponse généré : {}", responseIsoMessage);
-
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-
-            Map<String, String> fields = new HashMap<>();
-            isoMsg.setPackager(new GenericPackager(getClass().getClassLoader().getResourceAsStream("iso87ascii-packager.xml")));
-            isoMsg.unpack(request.getIsoMessage().getBytes());
-
-            for (int i = 0; i <= isoMsg.getMaxField(); i++) {
-                if (isoMsg.hasField(i)) {
-                    fields.put(String.valueOf(i), isoMsg.getString(i));
-                }
-            }
-
-            Map<String, Object> payload = Map.of(
-                    "mti", isoMsg.getMTI(),
-                    "fields", fields
-            );
-
-            HttpEntity<Map<String, Object>> entity = new HttpEntity<>(payload, headers);
-
-            ResponseEntity<String> packingResponse = restTemplate.postForEntity(
-                    "http://localhost:8082/packing-iso/pack-ascii", entity, String.class
-            );
-
-            if (packingResponse.getStatusCode().is2xxSuccessful()) {
-                log.info("✅ Réponse bien reçue par PackingISOService");
-            } else {
-                log.warn("❌ Réponse NON reçue (status: {})", packingResponse.getStatusCode());
-            }
-
-            log.info("📬 Réponse du PackingISOService : {}", packingResponse.getBody());
 
             saveToHistory("0210", fields, responseIsoMessage, "RAW", "SUCCESS");
 

@@ -1,0 +1,7 @@
+<h2 mat-dialog-title>Modifier l'incident</h2>
+<mat-dialog-content>
+  <app-incident-form [incident]="data.incident" (submitIncident)="onSubmit($event)"></app-incident-form>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()">Annuler</button>
+</mat-dialog-actions> 
