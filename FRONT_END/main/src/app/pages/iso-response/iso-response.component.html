@@ -1,0 +1,64 @@
+<div *ngIf="response" style="max-width: 900px; margin: 24px auto;">
+  <h3>Réponse :</h3>
+  <ng-container *ngIf="response && response.length > 0 && response[0] && typeof response[0] === 'object'; else rawJson">
+    <table mat-table [dataSource]="response" class="mat-elevation-z2" style="width: 100%; background: #fff; border-radius: 12px;">
+      <ng-container *ngFor="let col of displayedColumns" [matColumnDef]="col">
+        <th mat-header-cell *matHeaderCellDef>{{ col }}</th>
+        <td mat-cell *matCellDef="let element">{{ element[col] }}</td>
+      </ng-container>
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+  </ng-container>
+  <ng-template #rawJson>
+    <pre>{{ response | json }}</pre>
+  </ng-template>
+</div>
+
+<div style="max-width: 1000px; margin: 32px auto 0 auto;">
+  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+    <h3 style="margin: 0;">Historique des réponses ISO</h3>
+    <div style="display: flex; gap: 12px;">
+      <button mat-raised-button class="delete-all-btn" (click)="onDeleteAllResponses()">
+        <mat-icon>delete</mat-icon>
+        Supprimer tous
+      </button>
+    </div>
+  </div>
+  <table mat-table [dataSource]="allResponses" class="mat-elevation-z2" style="width: 100%; background: #fff; border-radius: 12px;">
+    <ng-container matColumnDef="id">
+      <th mat-header-cell *matHeaderCellDef>id</th>
+      <td mat-cell *matCellDef="let element">{{ element.id }}</td>
+    </ng-container>
+    <ng-container matColumnDef="mti">
+      <th mat-header-cell *matHeaderCellDef>mti</th>
+      <td mat-cell *matCellDef="let element">{{ element.mti }}</td>
+    </ng-container>
+    <ng-container matColumnDef="status">
+      <th mat-header-cell *matHeaderCellDef>status</th>
+      <td mat-cell *matCellDef="let element">
+        <span [ngClass]="{
+          'status-success': element.status === 'SUCCESS',
+          'status-failed': element.status === 'FAILED'
+        }">
+          {{ element.status }}
+        </span>
+      </td>
+    </ng-container>
+    <ng-container matColumnDef="createdAt">
+      <th mat-header-cell *matHeaderCellDef>Date</th>
+      <td mat-cell *matCellDef="let element">{{ element.createdAt | date:'short' }}</td>
+    </ng-container>
+    <ng-container matColumnDef="actions">
+      <th mat-header-cell *matHeaderCellDef>Actions</th>
+      <td mat-cell *matCellDef="let element">
+        <button mat-stroked-button color="primary" (click)="showDetails(element)">
+          <mat-icon>visibility</mat-icon> Détail
+        </button>
+      </td>
+    </ng-container>
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+  </table>
+  <div *ngIf="allResponses.length === 0" style="text-align: center; color: #888; margin: 24px 0;">Aucune réponse enregistrée.</div>
+</div> 

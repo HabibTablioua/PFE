@@ -40,6 +40,11 @@ export const navItems: NavItem[] = [
     route: '/dashboard/incidents',
   },
   {
+    displayName: 'Réponse',
+    iconName: 'send',
+    route: '/dashboard/iso-response',
+  },
+  {
     navCap: 'Auth',
   },
   {

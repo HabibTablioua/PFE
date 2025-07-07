@@ -3,6 +3,7 @@ import { StarterComponent } from './starter/starter.component';
 import { LogsMonitoringComponent } from './logs-monitoring/logs-monitoring.component';
 import { AuthGuard } from '../guards/auth.guard';
 import { IncidentsPage } from './incidents/incidents.page';
+import { IsoResponseComponent } from './iso-response/iso-response.component';
 
 export const PagesRoutes: Routes = [
   {
@@ -30,6 +31,14 @@ export const PagesRoutes: Routes = [
     canActivate: [AuthGuard],
     data: {
       title: 'Gestion des Incidents',
+    },
+  },
+  {
+    path: 'iso-response',
+    component: IsoResponseComponent,
+    canActivate: [AuthGuard],
+    data: {
+      title: 'Réponse ISO',
     },
   },
   // La route 'message' a été supprimée car le composant iso-form n'existe plus

@@ -12,5 +12,7 @@
     <mat-error *ngIf="form.get('description')?.hasError('required')">Description obligatoire</mat-error>
   </mat-form-field>
 
-  <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid">Envoyer</button>
+  <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid">
+    <mat-icon>send</mat-icon> Envoyer
+  </button>
 </form> 

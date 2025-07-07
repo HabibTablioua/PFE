@@ -69,5 +69,11 @@ public class IncidentReportController {
         incidentReportService.deleteIncident(id);
         return ResponseEntity.noContent().build();
     }
+
+    @DeleteMapping
+    public ResponseEntity<Void> deleteAllIncidents() {
+        incidentReportService.deleteAllIncidents();
+        return ResponseEntity.noContent().build();
+    }
 }
 

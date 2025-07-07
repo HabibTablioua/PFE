@@ -46,6 +46,15 @@ export class IncidentService {
     return this.http.delete(`${this.apiUrl}/${id}`, { headers });
   }
 
+  deleteAll(): Observable<any> {
+    const token = localStorage.getItem('token');
+    let headers = new HttpHeaders();
+    if (token) {
+      headers = headers.set('Authorization', `Bearer ${token}`);
+    }
+    return this.http.delete(this.apiUrl, { headers });
+  }
+
   showSuccess(message: string) {
     this.snackBar.open(message, 'Fermer', { duration: 3000, panelClass: 'snackbar-success' });
   }

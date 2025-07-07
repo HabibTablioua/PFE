@@ -39,4 +39,58 @@ button[mat-icon-button].edit {
 
 button[mat-icon-button].delete {
   color: #d32f2f;
+}
+
+.delete-all-btn {
+  background-color: #ffebee;
+  color: #d32f2f;
+  border-radius: 999px;
+  padding: 0.7em 2em;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  box-shadow: none;
+  transition: background 0.2s, color 0.2s;
+}
+.delete-all-btn mat-icon {
+  color: #d32f2f;
+}
+.delete-all-btn:hover,
+.delete-all-btn:active {
+  background-color: #ffcdd2;
+  color: #b71c1c;
+}
+
+button[mat-raised-button],
+button[mat-stroked-button] {
+  border-radius: 24px !important;
+}
+
+.filter-panel button[mat-stroked-button] {
+  background: #fff;
+  color: #2979ff;
+  border: none;
+  border-radius: 18px;
+  box-shadow: 0 2px 8px #2979ff11;
+  font-weight: 500;
+  min-width: 180px;
+  margin: 0;
+  transition: box-shadow 0.2s, background 0.2s, color 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.filter-panel button[mat-stroked-button]:hover {
+  background: #f0f7ff;
+  color: #1565c0;
+  box-shadow: 0 4px 16px #2979ff22;
+}
+
+.filter-panel button[mat-stroked-button] mat-icon {
+  color: inherit;
+  font-size: 1.2em;
+  margin-right: 6px;
 } 

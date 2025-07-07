@@ -98,5 +98,9 @@ public class IncidentReportService {
     public void deleteIncident(Long id) {
         incidentReportRepository.deleteById(id);
     }
+
+    public void deleteAllIncidents() {
+        incidentReportRepository.deleteAll();
+    }
 }
 

@@ -19,6 +19,7 @@ public class ResponseISOHistory {
     private String format;
     private String status;
     private LocalDateTime createdAt = LocalDateTime.now();
+    private String cause;
 
     // Getters et setters
     public Long getId() { return id; }
@@ -35,4 +36,6 @@ public class ResponseISOHistory {
     public void setStatus(String status) { this.status = status; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+    public String getCause() { return cause; }
+    public void setCause(String cause) { this.cause = cause; }
 } 

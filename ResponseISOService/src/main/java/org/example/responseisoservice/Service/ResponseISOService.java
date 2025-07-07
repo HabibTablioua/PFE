@@ -94,8 +94,22 @@ public class ResponseISOService {
         Map.entry("800002", new ResponseAction("0210", "58"))
     );
 
+    private String hexToAscii(String hexStr) {
+        StringBuilder output = new StringBuilder();
+        for (int i = 0; i < hexStr.length(); i += 2) {
+            String str = hexStr.substring(i, i + 2);
+            output.append((char) Integer.parseInt(str, 16));
+        }
+        return output.toString();
+    }
+
+    private boolean isHex(String s) {
+        return s != null && s.matches("[0-9A-Fa-f]+") && s.length() % 2 == 0;
+    }
+
     public ResponseISOResponse processISO(ResponseISORequest request) {
         ResponseISOResponse response = new ResponseISOResponse();
+        String cause = "";
         try {
             if (request == null || request.getIsoMessage() == null || request.getIsoMessage().isEmpty()) {
                 throw new IllegalArgumentException("Le message ISO ne doit pas être vide.");
@@ -108,8 +122,21 @@ public class ResponseISOService {
             GenericPackager packager = new GenericPackager(packagerStream);
             ISOMsg isoMsg = new ISOMsg();
             isoMsg.setPackager(packager);
-            isoMsg.unpack(request.getIsoMessage().getBytes());
+            // Ajout : décodage automatique du message ISO si hexadécimal
+            String isoMessage = request.getIsoMessage();
+            if (isHex(isoMessage)) {
+                log.info("🔄 Message ISO reçu en HEX, décodage en ASCII...");
+                isoMessage = hexToAscii(isoMessage);
+            }
+            isoMsg.unpack(isoMessage.getBytes());
             String processingCode = isoMsg.getString(3);
+            // Ajout : décodage hex si non reconnu
+            if (!RESPONSE_MAP.containsKey(processingCode) && isHex(processingCode)) {
+                String asciiCode = hexToAscii(processingCode);
+                if (RESPONSE_MAP.containsKey(asciiCode)) {
+                    processingCode = asciiCode;
+                }
+            }
             log.info("🔍 Code de traitement (champ 3) : {}", processingCode);
             ResponseAction action = RESPONSE_MAP.get(processingCode);
             if (action != null) {
@@ -142,26 +169,27 @@ public class ResponseISOService {
 
             log.info("📦 Message ISO réponse généré : {}", responseIsoMessage);
 
-            saveToHistory("0210", fields, responseIsoMessage, "RAW", "SUCCESS");
-
             String responseCode = isoMsg.getString(39);
             String reason = getReasonByResponseCode(responseCode);
-
             response.setStatus(responseCode.equals("00") ? "SUCCESS" : "FAILED");
             response.setMessage(responseCode.equals("00")
                     ? "Transaction approuvée."
                     : "Transaction échouée : " + reason);
-
+            cause = reason;
+            saveToHistory("0210", fields, responseIsoMessage, "RAW", response.getStatus(), cause);
 
         } catch (ISOException e) {
             log.error("❌ Erreur de traitement ISO: {}", e.getMessage());
             response.setStatus("FAILED");
             response.setMessage("Erreur de traitement ISO : " + e.getMessage());
-
+            cause = e.getMessage();
+            saveToHistory("0210", new HashMap<>(), "", "RAW", "FAILED", cause);
         } catch (Exception ex) {
             log.error("❌ Autre erreur : {}", ex.getMessage());
             response.setStatus("FAILED");
             response.setMessage("Erreur lors de l'envoi de la réponse ISO : " + ex.getMessage());
+            cause = ex.getMessage();
+            saveToHistory("0210", new HashMap<>(), "", "RAW", "FAILED", cause);
         }
 
         return response;
@@ -201,7 +229,7 @@ public class ResponseISOService {
 
 
 
-    private void saveToHistory(String mti, Map<String, String> fields, String messageIso, String format, String status) {
+    private void saveToHistory(String mti, Map<String, String> fields, String messageIso, String format, String status, String cause) {
         try {
             ResponseISOHistory history = new ResponseISOHistory();
             history.setMti(mti);
@@ -210,6 +238,7 @@ public class ResponseISOService {
             history.setFormat(format);
             history.setStatus(status);
             history.setCreatedAt(java.time.LocalDateTime.now());
+            history.setCause(cause);
             historyRepository.save(history);
             log.info("🗃️ Réponse ISO enregistrée avec succès dans la base de données.");
         } catch (Exception e) {

@@ -1,4 +1,54 @@
-<div class="incident-list-title">Liste des incidents</div>
+<div style="display: flex; gap: 16px; align-items: center; margin-bottom: 16px; justify-content: flex-end;">
+  <button mat-raised-button class="delete-all-btn" (click)="onDeleteAll()">
+    <mat-icon>delete</mat-icon>
+    Supprimer tous
+  </button>
+  <button mat-raised-button color="accent" (click)="toggleFilterPanel()" style="background: linear-gradient(90deg, #ff512f 0%, #f09819 100%); color: white;">
+    <mat-icon>filter_alt</mat-icon> Filtrage
+  </button>
+</div>
+
+<div *ngIf="showFilterPanel" class="filter-panel" style="background: #fafbfc; border-radius: 16px; padding: 24px; margin-bottom: 24px; box-shadow: 0 2px 8px #0001;">
+  <form [formGroup]="filterForm" style="display: flex; flex-wrap: wrap; gap: 16px; align-items: center;">
+    <mat-form-field appearance="outline" style="flex: 1; min-width: 180px;">
+      <mat-label>Titre</mat-label>
+      <input matInput formControlName="title" placeholder="Titre">
+    </mat-form-field>
+    <mat-form-field appearance="outline" style="flex: 1; min-width: 180px;">
+      <mat-label>Client</mat-label>
+      <input matInput formControlName="client" placeholder="Client">
+    </mat-form-field>
+    <mat-form-field appearance="outline" style="flex: 1; min-width: 180px;">
+      <mat-label>Date de début</mat-label>
+      <input matInput [matDatepicker]="startPicker" formControlName="startDate" placeholder="Date de début">
+      <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
+      <mat-datepicker #startPicker></mat-datepicker>
+    </mat-form-field>
+    <mat-form-field appearance="outline" style="flex: 1; min-width: 180px;">
+      <mat-label>Date de fin</mat-label>
+      <input matInput [matDatepicker]="endPicker" formControlName="endDate" placeholder="Date de fin">
+      <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
+      <mat-datepicker #endPicker></mat-datepicker>
+    </mat-form-field>
+    <mat-form-field appearance="outline" style="flex: 2; min-width: 220px;">
+      <mat-label>Rechercher par description</mat-label>
+      <input matInput formControlName="description" placeholder="Description">
+    </mat-form-field>
+    <div style="flex-basis: 100%; height: 0;"></div>
+    <div style="width: 100%; display: flex; justify-content: center; gap: 16px; margin-top: 16px;">
+      <button mat-stroked-button color="primary" type="button" (click)="applyAdvancedFilter()">
+        <mat-icon>search</mat-icon> Rechercher
+      </button>
+      <button mat-stroked-button color="primary" type="button" (click)="resetFilter()">
+        <mat-icon>clear_all</mat-icon> Réinitialiser
+      </button>
+      <button mat-stroked-button color="primary" type="button" (click)="toggleFilterPanel()">
+        <mat-icon>visibility_off</mat-icon> Masquer le filtre
+      </button>
+    </div>
+  </form>
+</div>
+
 <div class="incident-list-container">
   <table mat-table [dataSource]="dataSource" class="mat-elevation-z2" style="width: 100%">
     <ng-container matColumnDef="id">
