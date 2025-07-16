@@ -60,12 +60,106 @@ pre {
   display: inline-block;
 }
 
-table.mat-table tr.mat-row:hover {
-  background: #f5f7fa;
-  transition: background 0.2s;
+::ng-deep table.mat-table tr.mat-row {
+  transition: box-shadow 0.2s, background 0.2s !important;
+}
+::ng-deep table.mat-table tr.mat-row:hover {
+  background: #f5f7fa !important;
+  box-shadow: 0 4px 16px #0001 !important;
+  z-index: 2;
+  position: relative;
   cursor: pointer;
 }
 
 button mat-icon {
   margin-right: 8px;
+}
+
+::ng-deep .close-btn-modern {
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
+  padding: 7px 18px !important;
+  background: #ef4444 !important;
+  color: #fff !important;
+  border: none !important;
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+  text-transform: uppercase;
+  font-size: 0.95rem !important;
+  box-shadow: 0 2px 8px #ef444422 !important;
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s, transform 0.15s;
+}
+::ng-deep .close-btn-modern .close-icon {
+  font-size: 1.1em;
+  font-weight: bold;
+  line-height: 1;
+}
+::ng-deep .close-btn-modern:hover,
+::ng-deep .close-btn-modern:focus {
+  background: #b91c1c !important;
+  box-shadow: 0 4px 16px #ef444455 !important;
+  transform: translateY(-2px) scale(1.04);
+  color: #fff !important;
+}
+
+.filter-btn {
+  background: linear-gradient(90deg, #ff512f 0%, #f09819 100%);
+  color: #fff;
+  border-radius: 999px;
+  font-weight: 600;
+  padding: 0.7em 2em;
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  box-shadow: none;
+  transition: background 0.2s, color 0.2s;
+}
+.filter-btn mat-icon {
+  color: #fff;
+}
+.filter-btn:hover,
+.filter-btn:active {
+  background: linear-gradient(90deg, #f09819 0%, #ff512f 100%);
+  color: #fff;
+}
+.filter-panel {
+  background: #f8f9fb;
+  border-radius: 18px;
+  padding: 32px 24px 24px 24px;
+  margin: 32px 0;
+  box-shadow: 0 4px 24px #0001;
+}
+.filter-fields mat-form-field {
+  background: #fff;
+  border-radius: 8px;
+}
+.filter-actions button, .download-actions button {
+  background: #fff;
+  box-shadow: 0 2px 8px #0001;
+  border-radius: 12px;
+  font-weight: 500;
+  min-width: 180px;
+  margin: 0 8px;
+  transition: box-shadow 0.2s, background 0.2s;
+}
+.filter-actions button:hover, .download-actions button:hover {
+  box-shadow: 0 4px 16px #0002;
+  background: #f5f7fa;
+}
+.filter-actions, .download-actions {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  margin-top: 16px;
+}
+
+.action-bar {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+  margin-bottom: 24px;
+  justify-content: flex-end;
+  width: 100%;
 } 

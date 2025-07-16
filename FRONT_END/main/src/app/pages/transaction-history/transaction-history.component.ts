@@ -353,7 +353,7 @@ export class TransactionHistoryComponent implements OnInit {
     { value: 'BACKEND', viewValue: 'BACKEND' },
   ];
 
-  displayedColumns: string[] = ['select', 'id', 'mti', 'format', 'date', 'status', 'detail', 'actions'];
+  displayedColumns: string[] = ['select', 'id', 'mti', 'format', 'rrn', 'date', 'status', 'detail', 'actions'];
 
   constructor(private fb: FormBuilder, private http: HttpClient, private snackBar: MatSnackBar) {
     this.filterForm = this.fb.group({

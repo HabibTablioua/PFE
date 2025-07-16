@@ -26,6 +26,19 @@ spring:
             client-secret: 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
             scope: openid, profile, email
 
+  mail:
+      host: smtp.gmail.com
+      port: 587
+      username: habibtablioua1971@gmail.com
+      password: ton_mot_de_passe_ou_mot_de_passe_application
+      properties:
+        mail:
+          smtp:
+            auth: true
+            starttls:
+              enable: true
+              required: true
+
 eureka:
   client:
     service-url:
@@ -33,3 +46,6 @@ eureka:
 
 jwt:
   secret: super-ultra-mega-long-secret-key-123456
+
+
+

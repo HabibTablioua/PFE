@@ -337,4 +337,47 @@ export class MessageFormComponent implements OnInit {
     this.messageForm.reset();
     this.messageForm.get('mti')?.setValue(''); // Reset MTI explicitly as it has a required validator
   }
+
+  onFileSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files[0]) {
+      const file = input.files[0];
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          // JSON
+          const data = JSON.parse(reader.result as string);
+          if (data.fields) {
+            // Si le JSON a un objet fields, on adapte les clés
+            const patch: any = { mti: data.mti };
+            Object.keys(data.fields).forEach(key => {
+              patch['id' + key] = data.fields[key];
+            });
+            this.messageForm.patchValue(patch);
+          } else {
+            this.messageForm.patchValue(data);
+          }
+          this.snackBar.open('Champs importés avec succès !', 'Fermer', { duration: 2500 });
+        } catch {
+          // Texte clé=valeur
+          const lines = (reader.result as string).split('\n');
+          const values: any = {};
+          lines.forEach(line => {
+            const [key, value] = line.split('=');
+            if (key && value) {
+              const trimmedKey = key.trim();
+              if (/^\d+$/.test(trimmedKey)) {
+                values['id' + trimmedKey] = value.trim();
+              } else {
+                values[trimmedKey] = value.trim();
+              }
+            }
+          });
+          this.messageForm.patchValue(values);
+          this.snackBar.open('Champs importés avec succès !', 'Fermer', { duration: 2500 });
+        }
+      };
+      reader.readAsText(file);
+    }
+  }
 } 

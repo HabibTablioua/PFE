@@ -10,6 +10,12 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import net.sf.jasperreports.engine.*;
+import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
+import org.springframework.core.io.ClassPathResource;
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -66,5 +72,16 @@ public class UserService {
         if (!userRepository.existsById(id)) return false;
         userRepository.deleteById(id);
         return true;
+    }
+
+    public byte[] exportUsersPdf() throws Exception {
+        List<User> users = userRepository.findAll();
+        InputStream reportStream = new ClassPathResource("templates/users_report.jrxml").getInputStream();
+        JasperReport jasperReport = JasperCompileManager.compileReport(reportStream);
+        JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource(users);
+        Map<String, Object> params = new HashMap<>();
+        params.put("createdBy", "UserService");
+        JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, params, dataSource);
+        return JasperExportManager.exportReportToPdf(jasperPrint);
     }
 }

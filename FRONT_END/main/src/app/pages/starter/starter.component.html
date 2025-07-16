@@ -1,24 +1,27 @@
-<div class="row">
-  <div class="col-lg-8">
-    <app-sales-overview></app-sales-overview>
+<!-- Tous les widgets/statistiques par défaut ont été supprimés -->
+<div *ngIf="loading" class="dashboard-loader">Chargement des statistiques...</div>
+<div *ngIf="error && !loading" class="dashboard-error">{{ error }}</div>
+<div *ngIf="!loading && !error && totalTransactions === 0" class="dashboard-empty">Aucune transaction à afficher.</div>
+<div *ngIf="!loading && !error && totalTransactions > 0">
+  <div class="dashboard-header" style="display:flex;align-items:center;gap:1rem;">
+    <h2>Dashboard</h2>
+    <span class="badge" *ngIf="totalTransactions > 0">{{ totalTransactions }}</span>
   </div>
-  <div class="col-lg-4">
-    <app-yearly-breakup></app-yearly-breakup>
-    <app-monthly-earnings></app-monthly-earnings>
-  </div>
-</div>
-
-<div class="row">
-  <div class="col-lg-4">
-    <app-recent-transactions></app-recent-transactions>
-  </div>
-  <div class="col-lg-8">
-    <app-product-performance></app-product-performance>
-  </div>
-</div>
-
-<div class="row">
-  <div class="col-12">
-    <app-blog-card></app-blog-card>
+  <div class="dashboard-charts-row">
+    <div class="card bar-chart-container">
+      <h4>Transactions par jour</h4>
+      <canvas baseChart
+        [data]="barChartData"
+        [options]="barChartOptions"
+        [type]="'bar'">
+      </canvas>
+    </div>
+    <div class="card pie-chart-container">
+      <h4>Répartition des statuts de transactions</h4>
+      <canvas baseChart
+        [data]="pieChartData"
+        [type]="'pie'">
+      </canvas>
+    </div>
   </div>
 </div>

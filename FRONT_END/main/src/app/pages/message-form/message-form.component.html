@@ -1,11 +1,13 @@
 <div class="p-24">
   <mat-card>
     <mat-card-content>
-      <app-header 
-        icon="credit_card"
-        title="ISO 8583 Message Builder"
-        subtitle="Remplissez les champs ISO 8583 et générez un message au format ASCII ou HEX."
-      ></app-header>
+
+      <div style="margin-bottom: 16px;">
+        <button mat-stroked-button color="primary" (click)="fileInput.click()">
+          <mat-icon>upload</mat-icon> Importer un fichier
+        </button>
+        <input #fileInput type="file" accept=".txt,.json" style="display:none" (change)="onFileSelected($event)">
+      </div>
 
       <div *ngIf="showForm">
         <form [formGroup]="messageForm" (ngSubmit)="generateMessage()">

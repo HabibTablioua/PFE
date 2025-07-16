@@ -39,5 +39,9 @@ public class User {
 
 
     private String status = "offline"; // ✅ Nouveau champ avec valeur par défaut
+
+    public String getRolesAsString() {
+        return roles != null ? String.join(", ", roles) : "";
+    }
 }
 

@@ -20,6 +20,8 @@ public class ResponseISOHistory {
     private String status;
     private LocalDateTime createdAt = LocalDateTime.now();
     private String cause;
+    @Lob
+    private String details; // JSON des détails enrichis
 
     // Getters et setters
     public Long getId() { return id; }
@@ -38,4 +40,6 @@ public class ResponseISOHistory {
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
     public String getCause() { return cause; }
     public void setCause(String cause) { this.cause = cause; }
+    public String getDetails() { return details; }
+    public void setDetails(String details) { this.details = details; }
 } 

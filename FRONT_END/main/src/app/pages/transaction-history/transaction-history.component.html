@@ -1,9 +1,3 @@
-<app-header
-  title="Historique des Transactions ISO 8583"
-  subtitle="Consultez et filtrez l'historique de vos messages ISO générés et dépaquetés."
-  icon="receipt_long"
-></app-header>
-
 <div class="history-container">
   <div class="history-button-section" *ngIf="!showHistoryArea">
     <button mat-raised-button color="primary" (click)="toggleHistoryArea()">
@@ -126,6 +120,12 @@
         <ng-container matColumnDef="format">
           <th mat-header-cell *matHeaderCellDef mat-sort-header> Format </th>
           <td mat-cell *matCellDef="let element"> {{element.format}} </td>
+        </ng-container>
+
+        <!-- RRN Column -->
+        <ng-container matColumnDef="rrn">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header> RRN </th>
+          <td mat-cell *matCellDef="let element"> {{element.rrn}} </td>
         </ng-container>
 
         <!-- Date Column -->

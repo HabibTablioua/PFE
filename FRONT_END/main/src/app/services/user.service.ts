@@ -247,4 +247,23 @@ export class UserService {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   }
+
+  exportUsersPdf(): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/users/export/pdf`, {
+      headers: this.getHeaders(),
+      responseType: 'blob'
+    }) as Observable<Blob>;
+  }
+  exportUsersExcel(): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/users/export/excel`, {
+      headers: this.getHeaders(),
+      responseType: 'blob'
+    }) as Observable<Blob>;
+  }
+  exportUsersCsv(): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/users/export/csv`, {
+      headers: this.getHeaders(),
+      responseType: 'blob'
+    }) as Observable<Blob>;
+  }
 } 

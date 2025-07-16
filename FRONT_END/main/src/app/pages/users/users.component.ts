@@ -382,4 +382,38 @@ export class UsersComponent implements OnInit {
     this.userForm.get('password')?.setValue(password);
     this.hidePassword = false; // Affiche le mot de passe généré
   }
+
+  downloadUsersPdf() {
+    this.userService.exportUsersPdf().subscribe((blob: any) => {
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `utilisateurs_${new Date().toISOString().slice(0,10)}.pdf`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+      this.snackBar.open('PDF téléchargé avec succès !', 'Fermer', { duration: 3000 });
+    });
+  }
+  downloadUsersExcel() {
+    this.userService.exportUsersExcel().subscribe((blob: any) => {
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `utilisateurs_${new Date().toISOString().slice(0,10)}.xlsx`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+      this.snackBar.open('Excel téléchargé avec succès !', 'Fermer', { duration: 3000 });
+    });
+  }
+  downloadUsersCsv() {
+    this.userService.exportUsersCsv().subscribe((blob: any) => {
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `utilisateurs_${new Date().toISOString().slice(0,10)}.csv`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+      this.snackBar.open('CSV téléchargé avec succès !', 'Fermer', { duration: 3000 });
+    });
+  }
 } 

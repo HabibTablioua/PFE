@@ -1,9 +1,3 @@
-<app-header
-  title="Dépaqueter un message ISO 8583"
-  subtitle="Collez votre message ISO (ASCII ou HEX) pour analyser ses champs."
-  icon="description"
-></app-header>
-
 <div class="depacker-container">
   <div class="depack-button-section" *ngIf="!showDepackerArea">
     <button mat-raised-button color="primary" (click)="toggleDepackerArea()">
@@ -12,23 +6,54 @@
   </div>
 
   <div *ngIf="showDepackerArea" class="depack-form-area" @fadeIn>
-    <mat-form-field appearance="outline" class="w-full">
-      <mat-label>Message ISO (ASCII ou HEX)</mat-label>
+    <div class="iso-textarea-wrapper">
+      <span class="iso-textarea-icon">📥</span>
       <textarea matInput
                 rows="8"
                 placeholder="Collez votre message ISO ici..."
                 [(ngModel)]="isoMessage"
                 class="depack-textarea"></textarea>
-    </mat-form-field>
+    </div>
 
-    <div class="action-buttons justify-content-start">
-      <button mat-raised-button color="primary" (click)="analyzeMessage()">
+    <div *ngIf="fields.length > 0" class="depack-table-container" @fadeIn>
+      <table mat-table [dataSource]="fields" class="mat-elevation-z2" style="width:100%; border-radius: 1.2rem; overflow: hidden;">
+        <ng-container matColumnDef="id">
+          <th mat-header-cell *matHeaderCellDef style="background:#f0f7ff; color:#2196f3; font-weight:600;">Champ</th>
+          <td mat-cell *matCellDef="let field" style="font-weight:500;">{{ field.id }}</td>
+        </ng-container>
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef style="background:#f0f7ff; color:#2196f3; font-weight:600;">Nom du champ</th>
+          <td mat-cell *matCellDef="let field">{{ getFieldName(field.id) }}</td>
+        </ng-container>
+        <ng-container matColumnDef="length">
+          <th mat-header-cell *matHeaderCellDef style="background:#f0f7ff; color:#2196f3; font-weight:600;">Longueur</th>
+          <td mat-cell *matCellDef="let field">{{ getValueLength(field.value) }}</td>
+        </ng-container>
+        <ng-container matColumnDef="value">
+          <th mat-header-cell *matHeaderCellDef style="background:#f0f7ff; color:#2196f3; font-weight:600;">Valeur</th>
+          <td mat-cell *matCellDef="let field">{{ field.value }}</td>
+        </ng-container>
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef style="background:#f0f7ff; color:#2196f3; font-weight:600;">Actions</th>
+          <td mat-cell *matCellDef="let field">
+            <button mat-icon-button color="primary" (click)="copyFieldValue(field.value)" matTooltip="Copier la valeur">
+              <mat-icon>content_copy</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="['id', 'name', 'length', 'value', 'actions']"></tr>
+        <tr mat-row *matRowDef="let row; columns: ['id', 'name', 'length', 'value', 'actions'];"></tr>
+      </table>
+    </div>
+
+    <div class="action-buttons justify-content-center">
+      <button mat-raised-button color="primary" (click)="analyzeMessage()" class="analyze-btn">
         <mat-icon>search</mat-icon> Analyser
       </button>
-      <button mat-stroked-button color="basic" (click)="resetDepacker()">
+      <button mat-stroked-button color="primary" (click)="resetDepacker()" class="reset-btn">
         <mat-icon>refresh</mat-icon> Réinitialiser
       </button>
-      <button mat-stroked-button color="warn" (click)="toggleDepackerArea()">
+      <button mat-stroked-button color="warn" (click)="toggleDepackerArea()" class="cancel-btn">
         <mat-icon>cancel</mat-icon> Annuler
       </button>
     </div>

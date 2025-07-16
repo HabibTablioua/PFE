@@ -4,6 +4,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
+import java.util.Map;
 
 @Data
 @Builder
@@ -14,6 +15,7 @@ public class ResponseISOResponse {
 
     private String status;
     private String message;
+    private Map<String, Object> details;
 
     public void setStatus(String status) {
         this.status = status;
@@ -21,6 +23,14 @@ public class ResponseISOResponse {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public void setDetails(Map<String, Object> details) {
+        this.details = details;
+    }
+
+    public Map<String, Object> getDetails() {
+        return details;
     }
 
 

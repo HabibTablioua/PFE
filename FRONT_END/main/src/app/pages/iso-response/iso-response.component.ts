@@ -5,27 +5,52 @@ import { CommonModule } from '@angular/common';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
-import { MatTableModule } from '@angular/material/table';
+import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { MatIconModule } from '@angular/material/icon';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
 import { MatDialog } from '@angular/material/dialog';
 import { ResponseDetailDialogComponent } from './response-detail-dialog.component';
+import { MatSelectModule } from '@angular/material/select';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-iso-response',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatTableModule, MatIconModule],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatTableModule,
+    MatIconModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
+    MatSelectModule,
+  ],
   templateUrl: './iso-response.component.html',
   styleUrls: ['./iso-response.component.css']
 })
 export class IsoResponseComponent implements OnInit {
   form: FormGroup;
   response: any = null;
-  displayedColumns: string[] = ['id', 'mti', 'status', 'createdAt', 'actions'];
-  allResponses: any[] = [];
+  displayedColumns: string[] = ['id', 'mti', 'status', 'createdAt', 'rrn', 'actions'];
+  dataSource = new MatTableDataSource<any>([]);
+  showFilterPanel = false;
+  filterForm: FormGroup;
+  statusOptions = ['SUCCESS', 'FAILED'];
 
-  constructor(private fb: FormBuilder, private http: HttpClient, private dialog: MatDialog) {
+  constructor(private fb: FormBuilder, private http: HttpClient, private dialog: MatDialog, private snackBar: MatSnackBar) {
     this.form = this.fb.group({
       isoMessage: ['']
+    });
+    this.filterForm = this.fb.group({
+      mti: [''],
+      status: [''],
+      startDate: [''],
+      endDate: [''],
+      keyword: ['']
     });
   }
 
@@ -41,8 +66,13 @@ export class IsoResponseComponent implements OnInit {
     }
     this.http.get<any[]>('http://localhost:8088/api/response/history', { headers })
       .subscribe(res => {
-        this.allResponses = res;
+        this.dataSource.data = res.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
       });
+  }
+
+  applyFilter(event: Event) {
+    const filterValue = (event.target as HTMLInputElement).value;
+    this.dataSource.filter = filterValue.trim().toLowerCase();
   }
 
   submit() {
@@ -81,5 +111,85 @@ export class IsoResponseComponent implements OnInit {
           error: () => alert('Erreur lors de la suppression de toutes les réponses ISO')
         });
     }
+  }
+
+  toggleFilterPanel() {
+    this.showFilterPanel = !this.showFilterPanel;
+  }
+
+  applyAdvancedFilter() {
+    const { mti, status, startDate, endDate, keyword } = this.filterForm.value;
+    this.dataSource.filterPredicate = (item, filter) => {
+      const f = JSON.parse(filter);
+      const matchesMti = !f.mti || (item.mti && item.mti.toLowerCase().includes(f.mti.toLowerCase()));
+      const matchesStatus = !f.status || (item.status && item.status.toLowerCase().includes(f.status.toLowerCase()));
+      const matchesKeyword = !f.keyword || Object.values(item).some(val => val && val.toString().toLowerCase().includes(f.keyword.toLowerCase()));
+      const matchesStart = !f.startDate || (item.createdAt && new Date(item.createdAt) >= new Date(f.startDate));
+      const matchesEnd = !f.endDate || (item.createdAt && new Date(item.createdAt) <= new Date(f.endDate));
+      return matchesMti && matchesStatus && matchesKeyword && matchesStart && matchesEnd;
+    };
+    this.dataSource.filter = JSON.stringify(this.filterForm.value);
+  }
+
+  resetFilter() {
+    this.filterForm.reset();
+    this.dataSource.filter = '';
+  }
+
+  downloadPdf() {
+    const token = localStorage.getItem('token');
+    let headers = new HttpHeaders();
+    if (token) {
+      headers = headers.set('Authorization', `Bearer ${token}`);
+    }
+    this.http.get('http://localhost:8088/api/response/report/pdf', { headers, responseType: 'blob' })
+      .subscribe(blob => {
+        const dateStr = new Date().toISOString().slice(0,10);
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `iso_responses_${dateStr}.pdf`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+        this.snackBar.open('PDF téléchargé avec succès !', 'Fermer', { duration: 3000 });
+      });
+  }
+
+  downloadExcel() {
+    const token = localStorage.getItem('token');
+    let headers = new HttpHeaders();
+    if (token) {
+      headers = headers.set('Authorization', `Bearer ${token}`);
+    }
+    this.http.get('http://localhost:8088/api/response/report/excel', { headers, responseType: 'blob' })
+      .subscribe(blob => {
+        const dateStr = new Date().toISOString().slice(0,10);
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `iso_responses_${dateStr}.xlsx`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+        this.snackBar.open('Excel téléchargé avec succès !', 'Fermer', { duration: 3000 });
+      });
+  }
+
+  downloadCsv() {
+    const token = localStorage.getItem('token');
+    let headers = new HttpHeaders();
+    if (token) {
+      headers = headers.set('Authorization', `Bearer ${token}`);
+    }
+    this.http.get('http://localhost:8088/api/response/report/csv', { headers, responseType: 'blob' })
+      .subscribe(blob => {
+        const dateStr = new Date().toISOString().slice(0,10);
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `iso_responses_${dateStr}.csv`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+        this.snackBar.open('CSV téléchargé avec succès !', 'Fermer', { duration: 3000 });
+      });
   }
 } 

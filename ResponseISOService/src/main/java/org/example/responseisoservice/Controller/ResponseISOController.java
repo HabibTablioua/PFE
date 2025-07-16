@@ -20,6 +20,8 @@
     import org.example.responseisoservice.Entity.ResponseISOHistory;
     import org.example.responseisoservice.repository.ResponseISOHistoryRepository;
     import java.util.List;
+    import org.example.responseisoservice.Service.ResponseISOReportService;
+    import java.util.stream.Collectors;
 
     @RestController
     @RequestMapping("/response")
@@ -27,10 +29,12 @@
 
         private final ResponseISOService responseISOService;
         private final ResponseISOHistoryRepository historyRepository;
+        private final ResponseISOReportService reportService;
 
-        public ResponseISOController(ResponseISOService responseISOService, ResponseISOHistoryRepository historyRepository) {
+        public ResponseISOController(ResponseISOService responseISOService, ResponseISOHistoryRepository historyRepository, ResponseISOReportService reportService) {
             this.responseISOService = responseISOService;
             this.historyRepository = historyRepository;
+            this.reportService = reportService;
         }
 
         @PostMapping(value = "/process", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -126,8 +130,10 @@
         }
 
         @GetMapping("/history")
-        public List<ResponseISOHistory> getAllHistory() {
-            return historyRepository.findAll();
+        public List<org.example.responseisoservice.Service.ResponseISOReportService.ResponseISOHistoryReportDTO> getAllHistory() {
+            return historyRepository.findAll().stream()
+                .map(org.example.responseisoservice.Service.ResponseISOReportService.ResponseISOHistoryReportDTO::new)
+                .collect(Collectors.toList());
         }
 
         @GetMapping("/history/last")
@@ -135,6 +141,33 @@
             List<ResponseISOHistory> all = historyRepository.findAll();
             if (all.isEmpty()) return null;
             return all.get(all.size() - 1);
+        }
+
+        @GetMapping("/report/pdf")
+        public ResponseEntity<byte[]> downloadPdf() throws Exception {
+            byte[] pdf = reportService.exportPdf();
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_PDF);
+            headers.setContentDispositionFormData("attachment", "iso_responses.pdf");
+            return ResponseEntity.ok().headers(headers).body(pdf);
+        }
+
+        @GetMapping("/report/excel")
+        public ResponseEntity<byte[]> downloadExcel() throws Exception {
+            byte[] excel = reportService.exportExcel();
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
+            headers.setContentDispositionFormData("attachment", "iso_responses.xlsx");
+            return ResponseEntity.ok().headers(headers).body(excel);
+        }
+
+        @GetMapping("/report/csv")
+        public ResponseEntity<byte[]> downloadCsv() throws Exception {
+            byte[] csv = reportService.exportCsv();
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.parseMediaType("text/csv"));
+            headers.setContentDispositionFormData("attachment", "iso_responses.csv");
+            return ResponseEntity.ok().headers(headers).body(csv);
         }
 
     }

@@ -865,3 +865,56 @@ select:focus-visible {
     font-size: 12px;
   }
 } 
+
+.custom-filter-btn {
+  background: #fff !important;
+  color: #1976d2 !important;
+  border: none !important;
+  border-radius: 24px !important;
+  box-shadow: 0 2px 8px 0 rgba(25, 118, 210, 0.10);
+  font-weight: 500;
+  transition: box-shadow 0.18s cubic-bezier(.4,2,.6,1), transform 0.18s cubic-bezier(.4,2,.6,1);
+  padding: 0 28px;
+}
+
+.custom-filter-btn mat-icon {
+  color: #1976d2 !important;
+}
+
+.custom-filter-btn:hover, .custom-filter-btn:focus {
+  box-shadow: 0 8px 24px 0 rgba(25, 118, 210, 0.22);
+  background: #fff !important;
+  transform: translateY(-6px) scale(1.04);
+  outline: none;
+} 
+
+.button-row {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+} 
+
+.custom-stroked-btn {
+  background: #fff !important;
+  color: #1976d2 !important;
+  border: 1.5px solid #1976d2 !important;
+  border-radius: 24px !important;
+  font-weight: 500;
+  padding: 0 28px;
+  box-shadow: 0 2px 8px 0 rgba(25, 118, 210, 0.08);
+  transition: box-shadow 0.18s cubic-bezier(.4,2,.6,1), transform 0.18s cubic-bezier(.4,2,.6,1);
+}
+
+.custom-stroked-btn mat-icon {
+  color: #1976d2 !important;
+  margin-right: 8px;
+}
+
+.custom-stroked-btn:hover, .custom-stroked-btn:focus {
+  box-shadow: 0 8px 24px 0 rgba(25, 118, 210, 0.18);
+  background: #fff !important;
+  transform: translateY(-3px) scale(1.03);
+  outline: none;
+} 

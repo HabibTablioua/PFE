@@ -32,15 +32,16 @@ export class AuthService {
   }
 
   private loadStoredUser(): void {
-    const userStr = localStorage.getItem('currentUser');
-    if (userStr) {
+    const userJson = localStorage.getItem('user');
+    if (userJson && userJson !== 'undefined') {
       try {
-        const user = JSON.parse(userStr);
-        this.currentUserSubject.next(user);
-      } catch (error) {
-        console.error('Erreur lors du chargement de l\'utilisateur stocké:', error);
-        localStorage.removeItem('currentUser');
+        this.currentUserSubject.next(JSON.parse(userJson));
+      } catch (e) {
+        console.error('Erreur lors du parsing du user stocké :', e);
+        this.currentUserSubject.next(null);
       }
+    } else {
+      this.currentUserSubject.next(null);
     }
   }
 

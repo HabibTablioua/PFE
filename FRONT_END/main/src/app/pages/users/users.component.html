@@ -80,15 +80,28 @@
           </mat-form-field>
         </div>
         <div class="filter-actions">
-          <button mat-flat-button class="gradient-btn" (click)="applyFilter()">
-            <mat-icon>search</mat-icon> Rechercher
-          </button>
-          <button mat-flat-button class="orange-btn" (click)="resetFilters()">
-            <mat-icon>refresh</mat-icon> Réinitialiser
-          </button>
-          <button mat-flat-button class="yellow-btn" (click)="toggleFilterPanel()">
-            <mat-icon>visibility_off</mat-icon> Masquer le filtre
-          </button>
+          <div class="button-row">
+            <button mat-stroked-button class="custom-stroked-btn" (click)="applyFilter()">
+              <mat-icon>search</mat-icon> Rechercher
+            </button>
+            <button mat-stroked-button class="custom-stroked-btn" (click)="resetFilters()">
+              <mat-icon>refresh</mat-icon> Réinitialiser
+            </button>
+            <button mat-stroked-button class="custom-stroked-btn" (click)="toggleFilterPanel()">
+              <mat-icon>visibility_off</mat-icon> Masquer le filtre
+            </button>
+          </div>
+          <div class="button-row">
+            <button mat-stroked-button class="custom-stroked-btn" (click)="downloadUsersPdf()">
+              <mat-icon>download</mat-icon> Télécharger PDF
+            </button>
+            <button mat-stroked-button class="custom-stroked-btn" (click)="downloadUsersExcel()">
+              <mat-icon>download</mat-icon> Télécharger Excel
+            </button>
+            <button mat-stroked-button class="custom-stroked-btn" (click)="downloadUsersCsv()">
+              <mat-icon>download</mat-icon> Télécharger CSV
+            </button>
+          </div>
         </div>
       </div>
 

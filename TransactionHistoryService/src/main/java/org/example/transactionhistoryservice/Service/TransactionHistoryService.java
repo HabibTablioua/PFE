@@ -176,6 +176,30 @@ public class TransactionHistoryService {
         return repository.findAll(spec, Sort.by(Sort.Direction.DESC, "createdAt"));
     }
 
+    public List<Map<String, Object>> countTransactionsPerDay() {
+        List<Object[]> results = repository.countTransactionsGroupedByDay();
+        List<Map<String, Object>> stats = new ArrayList<>();
+        for (Object[] row : results) {
+            Map<String, Object> map = new HashMap<>();
+            map.put("date", row[0].toString());
+            map.put("count", ((Number) row[1]).intValue());
+            stats.add(map);
+        }
+        return stats;
+    }
+
+    public List<Map<String, Object>> countTransactionsByStatus() {
+        List<Object[]> results = repository.countByStatus();
+        List<Map<String, Object>> stats = new ArrayList<>();
+        for (Object[] row : results) {
+            Map<String, Object> map = new HashMap<>();
+            map.put("status", row[0]);
+            map.put("count", ((Number) row[1]).intValue());
+            stats.add(map);
+        }
+        return stats;
+    }
+
     @Service
     public static class PdfExportService {
 

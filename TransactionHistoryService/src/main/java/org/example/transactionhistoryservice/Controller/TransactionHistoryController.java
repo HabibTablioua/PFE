@@ -13,6 +13,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @RestController
 @RequestMapping("/history")
@@ -40,7 +43,7 @@ public class TransactionHistoryController {
     }
 
     @GetMapping
-    public List<TransactionHistory> getAll(
+    public List<TransactionHistoryDTO> getAll(
             @RequestParam(required = false) String mti,
             @RequestParam(required = false) String format,
             @RequestParam(required = false) String source,
@@ -48,7 +51,50 @@ public class TransactionHistoryController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate,
             @RequestParam(required = false) String searchTerm
     ) {
-        return historyService.getFilteredTransactions(mti, format, source, startDate, endDate, searchTerm);
+        List<TransactionHistory> transactions = historyService.getFilteredTransactions(mti, format, source, startDate, endDate, searchTerm);
+        return transactions.stream().map(TransactionHistoryDTO::new).collect(Collectors.toList());
+    }
+
+    // DTO interne pour exposer le RRN
+    public static class TransactionHistoryDTO {
+        private Long id;
+        private String mti;
+        private String format;
+        private String source;
+        private String status;
+        private String rrn;
+        private String fieldsJson;
+        private String message;
+        private java.util.Date createdAt;
+        public TransactionHistoryDTO(TransactionHistory entity) {
+            this.id = entity.getId();
+            this.mti = entity.getMti();
+            this.format = entity.getFormat();
+            this.source = entity.getSource();
+            this.status = entity.getStatus();
+            this.fieldsJson = entity.getFieldsJson();
+            this.message = entity.getMessage();
+            this.createdAt = entity.getCreatedAt();
+            this.rrn = extractRRN(entity.getFieldsJson());
+        }
+        private String extractRRN(String fieldsJson) {
+            try {
+                ObjectMapper mapper = new ObjectMapper();
+                java.util.Map<String, String> map = mapper.readValue(fieldsJson, java.util.Map.class);
+                return map.getOrDefault("37", "");
+            } catch (Exception e) {
+                return "";
+            }
+        }
+        public Long getId() { return id; }
+        public String getMti() { return mti; }
+        public String getFormat() { return format; }
+        public String getSource() { return source; }
+        public String getStatus() { return status; }
+        public String getRrn() { return rrn; }
+        public String getFieldsJson() { return fieldsJson; }
+        public String getMessage() { return message; }
+        public java.util.Date getCreatedAt() { return createdAt; }
     }
 
     @GetMapping("/search")
@@ -61,6 +107,16 @@ public class TransactionHistoryController {
             @RequestParam(required = false) String searchTerm
     ) {
         return historyService.getFilteredTransactions(mti, format, source, start, end, searchTerm);
+    }
+
+    @GetMapping("/per-day")
+    public List<Map<String, Object>> getTransactionsPerDay() {
+        return historyService.countTransactionsPerDay();
+    }
+
+    @GetMapping("/per-status")
+    public List<Map<String, Object>> getTransactionsByStatus() {
+        return historyService.countTransactionsByStatus();
     }
 
     @GetMapping("/{id}")

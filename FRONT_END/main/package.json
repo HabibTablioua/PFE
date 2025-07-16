@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve",
+    "start": "ng serve --proxy-config proxy.conf.json",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
@@ -26,7 +26,9 @@
     "@stomp/stompjs": "^7.1.1",
     "angular-tabler-icons": "^2.7.0",
     "apexcharts": "^3.49.0",
+    "chart.js": "^4.5.0",
     "ng-apexcharts": "1.7.6",
+    "ng2-charts": "^8.0.0",
     "ngx-scrollbar": "^11.0.0",
     "rxjs": "~7.5.0",
     "sass": "1.81.0",
@@ -38,6 +40,7 @@
     "@angular-devkit/build-angular": "^19.0.1",
     "@angular/cli": "~19.0.1",
     "@angular/compiler-cli": "^19.0.0",
+    "@types/chart.js": "^4.0.1",
     "@types/date-fns": "^2.6.0",
     "@types/jasmine": "~4.3.0",
     "@types/sockjs-client": "^1.5.4",
