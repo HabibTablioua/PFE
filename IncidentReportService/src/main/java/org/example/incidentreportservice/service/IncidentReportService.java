@@ -15,6 +15,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.client.RestTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.example.incidentreportservice.service.EmailService;
 
 import java.util.List;
 import java.util.Map;
@@ -29,10 +30,15 @@ public class IncidentReportService {
     @Autowired
     private RestTemplate restTemplate;
 
+    @Autowired
+    private EmailService emailService;
+
     private static final Logger log = LoggerFactory.getLogger(IncidentReportService.class);
 
     public IncidentReport createIncident(IncidentReport incident) {
         IncidentReport savedIncident = incidentReportRepository.save(incident);
+        // Envoi de l'email d'alerte à l'admin
+        emailService.sendIncidentAlert(savedIncident.getTitle(), savedIncident.getDescription());
         sendNotificationToNotificationService("Le message pour l'incident ID " + savedIncident.getId() + " a été généré avec succès.");
         return savedIncident;
     }

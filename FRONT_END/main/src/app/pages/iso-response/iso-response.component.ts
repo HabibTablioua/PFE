@@ -192,4 +192,22 @@ export class IsoResponseComponent implements OnInit {
         this.snackBar.open('CSV téléchargé avec succès !', 'Fermer', { duration: 3000 });
       });
   }
+
+  deleteResponse(id: number) {
+    if (confirm('Voulez-vous vraiment supprimer cette réponse ISO ?')) {
+      const token = localStorage.getItem('token');
+      let headers = new HttpHeaders();
+      if (token) {
+        headers = headers.set('Authorization', `Bearer ${token}`);
+      }
+      this.http.delete(`http://localhost:8088/api/response/${id}`, { headers })
+        .subscribe({
+          next: () => {
+            this.snackBar.open('Réponse ISO supprimée avec succès !', 'Fermer', { duration: 3000 });
+            this.loadAllResponses();
+          },
+          error: () => this.snackBar.open('Erreur lors de la suppression de la réponse ISO', 'Fermer', { duration: 3000 })
+        });
+    }
+  }
 } 

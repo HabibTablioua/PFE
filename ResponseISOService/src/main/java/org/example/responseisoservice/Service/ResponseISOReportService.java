@@ -66,8 +66,8 @@ public class ResponseISOReportService {
     public byte[] exportPdf() throws Exception {
         java.util.List<org.example.responseisoservice.Entity.ResponseISOHistory> responses = repository.findAll();
         java.util.List<ResponseISOHistoryReportDTO> dtos = responses.stream()
-            .map(ResponseISOHistoryReportDTO::new)
-            .toList();
+                .map(ResponseISOHistoryReportDTO::new)
+                .toList();
         java.io.InputStream reportStream = new org.springframework.core.io.ClassPathResource("reports/iso_responses_report.jrxml").getInputStream();
         net.sf.jasperreports.engine.JasperReport jasperReport = net.sf.jasperreports.engine.JasperCompileManager.compileReport(reportStream);
         net.sf.jasperreports.engine.data.JRBeanCollectionDataSource dataSource = new net.sf.jasperreports.engine.data.JRBeanCollectionDataSource(dtos);

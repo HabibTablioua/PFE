@@ -123,6 +123,19 @@
         </button>
       </td>
     </ng-container>
+    <ng-container matColumnDef="delete">
+      <th mat-header-cell *matHeaderCellDef></th>
+      <td mat-cell *matCellDef="let element">
+        <button
+          aria-label="Supprimer"
+          (click)="deleteResponse(element.id)"
+          style="width:40px; height:40px; display:flex; align-items:center; justify-content:center; border-radius:50%; background:#fff; color:#ef4444; border:none; box-shadow:none;"
+          class="hover:bg-red-50 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-red-400"
+        >
+          <mat-icon style="font-size: 24px; line-height: 1; display: flex; align-items: center; justify-content: center;">delete</mat-icon>
+        </button>
+      </td>
+    </ng-container>
     <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
     <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
   </table>

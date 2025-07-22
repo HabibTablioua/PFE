@@ -55,7 +55,8 @@ export class IncidentListComponent implements OnInit {
   loadIncidents() {
     this.incidentService.getAll().subscribe({
       next: data => {
-        this.dataSource.data = data;
+        // Trier par dateTime décroissante (plus récent en premier)
+        this.dataSource.data = data.sort((a, b) => new Date(b.dateTime).getTime() - new Date(a.dateTime).getTime());
         this.dataSource.paginator = this.paginator;
       },
       error: () => this.incidentService.showError('Erreur lors du chargement des incidents')

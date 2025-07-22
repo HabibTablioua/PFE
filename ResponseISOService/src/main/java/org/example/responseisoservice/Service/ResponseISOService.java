@@ -89,6 +89,8 @@ public class ResponseISOService {
     public ResponseISOResponse processISO(ResponseISORequest request) {
         ResponseISOResponse response = new ResponseISOResponse();
         String cause = "";
+        Map<String, String> fields = new HashMap<>();
+        String messageIso = "";
         try {
             if (request == null || request.getIsoMessage() == null || request.getIsoMessage().isEmpty()) {
                 throw new IllegalArgumentException("Le message ISO ne doit pas être vide.");
@@ -122,8 +124,7 @@ public class ResponseISOService {
                 details.put("action", "Vérifiez le numéro de carte saisi.");
                 response.setDetails(details);
                 // Remplir fields et messageIso même en cas d'échec
-                Map<String, String> fields = new HashMap<>();
-                String messageIso = "";
+                fields.clear();
                 if (isoMsg != null) {
                     for (int i = 0; i <= isoMsg.getMaxField(); i++) {
                         if (isoMsg.hasField(i)) {
@@ -151,7 +152,21 @@ public class ResponseISOService {
                 details.put("pan", pan);
                 details.put("action", "Vérifiez le numéro de carte ou contactez la banque.");
                 response.setDetails(details);
-                saveToHistory("0210", new HashMap<>(), "", "RAW", response.getStatus(), response.getMessage());
+                fields.clear();
+                if (isoMsg != null) {
+                    for (int i = 0; i <= isoMsg.getMaxField(); i++) {
+                        if (isoMsg.hasField(i)) {
+                            fields.put(String.valueOf(i), isoMsg.getString(i));
+                        }
+                    }
+                }
+                log.info("[DEBUG] Champs extraits pour historique : {}", fields);
+                messageIso = "";
+                try { if (isoMsg != null) messageIso = new String(isoMsg.pack()); } catch (Exception e) { messageIso = request.getIsoMessage(); }
+                log.info("[DEBUG] Message ISO généré pour historique : {}", messageIso);
+                ThreadLocalDetailsHolder.details = response.getDetails();
+                saveToHistory("0210", fields, messageIso, "RAW", response.getStatus(), response.getMessage());
+                ThreadLocalDetailsHolder.details = null;
                 return response;
             }
             Card card = cardOpt.get();
@@ -166,7 +181,21 @@ public class ResponseISOService {
                 details.put("pan", pan);
                 details.put("action", "Retirer la carte et contacter l’émetteur.");
                 response.setDetails(details);
-                saveToHistory("0210", new HashMap<>(), "", "RAW", response.getStatus(), response.getMessage());
+                fields.clear();
+                if (isoMsg != null) {
+                    for (int i = 0; i <= isoMsg.getMaxField(); i++) {
+                        if (isoMsg.hasField(i)) {
+                            fields.put(String.valueOf(i), isoMsg.getString(i));
+                        }
+                    }
+                }
+                log.info("[DEBUG] Champs extraits pour historique : {}", fields);
+                messageIso = "";
+                try { if (isoMsg != null) messageIso = new String(isoMsg.pack()); } catch (Exception e) { messageIso = request.getIsoMessage(); }
+                log.info("[DEBUG] Message ISO généré pour historique : {}", messageIso);
+                ThreadLocalDetailsHolder.details = response.getDetails();
+                saveToHistory("0210", fields, messageIso, "RAW", response.getStatus(), response.getMessage());
+                ThreadLocalDetailsHolder.details = null;
                 return response;
             }
             if (card.isLost()) {
@@ -180,7 +209,21 @@ public class ResponseISOService {
                 details.put("pan", pan);
                 details.put("action", "Retirer la carte et contacter l’émetteur.");
                 response.setDetails(details);
-                saveToHistory("0210", new HashMap<>(), "", "RAW", response.getStatus(), response.getMessage());
+                fields.clear();
+                if (isoMsg != null) {
+                    for (int i = 0; i <= isoMsg.getMaxField(); i++) {
+                        if (isoMsg.hasField(i)) {
+                            fields.put(String.valueOf(i), isoMsg.getString(i));
+                        }
+                    }
+                }
+                log.info("[DEBUG] Champs extraits pour historique : {}", fields);
+                messageIso = "";
+                try { if (isoMsg != null) messageIso = new String(isoMsg.pack()); } catch (Exception e) { messageIso = request.getIsoMessage(); }
+                log.info("[DEBUG] Message ISO généré pour historique : {}", messageIso);
+                ThreadLocalDetailsHolder.details = response.getDetails();
+                saveToHistory("0210", fields, messageIso, "RAW", response.getStatus(), response.getMessage());
+                ThreadLocalDetailsHolder.details = null;
                 return response;
             }
             if (card.isBlacklisted()) {
@@ -194,7 +237,21 @@ public class ResponseISOService {
                 details.put("pan", pan);
                 details.put("action", "Retirer la carte et contacter l’émetteur.");
                 response.setDetails(details);
-                saveToHistory("0210", new HashMap<>(), "", "RAW", response.getStatus(), response.getMessage());
+                fields.clear();
+                if (isoMsg != null) {
+                    for (int i = 0; i <= isoMsg.getMaxField(); i++) {
+                        if (isoMsg.hasField(i)) {
+                            fields.put(String.valueOf(i), isoMsg.getString(i));
+                        }
+                    }
+                }
+                log.info("[DEBUG] Champs extraits pour historique : {}", fields);
+                messageIso = "";
+                try { if (isoMsg != null) messageIso = new String(isoMsg.pack()); } catch (Exception e) { messageIso = request.getIsoMessage(); }
+                log.info("[DEBUG] Message ISO généré pour historique : {}", messageIso);
+                ThreadLocalDetailsHolder.details = response.getDetails();
+                saveToHistory("0210", fields, messageIso, "RAW", response.getStatus(), response.getMessage());
+                ThreadLocalDetailsHolder.details = null;
                 return response;
             }
             if ("BLOCKED".equalsIgnoreCase(card.getStatus())) {
@@ -208,7 +265,21 @@ public class ResponseISOService {
                 details.put("pan", pan);
                 details.put("action", "Contacter la banque pour débloquer la carte.");
                 response.setDetails(details);
-                saveToHistory("0210", new HashMap<>(), "", "RAW", response.getStatus(), response.getMessage());
+                fields.clear();
+                if (isoMsg != null) {
+                    for (int i = 0; i <= isoMsg.getMaxField(); i++) {
+                        if (isoMsg.hasField(i)) {
+                            fields.put(String.valueOf(i), isoMsg.getString(i));
+                        }
+                    }
+                }
+                log.info("[DEBUG] Champs extraits pour historique : {}", fields);
+                messageIso = "";
+                try { if (isoMsg != null) messageIso = new String(isoMsg.pack()); } catch (Exception e) { messageIso = request.getIsoMessage(); }
+                log.info("[DEBUG] Message ISO généré pour historique : {}", messageIso);
+                ThreadLocalDetailsHolder.details = response.getDetails();
+                saveToHistory("0210", fields, messageIso, "RAW", response.getStatus(), response.getMessage());
+                ThreadLocalDetailsHolder.details = null;
                 return response;
             }
             if (card.getExpiryDate() != null && card.getExpiryDate().isBefore(java.time.LocalDate.now())) {
@@ -222,7 +293,21 @@ public class ResponseISOService {
                 details.put("expiryDate", card.getExpiryDate());
                 details.put("action", "Demander une nouvelle carte à la banque.");
                 response.setDetails(details);
-                saveToHistory("0210", new HashMap<>(), "", "RAW", response.getStatus(), response.getMessage());
+                fields.clear();
+                if (isoMsg != null) {
+                    for (int i = 0; i <= isoMsg.getMaxField(); i++) {
+                        if (isoMsg.hasField(i)) {
+                            fields.put(String.valueOf(i), isoMsg.getString(i));
+                        }
+                    }
+                }
+                log.info("[DEBUG] Champs extraits pour historique : {}", fields);
+                messageIso = "";
+                try { if (isoMsg != null) messageIso = new String(isoMsg.pack()); } catch (Exception e) { messageIso = request.getIsoMessage(); }
+                log.info("[DEBUG] Message ISO généré pour historique : {}", messageIso);
+                ThreadLocalDetailsHolder.details = response.getDetails();
+                saveToHistory("0210", fields, messageIso, "RAW", response.getStatus(), response.getMessage());
+                ThreadLocalDetailsHolder.details = null;
                 return response;
             }
             // --- VALIDATION DU MONTANT (field 4) ---
@@ -234,22 +319,6 @@ public class ResponseISOService {
             }
             // --- AJOUT : Contrôle terminal autorisé (code 58) ---
             String terminalId = isoMsg.hasField(41) ? isoMsg.getString(41) : null;
-            if (!isTerminalAuthorized(terminalId, processingCode)) {
-                isoMsg.setMTI("0210");
-                isoMsg.set(39, "58"); // Code ISO 58 : Terminal non autorisé
-                response.setStatus("FAILED");
-                response.setMessage("Terminal non autorisé pour cette opération.");
-                Map<String, Object> details = new HashMap<>();
-                details.put("isoCode", "58");
-                details.put("isoField", "41");
-                details.put("reason", "Le terminal n’est pas autorisé pour ce type d’opération.");
-                details.put("terminalId", terminalId);
-                details.put("processingCode", processingCode);
-                details.put("action", "Vérifiez l’autorisation du terminal ou contactez l’administrateur.");
-                response.setDetails(details);
-                saveToHistory("0210", new HashMap<>(), "", "RAW", response.getStatus(), response.getMessage());
-                return response;
-            }
             log.info("🔍 Code de traitement (champ 3) : {}", processingCode);
             // SUPPRESSION de la map RESPONSE_MAP et de la classe interne ResponseAction
             // À LA FIN DU TRAITEMENT, fallback si aucun code 39 n’a été fixé :
@@ -259,7 +328,7 @@ public class ResponseISOService {
                 response.setMessage("Code traitement non reconnu ou cas non géré.");
             }
             log.info("✅ Message ISO reçu décomposé :");
-            Map<String, String> fields = new HashMap<>();
+            fields.clear();
             for (int i = 0; i <= isoMsg.getMaxField(); i++) {
                 if (isoMsg.hasField(i)) {
                     fields.put(String.valueOf(i), isoMsg.getString(i));
@@ -272,9 +341,9 @@ public class ResponseISOService {
             }
 
             byte[] packed = isoMsg.pack();
-            String responseIsoMessage = new String(packed);
+            messageIso = new String(packed);
 
-            log.info("📦 Message ISO réponse généré : {}", responseIsoMessage);
+            log.info("📦 Message ISO réponse généré : {}", messageIso);
 
             String responseCode = isoMsg.getString(39);
             String reason = getReasonByResponseCode(responseCode);
@@ -283,7 +352,19 @@ public class ResponseISOService {
                     ? "Transaction approuvée."
                     : "Transaction échouée : " + reason);
             cause = reason;
-            saveToHistory("0210", fields, responseIsoMessage, "RAW", response.getStatus(), cause);
+            fields.clear();
+            if (isoMsg != null) {
+                for (int i = 0; i <= isoMsg.getMaxField(); i++) {
+                    if (isoMsg.hasField(i)) {
+                        fields.put(String.valueOf(i), isoMsg.getString(i));
+                    }
+                }
+            }
+            log.info("[DEBUG] Champs extraits pour historique : {}", fields);
+            messageIso = "";
+            try { if (isoMsg != null) messageIso = new String(isoMsg.pack()); } catch (Exception e) { messageIso = request.getIsoMessage(); }
+            log.info("[DEBUG] Message ISO généré pour historique : {}", messageIso);
+            saveToHistory("0210", fields, messageIso, "RAW", response.getStatus(), cause);
 
             Optional<Account> accountOpt = accountRepository.findByPan(pan);
             if (accountOpt.isEmpty()) {
@@ -297,7 +378,21 @@ public class ResponseISOService {
                 details.put("pan", pan);
                 details.put("action", "Vérifiez le numéro de carte ou contactez la banque.");
                 response.setDetails(details);
-                saveToHistory("0210", fields, "", "RAW", response.getStatus(), response.getMessage());
+                fields.clear();
+                if (isoMsg != null) {
+                    for (int i = 0; i <= isoMsg.getMaxField(); i++) {
+                        if (isoMsg.hasField(i)) {
+                            fields.put(String.valueOf(i), isoMsg.getString(i));
+                        }
+                    }
+                }
+                log.info("[DEBUG] Champs extraits pour historique : {}", fields);
+                messageIso = "";
+                try { if (isoMsg != null) messageIso = new String(isoMsg.pack()); } catch (Exception e) { messageIso = request.getIsoMessage(); }
+                log.info("[DEBUG] Message ISO généré pour historique : {}", messageIso);
+                ThreadLocalDetailsHolder.details = response.getDetails();
+                saveToHistory("0210", fields, messageIso, "RAW", response.getStatus(), response.getMessage());
+                ThreadLocalDetailsHolder.details = null;
                 return response;
             }
             if (accountOpt.isPresent() && accountOpt.get().isRestricted()) {
@@ -311,7 +406,21 @@ public class ResponseISOService {
                 details.put("pan", pan);
                 details.put("action", "Contactez la banque pour plus d’informations.");
                 response.setDetails(details);
-                saveToHistory("0210", fields, "", "RAW", response.getStatus(), response.getMessage());
+                fields.clear();
+                if (isoMsg != null) {
+                    for (int i = 0; i <= isoMsg.getMaxField(); i++) {
+                        if (isoMsg.hasField(i)) {
+                            fields.put(String.valueOf(i), isoMsg.getString(i));
+                        }
+                    }
+                }
+                log.info("[DEBUG] Champs extraits pour historique : {}", fields);
+                messageIso = "";
+                try { if (isoMsg != null) messageIso = new String(isoMsg.pack()); } catch (Exception e) { messageIso = request.getIsoMessage(); }
+                log.info("[DEBUG] Message ISO généré pour historique : {}", messageIso);
+                ThreadLocalDetailsHolder.details = response.getDetails();
+                saveToHistory("0210", fields, messageIso, "RAW", response.getStatus(), response.getMessage());
+                ThreadLocalDetailsHolder.details = null;
                 return response;
             }
             if (accountOpt.isPresent()) {
@@ -327,7 +436,21 @@ public class ResponseISOService {
                     details.put("pan", pan);
                     details.put("action", "Retirer la carte et contacter l’émetteur.");
                     response.setDetails(details);
-                    saveToHistory("0210", fields, "", "RAW", response.getStatus(), response.getMessage());
+                    fields.clear();
+                    if (isoMsg != null) {
+                        for (int i = 0; i <= isoMsg.getMaxField(); i++) {
+                            if (isoMsg.hasField(i)) {
+                                fields.put(String.valueOf(i), isoMsg.getString(i));
+                            }
+                        }
+                    }
+                    log.info("[DEBUG] Champs extraits pour historique : {}", fields);
+                    messageIso = "";
+                    try { if (isoMsg != null) messageIso = new String(isoMsg.pack()); } catch (Exception e) { messageIso = request.getIsoMessage(); }
+                    log.info("[DEBUG] Message ISO généré pour historique : {}", messageIso);
+                    ThreadLocalDetailsHolder.details = response.getDetails();
+                    saveToHistory("0210", fields, messageIso, "RAW", response.getStatus(), response.getMessage());
+                    ThreadLocalDetailsHolder.details = null;
                     return response;
                 }
                 if (acc.isLost()) {
@@ -341,7 +464,21 @@ public class ResponseISOService {
                     details.put("pan", pan);
                     details.put("action", "Retirer la carte et contacter l’émetteur.");
                     response.setDetails(details);
-                    saveToHistory("0210", fields, "", "RAW", response.getStatus(), response.getMessage());
+                    fields.clear();
+                    if (isoMsg != null) {
+                        for (int i = 0; i <= isoMsg.getMaxField(); i++) {
+                            if (isoMsg.hasField(i)) {
+                                fields.put(String.valueOf(i), isoMsg.getString(i));
+                            }
+                        }
+                    }
+                    log.info("[DEBUG] Champs extraits pour historique : {}", fields);
+                    messageIso = "";
+                    try { if (isoMsg != null) messageIso = new String(isoMsg.pack()); } catch (Exception e) { messageIso = request.getIsoMessage(); }
+                    log.info("[DEBUG] Message ISO généré pour historique : {}", messageIso);
+                    ThreadLocalDetailsHolder.details = response.getDetails();
+                    saveToHistory("0210", fields, messageIso, "RAW", response.getStatus(), response.getMessage());
+                    ThreadLocalDetailsHolder.details = null;
                     return response;
                 }
                 if (acc.isBlacklisted()) {
@@ -355,25 +492,54 @@ public class ResponseISOService {
                     details.put("pan", pan);
                     details.put("action", "Retirer la carte et contacter l’émetteur.");
                     response.setDetails(details);
-                    saveToHistory("0210", fields, "", "RAW", response.getStatus(), response.getMessage());
+                    fields.clear();
+                    if (isoMsg != null) {
+                        for (int i = 0; i <= isoMsg.getMaxField(); i++) {
+                            if (isoMsg.hasField(i)) {
+                                fields.put(String.valueOf(i), isoMsg.getString(i));
+                            }
+                        }
+                    }
+                    log.info("[DEBUG] Champs extraits pour historique : {}", fields);
+                    messageIso = "";
+                    try { if (isoMsg != null) messageIso = new String(isoMsg.pack()); } catch (Exception e) { messageIso = request.getIsoMessage(); }
+                    log.info("[DEBUG] Message ISO généré pour historique : {}", messageIso);
+                    ThreadLocalDetailsHolder.details = response.getDetails();
+                    saveToHistory("0210", fields, messageIso, "RAW", response.getStatus(), response.getMessage());
+                    ThreadLocalDetailsHolder.details = null;
                     return response;
                 }
                 if (acc.getAllowedOperations() != null && processingCode != null) {
                     java.util.List<String> allowed = java.util.Arrays.asList(acc.getAllowedOperations().split(","));
-                    if (!allowed.contains(processingCode)) {
-                        isoMsg.set(39, "57"); // Transaction non autorisée pour cette carte
-                        response.setStatus("FAILED");
-                        response.setMessage("Transaction non autorisée pour cette carte.");
-                        Map<String, Object> details = new HashMap<>();
-                        details.put("isoCode", "57");
-                        details.put("isoField", "3");
-                        details.put("reason", "Le code de traitement n’est pas autorisé pour ce compte/cette carte.");
-                        details.put("processingCode", processingCode);
-                        details.put("action", "Vérifiez les droits de la carte ou contactez la banque.");
-                        response.setDetails(details);
-                        saveToHistory("0210", fields, "", "RAW", response.getStatus(), response.getMessage());
-                        return response;
-                    }
+                    // Suppression du contrôle sur le code de traitement pour autoriser toutes les transactions
+                    // if (!allowed.contains(processingCode)) {
+                    //     isoMsg.set(39, "57"); // Transaction non autorisée pour cette carte
+                    //     response.setStatus("FAILED");
+                    //     response.setMessage("Transaction non autorisée pour cette carte.");
+                    //     Map<String, Object> details = new HashMap<>();
+                    //     details.put("isoCode", "57");
+                    //     details.put("isoField", "3");
+                    //     details.put("reason", "Le code de traitement n’est pas autorisé pour ce compte/cette carte.");
+                    //     details.put("processingCode", processingCode);
+                    //     details.put("action", "Vérifiez les droits de la carte ou contactez la banque.");
+                    //     response.setDetails(details);
+                    //     fields.clear();
+                    //     if (isoMsg != null) {
+                    //         for (int i = 0; i <= isoMsg.getMaxField(); i++) {
+                    //             if (isoMsg.hasField(i)) {
+                    //                 fields.put(String.valueOf(i), isoMsg.getString(i));
+                    //             }
+                    //         }
+                    //     }
+                    //     log.info("[DEBUG] Champs extraits pour historique : {}", fields);
+                    //     messageIso = "";
+                    //     try { if (isoMsg != null) messageIso = new String(isoMsg.pack()); } catch (Exception e) { messageIso = request.getIsoMessage(); }
+                    //     log.info("[DEBUG] Message ISO généré pour historique : {}", messageIso);
+                    //     ThreadLocalDetailsHolder.details = response.getDetails();
+                    //     saveToHistory("0210", fields, messageIso, "RAW", response.getStatus(), response.getMessage());
+                    //     ThreadLocalDetailsHolder.details = null;
+                    //     return response;
+                    // }
                 }
             }
             Optional<Account> accountClosedOpt = accountRepository.findByPan(pan);
@@ -388,7 +554,21 @@ public class ResponseISOService {
                 details.put("pan", pan);
                 details.put("action", "Contactez la banque pour plus d’informations.");
                 response.setDetails(details);
-                saveToHistory("0210", fields, "", "RAW", response.getStatus(), response.getMessage());
+                fields.clear();
+                if (isoMsg != null) {
+                    for (int i = 0; i <= isoMsg.getMaxField(); i++) {
+                        if (isoMsg.hasField(i)) {
+                            fields.put(String.valueOf(i), isoMsg.getString(i));
+                        }
+                    }
+                }
+                log.info("[DEBUG] Champs extraits pour historique : {}", fields);
+                messageIso = "";
+                try { if (isoMsg != null) messageIso = new String(isoMsg.pack()); } catch (Exception e) { messageIso = request.getIsoMessage(); }
+                log.info("[DEBUG] Message ISO généré pour historique : {}", messageIso);
+                ThreadLocalDetailsHolder.details = response.getDetails();
+                saveToHistory("0210", fields, messageIso, "RAW", response.getStatus(), response.getMessage());
+                ThreadLocalDetailsHolder.details = null;
                 return response;
             }
             Optional<Account> accountStolenOpt = accountRepository.findByPan(pan);
@@ -403,7 +583,21 @@ public class ResponseISOService {
                 details.put("pan", pan);
                 details.put("action", "Retirer la carte et contacter l’émetteur.");
                 response.setDetails(details);
-                saveToHistory("0210", fields, "", "RAW", response.getStatus(), response.getMessage());
+                fields.clear();
+                if (isoMsg != null) {
+                    for (int i = 0; i <= isoMsg.getMaxField(); i++) {
+                        if (isoMsg.hasField(i)) {
+                            fields.put(String.valueOf(i), isoMsg.getString(i));
+                        }
+                    }
+                }
+                log.info("[DEBUG] Champs extraits pour historique : {}", fields);
+                messageIso = "";
+                try { if (isoMsg != null) messageIso = new String(isoMsg.pack()); } catch (Exception e) { messageIso = request.getIsoMessage(); }
+                log.info("[DEBUG] Message ISO généré pour historique : {}", messageIso);
+                ThreadLocalDetailsHolder.details = response.getDetails();
+                saveToHistory("0210", fields, messageIso, "RAW", response.getStatus(), response.getMessage());
+                ThreadLocalDetailsHolder.details = null;
                 return response;
             }
             Account account = card.getAccount();
@@ -418,7 +612,21 @@ public class ResponseISOService {
                 details.put("pan", pan);
                 details.put("action", "Vérifiez le numéro de carte ou contactez la banque.");
                 response.setDetails(details);
-                saveToHistory("0210", fields, "", "RAW", response.getStatus(), response.getMessage());
+                fields.clear();
+                if (isoMsg != null) {
+                    for (int i = 0; i <= isoMsg.getMaxField(); i++) {
+                        if (isoMsg.hasField(i)) {
+                            fields.put(String.valueOf(i), isoMsg.getString(i));
+                        }
+                    }
+                }
+                log.info("[DEBUG] Champs extraits pour historique : {}", fields);
+                messageIso = "";
+                try { if (isoMsg != null) messageIso = new String(isoMsg.pack()); } catch (Exception e) { messageIso = request.getIsoMessage(); }
+                log.info("[DEBUG] Message ISO généré pour historique : {}", messageIso);
+                ThreadLocalDetailsHolder.details = response.getDetails();
+                saveToHistory("0210", fields, messageIso, "RAW", response.getStatus(), response.getMessage());
+                ThreadLocalDetailsHolder.details = null;
                 return response;
             }
             String amount = isoMsg.hasField(4) ? isoMsg.getString(4) : null;
@@ -435,7 +643,21 @@ public class ResponseISOService {
                 details.put("accountNumber", account.getAccountNumber());
                 details.put("action", "Approvisionnez le compte ou essayez un montant inférieur.");
                 response.setDetails(details);
-                saveToHistory("0210", fields, "", "RAW", response.getStatus(), response.getMessage());
+                fields.clear();
+                if (isoMsg != null) {
+                    for (int i = 0; i <= isoMsg.getMaxField(); i++) {
+                        if (isoMsg.hasField(i)) {
+                            fields.put(String.valueOf(i), isoMsg.getString(i));
+                        }
+                    }
+                }
+                log.info("[DEBUG] Champs extraits pour historique : {}", fields);
+                messageIso = "";
+                try { if (isoMsg != null) messageIso = new String(isoMsg.pack()); } catch (Exception e) { messageIso = request.getIsoMessage(); }
+                log.info("[DEBUG] Message ISO généré pour historique : {}", messageIso);
+                ThreadLocalDetailsHolder.details = response.getDetails();
+                saveToHistory("0210", fields, messageIso, "RAW", response.getStatus(), response.getMessage());
+                ThreadLocalDetailsHolder.details = null;
                 return response;
             }
             String expectedHolder = account.getHolderName(); // ou card.getHolderName() si besoin
@@ -452,7 +674,21 @@ public class ResponseISOService {
                 details.put("providedHolder", providedHolder);
                 details.put("action", "Vérifiez le nom du titulaire.");
                 response.setDetails(details);
-                saveToHistory("0210", fields, "", "RAW", response.getStatus(), response.getMessage());
+                fields.clear();
+                if (isoMsg != null) {
+                    for (int i = 0; i <= isoMsg.getMaxField(); i++) {
+                        if (isoMsg.hasField(i)) {
+                            fields.put(String.valueOf(i), isoMsg.getString(i));
+                        }
+                    }
+                }
+                log.info("[DEBUG] Champs extraits pour historique : {}", fields);
+                messageIso = "";
+                try { if (isoMsg != null) messageIso = new String(isoMsg.pack()); } catch (Exception e) { messageIso = request.getIsoMessage(); }
+                log.info("[DEBUG] Message ISO généré pour historique : {}", messageIso);
+                ThreadLocalDetailsHolder.details = response.getDetails();
+                saveToHistory("0210", fields, messageIso, "RAW", response.getStatus(), response.getMessage());
+                ThreadLocalDetailsHolder.details = null;
                 return response;
             }
             String pin = isoMsg.hasField(52) ? isoMsg.getString(52) : null;
@@ -468,7 +704,21 @@ public class ResponseISOService {
                 details.put("pan", pan);
                 details.put("action", "Contactez la banque pour débloquer la carte.");
                 response.setDetails(details);
-                saveToHistory("0210", fields, "", "RAW", response.getStatus(), response.getMessage());
+                fields.clear();
+                if (isoMsg != null) {
+                    for (int i = 0; i <= isoMsg.getMaxField(); i++) {
+                        if (isoMsg.hasField(i)) {
+                            fields.put(String.valueOf(i), isoMsg.getString(i));
+                        }
+                    }
+                }
+                log.info("[DEBUG] Champs extraits pour historique : {}", fields);
+                messageIso = "";
+                try { if (isoMsg != null) messageIso = new String(isoMsg.pack()); } catch (Exception e) { messageIso = request.getIsoMessage(); }
+                log.info("[DEBUG] Message ISO généré pour historique : {}", messageIso);
+                ThreadLocalDetailsHolder.details = response.getDetails();
+                saveToHistory("0210", fields, messageIso, "RAW", response.getStatus(), response.getMessage());
+                ThreadLocalDetailsHolder.details = null;
                 return response;
             }
             String cancellationIndicator = isoMsg.hasField(25) ? isoMsg.getString(25) : null;
@@ -482,7 +732,21 @@ public class ResponseISOService {
                 details.put("reason", "La transaction a été annulée par le client.");
                 details.put("action", "Aucune action requise.");
                 response.setDetails(details);
-                saveToHistory("0210", fields, "", "RAW", response.getStatus(), response.getMessage());
+                fields.clear();
+                if (isoMsg != null) {
+                    for (int i = 0; i <= isoMsg.getMaxField(); i++) {
+                        if (isoMsg.hasField(i)) {
+                            fields.put(String.valueOf(i), isoMsg.getString(i));
+                        }
+                    }
+                }
+                log.info("[DEBUG] Champs extraits pour historique : {}", fields);
+                messageIso = "";
+                try { if (isoMsg != null) messageIso = new String(isoMsg.pack()); } catch (Exception e) { messageIso = request.getIsoMessage(); }
+                log.info("[DEBUG] Message ISO généré pour historique : {}", messageIso);
+                ThreadLocalDetailsHolder.details = response.getDetails();
+                saveToHistory("0210", fields, messageIso, "RAW", response.getStatus(), response.getMessage());
+                ThreadLocalDetailsHolder.details = null;
                 return response;
             }
             String currency = isoMsg.hasField(49) ? isoMsg.getString(49) : null;
@@ -497,7 +761,21 @@ public class ResponseISOService {
                 details.put("currency", currency);
                 details.put("action", "Essayez avec une devise supportée (MAD, USD, EUR).");
                 response.setDetails(details);
-                saveToHistory("0210", fields, "", "RAW", response.getStatus(), response.getMessage());
+                fields.clear();
+                if (isoMsg != null) {
+                    for (int i = 0; i <= isoMsg.getMaxField(); i++) {
+                        if (isoMsg.hasField(i)) {
+                            fields.put(String.valueOf(i), isoMsg.getString(i));
+                        }
+                    }
+                }
+                log.info("[DEBUG] Champs extraits pour historique : {}", fields);
+                messageIso = "";
+                try { if (isoMsg != null) messageIso = new String(isoMsg.pack()); } catch (Exception e) { messageIso = request.getIsoMessage(); }
+                log.info("[DEBUG] Message ISO généré pour historique : {}", messageIso);
+                ThreadLocalDetailsHolder.details = response.getDetails();
+                saveToHistory("0210", fields, messageIso, "RAW", response.getStatus(), response.getMessage());
+                ThreadLocalDetailsHolder.details = null;
                 return response;
             }
             String expiry = isoMsg.hasField(14) ? isoMsg.getString(14) : null;
@@ -517,7 +795,21 @@ public class ResponseISOService {
                     details.put("expiry", expiry);
                     details.put("action", "Demander une nouvelle carte à la banque.");
                     response.setDetails(details);
-                    saveToHistory("0210", fields, "", "RAW", response.getStatus(), response.getMessage());
+                    fields.clear();
+                    if (isoMsg != null) {
+                        for (int i = 0; i <= isoMsg.getMaxField(); i++) {
+                            if (isoMsg.hasField(i)) {
+                                fields.put(String.valueOf(i), isoMsg.getString(i));
+                            }
+                        }
+                    }
+                    log.info("[DEBUG] Champs extraits pour historique : {}", fields);
+                    messageIso = "";
+                    try { if (isoMsg != null) messageIso = new String(isoMsg.pack()); } catch (Exception e) { messageIso = request.getIsoMessage(); }
+                    log.info("[DEBUG] Message ISO généré pour historique : {}", messageIso);
+                    ThreadLocalDetailsHolder.details = response.getDetails();
+                    saveToHistory("0210", fields, messageIso, "RAW", response.getStatus(), response.getMessage());
+                    ThreadLocalDetailsHolder.details = null;
                     return response;
                 }
             }
@@ -659,20 +951,5 @@ public class ResponseISOService {
     private boolean isPinCorrect(String pan, String pin) {
         // TODO: Ajoute ici ta logique de vérification du PIN réel
         return true; // ou false selon le test
-    }
-
-    // --- Liste statique de terminaux autorisés par processingCode ---
-    private static final Map<String, java.util.Set<String>> AUTHORIZED_TERMINALS = Map.of(
-        "200000", java.util.Set.of("T12345", "T67890"), // Ex : terminaux autorisés pour le code 200000
-        "310000", java.util.Set.of("T12345"),
-        "500000", java.util.Set.of("T99999")
-        // Ajoute d'autres mappings selon tes besoins
-    );
-
-    // --- Méthode de vérification d'autorisation du terminal ---
-    private boolean isTerminalAuthorized(String terminalId, String processingCode) {
-        if (terminalId == null || processingCode == null) return false;
-        java.util.Set<String> allowed = AUTHORIZED_TERMINALS.get(processingCode);
-        return allowed != null && allowed.contains(terminalId);
     }
 }

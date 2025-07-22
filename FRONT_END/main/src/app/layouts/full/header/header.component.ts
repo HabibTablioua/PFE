@@ -5,6 +5,7 @@ import {
   Input,
   ViewEncapsulation,
   OnInit,
+  OnDestroy,
 } from '@angular/core';
 import { trigger, transition, style, animate, query, stagger } from '@angular/animations';
 import { TablerIconsModule } from 'angular-tabler-icons';
@@ -13,6 +14,7 @@ import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { NgScrollbarModule } from 'ngx-scrollbar';
 import { NotificationService } from 'src/app/services/notification.service';
+import { interval, Subscription } from 'rxjs';
 
 interface Notification {
   id: number;
@@ -51,17 +53,26 @@ interface Notification {
     ])
   ]
 })
-export class HeaderComponent implements OnInit {
+export class HeaderComponent implements OnInit, OnDestroy {
   @Input() showToggle = true;
   @Input() toggleChecked = false;
   @Output() toggleMobileNav = new EventEmitter<void>();
 
   notifications: Notification[] = [];
+  private pollingSubscription!: Subscription;
 
   constructor(private notificationService: NotificationService) {}
 
   ngOnInit(): void {
     this.loadNotifications();
+    // Ajout du polling toutes les 5 secondes
+    this.pollingSubscription = interval(5000).subscribe(() => this.loadNotifications());
+  }
+
+  ngOnDestroy(): void {
+    if (this.pollingSubscription) {
+      this.pollingSubscription.unsubscribe();
+    }
   }
 
   loadNotifications(): void {
