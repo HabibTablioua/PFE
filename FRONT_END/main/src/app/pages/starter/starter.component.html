@@ -2,26 +2,68 @@
 <div *ngIf="loading" class="dashboard-loader">Chargement des statistiques...</div>
 <div *ngIf="error && !loading" class="dashboard-error">{{ error }}</div>
 <div *ngIf="!loading && !error && totalTransactions === 0" class="dashboard-empty">Aucune transaction à afficher.</div>
-<div *ngIf="!loading && !error && totalTransactions > 0">
-  <div class="dashboard-header" style="display:flex;align-items:center;gap:1rem;">
-    <h2>Dashboard</h2>
-    <span class="badge" *ngIf="totalTransactions > 0">{{ totalTransactions }}</span>
-  </div>
-  <div class="dashboard-charts-row">
-    <div class="card bar-chart-container">
-      <h4>Transactions par jour</h4>
-      <canvas baseChart
-        [data]="barChartData"
-        [options]="barChartOptions"
-        [type]="'bar'">
-      </canvas>
+<div *ngIf="!loading && !error">
+  <div class="dashboard-widgets-row" style="display: flex; gap: 2rem; margin-bottom: 2rem;">
+    <div class="dashboard-widget-card" style="flex:1; min-width:220px; background: linear-gradient(120deg, #42e695 0%, #3bb2b8 100%); color: #fff; border-radius: 18px; padding: 1.5rem 2.2rem; box-shadow: 0 4px 24px rgba(0,0,0,0.07); display: flex; flex-direction: column; align-items: flex-start; justify-content: center;">
+      <div style="font-size: 1.1rem; font-weight: 500; opacity: 0.9;">Nombre total de transactions</div>
+      <div style="font-size: 2.3rem; font-weight: bold; margin: 0.5rem 0 0.2rem 0; letter-spacing: 1px;">{{ totalTransactions | number:'1.0-0' }}</div>
     </div>
-    <div class="card pie-chart-container">
-      <h4>Répartition des statuts de transactions</h4>
-      <canvas baseChart
-        [data]="pieChartData"
-        [type]="'pie'">
-      </canvas>
+    <div class="dashboard-widget-card" style="flex:1; min-width:220px; background: linear-gradient(120deg, #ffb347 0%, #ffcc33 100%); color: #fff; border-radius: 18px; padding: 1.5rem 2.2rem; box-shadow: 0 4px 24px rgba(0,0,0,0.07); display: flex; flex-direction: column; align-items: flex-start; justify-content: center;">
+      <div style="font-size: 1.1rem; font-weight: 500; opacity: 0.9;">Nombre d'utilisateurs</div>
+      <div style="font-size: 2.3rem; font-weight: bold; margin: 0.5rem 0 0.2rem 0; letter-spacing: 1px;">{{ userCount | number:'1.0-0' }}</div>
+    </div>
+    <div class="dashboard-widget-card" style="flex:1; min-width:220px; background: linear-gradient(120deg, #ff5858 0%, #f09819 100%); color: #fff; border-radius: 18px; padding: 1.5rem 2.2rem; box-shadow: 0 4px 24px rgba(0,0,0,0.07); display: flex; flex-direction: column; align-items: flex-start; justify-content: center;">
+      <div style="font-size: 1.1rem; font-weight: 500; opacity: 0.9;">Nombre d'incidents</div>
+      <div style="font-size: 2.3rem; font-weight: bold; margin: 0.5rem 0 0.2rem 0; letter-spacing: 1px;">{{ incidentCount | number:'1.0-0' }}</div>
+    </div>
+    <div class="dashboard-widget-card" style="flex:1; min-width:220px; background: linear-gradient(120deg, #00c6ff 0%, #0072ff 100%); color: #fff; border-radius: 18px; padding: 1.5rem 2.2rem; box-shadow: 0 4px 24px rgba(0,0,0,0.07); display: flex; flex-direction: column; align-items: flex-start; justify-content: center;">
+      <div style="font-size: 1.1rem; font-weight: 500; opacity: 0.9;">Transactions approuvées</div>
+      <div style="font-size: 2.3rem; font-weight: bold; margin: 0.5rem 0 0.2rem 0; letter-spacing: 1px;">{{ successResponseCount | number:'1.0-0' }}</div>
+    </div>
+  </div>
+  <hr style="border: none; border-top: 2px solid #f0f0f0; margin: 2.5rem 0 2rem 0; width: 100%;" />
+ 
+  <div class="dashboard-charts-row" style="display: flex; gap: 2.5rem; align-items: stretch;">
+    <div style="flex:2; display:flex; flex-direction:column;">
+      <div class="card bar-chart-container">
+        <h4>Transactions par jour</h4>
+        <canvas baseChart
+          [data]="barChartData"
+          [options]="barChartOptions"
+          [type]="'bar'">
+        </canvas>
+      </div>
+    </div>
+    <div style="flex:1; display:flex; flex-direction:column;">
+      <div class="card pie-chart-container">
+        <h4>Répartition des statuts d'incidents</h4>
+        <canvas baseChart
+          [data]="incidentStatusChartData"
+          [type]="'doughnut'">
+        </canvas>
+      </div>
+    </div>
+  </div>
+  <div style="height: 8rem;"></div>
+  <div class="dashboard-charts-row" style="display: flex; gap: 2.5rem; align-items: stretch;">
+    <div style="flex:2; display:flex; flex-direction:column;">
+      <div class="card bar-chart-container">
+        <h4>Top 5 sources de transactions</h4>
+        <canvas baseChart
+          [data]="topSourcesChartData"
+          [options]="topSourcesChartOptions"
+          [type]="'bar'">
+        </canvas>
+      </div>
+    </div>
+    <div style="flex:1; display:flex; flex-direction:column;">
+      <div class="card pie-chart-container">
+        <h4>Répartition des réponses ISO</h4>
+        <canvas baseChart
+          [data]="responseStatusChartData"
+          [type]="'doughnut'">
+        </canvas>
+      </div>
     </div>
   </div>
 </div>

@@ -10,14 +10,7 @@ export const navItems: NavItem[] = [
     route: '/dashboard',
   },
   {
-    displayName: 'Message',
-    iconName: 'message-circle',
-    route: '/message-form',
-  },
-  {
-    displayName: 'Depack Message',
-    iconName: 'box',
-    route: '/iso-depacker',
+    navCap: 'Gestion Transactions',
   },
   {
     displayName: 'Historique des Transactions',
@@ -25,9 +18,22 @@ export const navItems: NavItem[] = [
     route: '/transaction-history',
   },
   {
+    displayName: 'Depack Message',
+    iconName: 'box',
+    route: '/iso-depacker',
+  },
+  {
+    displayName: 'Message',
+    iconName: 'message-circle',
+    route: '/message-form',
+  },
+  {
     displayName: 'Logs',
     iconName: 'file-text',
     route: '/dashboard/logs-monitoring',
+  },
+  {
+    navCap: 'Gestion Utilisateurs',
   },
   {
     displayName: 'Users',
@@ -35,9 +41,15 @@ export const navItems: NavItem[] = [
     route: '/users',
   },
   {
+    navCap: 'Gestion Incidents',
+  },
+  {
     displayName: 'Gestion Incidents',
     iconName: 'tool',
     route: '/dashboard/incidents',
+  },
+  {
+    navCap: 'ISO',
   },
   {
     displayName: 'Réponse',
@@ -50,25 +62,11 @@ export const navItems: NavItem[] = [
   {
     displayName: 'Login',
     iconName: 'login',
-    route: '/authentication',
-    children: [
-      {
-        displayName: 'Login',
-        iconName: 'point',
-        route: '/authentication/login',
-      },
-    ],
+    route: '/authentication/login',
   },
   {
     displayName: 'Register',
     iconName: 'user-plus',
-    route: '/authentication',
-    children: [
-      {
-        displayName: 'Register',
-        iconName: 'point',
-        route: '/authentication/register',
-      },
-    ],
+    route: '/authentication/register',
   },
 ];

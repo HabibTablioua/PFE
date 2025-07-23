@@ -10,11 +10,12 @@ import {
 import { trigger, transition, style, animate, query, stagger } from '@angular/animations';
 import { TablerIconsModule } from 'angular-tabler-icons';
 import { MaterialModule } from 'src/app/material.module';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { NgScrollbarModule } from 'ngx-scrollbar';
 import { NotificationService } from 'src/app/services/notification.service';
 import { interval, Subscription } from 'rxjs';
+import { AuthService } from 'src/app/services/auth.service';
 
 interface Notification {
   id: number;
@@ -61,7 +62,11 @@ export class HeaderComponent implements OnInit, OnDestroy {
   notifications: Notification[] = [];
   private pollingSubscription!: Subscription;
 
-  constructor(private notificationService: NotificationService) {}
+  constructor(
+    private notificationService: NotificationService,
+    public authService: AuthService,
+    private router: Router
+  ) {}
 
   ngOnInit(): void {
     this.loadNotifications();
@@ -115,5 +120,10 @@ export class HeaderComponent implements OnInit, OnDestroy {
     this.notificationService.deleteAllNotifications().subscribe(() => {
       this.notifications = [];
     });
+  }
+
+  logout(): void {
+    this.authService.logout();
+    this.router.navigate(['/authentication/login']);
   }
 }

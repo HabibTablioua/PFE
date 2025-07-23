@@ -108,5 +108,20 @@ public class IncidentReportService {
     public void deleteAllIncidents() {
         incidentReportRepository.deleteAll();
     }
+
+    public long countIncidents() {
+        return incidentReportRepository.count();
+    }
+
+    public long countNonTraiteIncidents() {
+        return incidentReportRepository.countByStatus("NON_TRAITE");
+    }
+    public long countResoluIncidents() {
+        return incidentReportRepository.countByStatus("RESOLU");
+    }
+
+    public long countByStatus(String status) {
+        return incidentReportRepository.countByStatus(status);
+    }
 }
 

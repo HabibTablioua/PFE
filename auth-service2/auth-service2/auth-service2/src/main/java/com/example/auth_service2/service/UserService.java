@@ -84,4 +84,8 @@ public class UserService {
         JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, params, dataSource);
         return JasperExportManager.exportReportToPdf(jasperPrint);
     }
+
+    public long countUsers() {
+        return userRepository.count();
+    }
 }

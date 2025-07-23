@@ -147,4 +147,22 @@
 .mat-badge-warn {
   background-color: #e53935 !important;
   color: #fff !important;
+}
+
+.profile-menu-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.7rem 0 0.5rem 0;
+}
+.profile-menu-header img {
+  margin-bottom: 0.3rem;
+  box-shadow: 0 2px 8px rgba(183,28,28,0.10);
+}
+.profile-menu-name {
+  font-size: 1.08rem;
+  font-weight: 600;
+  color: #22223b;
+  margin-bottom: 0.5rem;
+  letter-spacing: 0.2px;
 } 

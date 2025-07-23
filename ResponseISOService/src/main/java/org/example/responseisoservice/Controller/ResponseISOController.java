@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import org.example.responseisoservice.Entity.ResponseISOHistory;
@@ -141,6 +143,22 @@ public class ResponseISOController {
         List<ResponseISOHistory> all = historyRepository.findAll();
         if (all.isEmpty()) return null;
         return all.get(all.size() - 1);
+    }
+
+    @GetMapping("/history/count-success")
+    public long countSuccessResponses() {
+        return responseISOService.countSuccessResponses();
+    }
+
+    @GetMapping("/history/count-failed")
+    public long countFailedResponses() {
+        return responseISOService.countFailedResponses();
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteResponse(@PathVariable Long id) {
+        historyRepository.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/report/pdf")

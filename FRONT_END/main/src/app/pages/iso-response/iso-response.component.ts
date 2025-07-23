@@ -13,6 +13,8 @@ import { MatDialog } from '@angular/material/dialog';
 import { ResponseDetailDialogComponent } from './response-detail-dialog.component';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { SelectionModel } from '@angular/cdk/collections';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 
 @Component({
   selector: 'app-iso-response',
@@ -28,6 +30,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
     MatDatepickerModule,
     MatNativeDateModule,
     MatSelectModule,
+    MatCheckboxModule, // Ajouté pour mat-checkbox
   ],
   templateUrl: './iso-response.component.html',
   styleUrls: ['./iso-response.component.css']
@@ -36,10 +39,12 @@ export class IsoResponseComponent implements OnInit {
   form: FormGroup;
   response: any = null;
   displayedColumns: string[] = ['id', 'mti', 'status', 'createdAt', 'rrn', 'actions'];
+  allColumns: string[] = ['select', 'id', 'mti', 'status', 'createdAt', 'rrn', 'actions'];
   dataSource = new MatTableDataSource<any>([]);
   showFilterPanel = false;
   filterForm: FormGroup;
   statusOptions = ['SUCCESS', 'FAILED'];
+  selection = new SelectionModel<any>(true, []);
 
   constructor(private fb: FormBuilder, private http: HttpClient, private dialog: MatDialog, private snackBar: MatSnackBar) {
     this.form = this.fb.group({
@@ -208,6 +213,40 @@ export class IsoResponseComponent implements OnInit {
           },
           error: () => this.snackBar.open('Erreur lors de la suppression de la réponse ISO', 'Fermer', { duration: 3000 })
         });
+    }
+  }
+
+  isAllSelected() {
+    const numSelected = this.selection.selected.length;
+    const numRows = this.dataSource.data.length;
+    return numSelected === numRows;
+  }
+  masterToggle() {
+    this.isAllSelected() ?
+      this.selection.clear() :
+      this.dataSource.data.forEach(row => this.selection.select(row));
+  }
+  deleteSelectedResponses() {
+    const selectedIds = this.selection.selected.map(item => item.id);
+    if (selectedIds.length === 0) {
+      this.snackBar.open('Aucune ligne sélectionnée.', 'Fermer', { duration: 2000 });
+      return;
+    }
+    if (confirm('Voulez-vous vraiment supprimer les réponses sélectionnées ?')) {
+      const token = localStorage.getItem('token');
+      let headers = new HttpHeaders();
+      if (token) {
+        headers = headers.set('Authorization', `Bearer ${token}`);
+      }
+      Promise.all(selectedIds.map(id =>
+        this.http.delete(`http://localhost:8088/api/response/${id}`, { headers }).toPromise()
+      )).then(() => {
+        this.snackBar.open('Sélection supprimée avec succès !', 'Fermer', { duration: 3000 });
+        this.loadAllResponses();
+        this.selection.clear();
+      }).catch(() => {
+        this.snackBar.open('Erreur lors de la suppression.', 'Fermer', { duration: 3000 });
+      });
     }
   }
 } 

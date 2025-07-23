@@ -49,6 +49,25 @@ public class IncidentReportController {
         return ResponseEntity.ok(incidentReportService.getAllIncidents());
     }
 
+    @GetMapping("/count")
+    public long countIncidents() {
+        return incidentReportService.countIncidents();
+    }
+
+    @GetMapping("/count-non-traite")
+    public long countNonTraiteIncidents() {
+        return incidentReportService.countNonTraiteIncidents();
+    }
+    @GetMapping("/count-resolu")
+    public long countResoluIncidents() {
+        return incidentReportService.countResoluIncidents();
+    }
+
+    @GetMapping("/count-by-status")
+    public long countByStatus(@RequestParam String status) {
+        return incidentReportService.countByStatus(status);
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<String> updateIncidentStatus(@PathVariable Long id, @RequestBody Map<String, String> request) {
         incidentReportService.updateIncidentStatus(id, request.get("status"));

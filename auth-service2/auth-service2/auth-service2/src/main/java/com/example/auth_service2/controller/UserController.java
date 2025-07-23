@@ -54,6 +54,11 @@ public class UserController {
         return ResponseEntity.ok().headers(headers).body(pdf);
     }
 
+    @GetMapping("/count")
+    public long countUsers() {
+        return userService.countUsers();
+    }
+
     @PostMapping
     public ResponseEntity<User> createUser(@Valid @RequestBody User user) {
         log.info("[UserController] POST /users appelé avec user: {}", user.getEmail());

@@ -119,6 +119,16 @@ public class TransactionHistoryController {
         return historyService.countTransactionsByStatus();
     }
 
+    @GetMapping("/per-source")
+    public List<Map<String, Object>> getTransactionsBySource() {
+        return historyService.countTransactionsBySource();
+    }
+
+    @GetMapping("/count")
+    public long countTransactions() {
+        return historyService.countAllTransactions();
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<TransactionHistory> getById(@PathVariable Long id) {
         return historyService.getById(id)
@@ -204,7 +214,6 @@ public class TransactionHistoryController {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
 }
 
 

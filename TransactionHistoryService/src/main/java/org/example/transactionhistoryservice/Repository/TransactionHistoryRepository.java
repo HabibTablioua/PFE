@@ -21,5 +21,8 @@ public interface TransactionHistoryRepository extends JpaRepository<TransactionH
 
     @Query("SELECT th.status, COUNT(th) FROM TransactionHistory th GROUP BY th.status")
     List<Object[]> countByStatus();
+
+    @Query("SELECT th.source, COUNT(th) FROM TransactionHistory th GROUP BY th.source ORDER BY COUNT(th) DESC")
+    List<Object[]> countBySource();
 }
 

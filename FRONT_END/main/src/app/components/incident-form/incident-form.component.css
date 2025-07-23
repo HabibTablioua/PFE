@@ -58,4 +58,74 @@ button[mat-raised-button] mat-icon {
   color: inherit;
   font-size: 1.3em;
   margin-right: 6px;
+}
+
+.modern-incident-form {
+  background: linear-gradient(120deg, #f8fafc 60%, #e3f0ff 100%);
+  border-radius: 22px;
+  box-shadow: 0 6px 32px rgba(33, 150, 243, 0.10), 0 1.5px 6px rgba(33, 150, 243, 0.08);
+  padding: 2.2rem 2rem 1.5rem 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.3rem;
+  min-width: 320px;
+  max-width: 420px;
+  margin: 0 auto;
+}
+
+.modern-field {
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 2px 8px #2196f311;
+  font-size: 1.08rem;
+}
+
+.modern-field.mat-form-field-appearance-outline .mat-form-field-outline {
+  color: #2196f3;
+}
+
+.modern-field .mat-form-field-flex {
+  border-radius: 14px;
+}
+
+.modern-field .mat-input-element, .modern-field .mat-select-value {
+  font-size: 1.13rem;
+  padding: 10px 0;
+}
+
+.modern-field .mat-form-field-label {
+  color: #1976d2;
+  font-weight: 500;
+  font-size: 1.08rem;
+}
+
+.modern-field .mat-form-field-appearance-outline.mat-focused .mat-form-field-outline-thick {
+  color: #1976d2;
+  border-color: #1976d2;
+}
+
+.modern-submit-btn {
+  width: 100%;
+  border-radius: 18px;
+  font-size: 1.15rem;
+  font-weight: 600;
+  padding: 0.9rem 0;
+  background: linear-gradient(90deg, #42a5f5 0%, #1976d2 100%);
+  color: #fff;
+  box-shadow: 0 4px 16px #1976d222;
+  margin-top: 0.7rem;
+  transition: background 0.2s, box-shadow 0.2s;
+}
+
+.modern-submit-btn:hover {
+  background: linear-gradient(90deg, #1976d2 0%, #42a5f5 100%);
+  box-shadow: 0 8px 32px #1976d244;
+}
+
+@media (max-width: 600px) {
+  .modern-incident-form {
+    padding: 1.2rem 0.5rem 1rem 0.5rem;
+    min-width: unset;
+    max-width: 100%;
+  }
 } 

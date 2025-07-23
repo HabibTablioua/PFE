@@ -94,3 +94,31 @@ button[mat-stroked-button] {
   font-size: 1.2em;
   margin-right: 6px;
 } 
+
+.status-non-traite {
+  background: #ffebee;
+  color: #d32f2f;
+  font-weight: 600;
+  border-radius: 12px;
+  padding: 4px 16px;
+  display: inline-block;
+  font-size: 1em;
+}
+.status-en-cours {
+  background: #fff8e1;
+  color: #ff9800;
+  font-weight: 600;
+  border-radius: 12px;
+  padding: 4px 16px;
+  display: inline-block;
+  font-size: 1em;
+}
+.status-resolu {
+  background: #e8f5e9;
+  color: #388e3c;
+  font-weight: 600;
+  border-radius: 12px;
+  padding: 4px 16px;
+  display: inline-block;
+  font-size: 1em;
+} 

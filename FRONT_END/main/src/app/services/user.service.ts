@@ -266,4 +266,12 @@ export class UserService {
       responseType: 'blob'
     }) as Observable<Blob>;
   }
+
+  getUserCount(): Observable<number> {
+    return this.http.get<number>(`${this.apiUrl}/users/count`, { headers: this.getHeaders() });
+  }
+
+  getUserByToken(): Observable<User> {
+    return this.http.get<User>(`${environment.authUrl}/me`, { headers: this.getHeaders() });
+  }
 } 

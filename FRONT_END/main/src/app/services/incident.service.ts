@@ -55,6 +55,41 @@ export class IncidentService {
     return this.http.delete(this.apiUrl, { headers });
   }
 
+  getIncidentCount(): Observable<number> {
+    const token = localStorage.getItem('token');
+    let headers = new HttpHeaders();
+    if (token) {
+      headers = headers.set('Authorization', `Bearer ${token}`);
+    }
+    return this.http.get<number>(`${this.apiUrl}/count`, { headers });
+  }
+
+  getNonTraiteIncidentCount(): Observable<number> {
+    const token = localStorage.getItem('token');
+    let headers = new HttpHeaders();
+    if (token) {
+      headers = headers.set('Authorization', `Bearer ${token}`);
+    }
+    return this.http.get<number>(`${this.apiUrl}/count-non-traite`, { headers });
+  }
+  getResoluIncidentCount(): Observable<number> {
+    const token = localStorage.getItem('token');
+    let headers = new HttpHeaders();
+    if (token) {
+      headers = headers.set('Authorization', `Bearer ${token}`);
+    }
+    return this.http.get<number>(`${this.apiUrl}/count-resolu`, { headers });
+  }
+  getEnCoursIncidentCount(): Observable<number> {
+    const token = localStorage.getItem('token');
+    let headers = new HttpHeaders();
+    if (token) {
+      headers = headers.set('Authorization', `Bearer ${token}`);
+    }
+    // On compte les incidents EN_COURS via un endpoint générique (à créer côté backend si besoin)
+    return this.http.get<number>(`${this.apiUrl}/count-by-status?status=EN_COURS`, { headers });
+  }
+
   showSuccess(message: string) {
     this.snackBar.open(message, 'Fermer', { duration: 3000, panelClass: 'snackbar-success' });
   }

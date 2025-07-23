@@ -63,6 +63,18 @@
       <th mat-header-cell *matHeaderCellDef>Description</th>
       <td mat-cell *matCellDef="let incident">{{incident.description}}</td>
     </ng-container>
+    <ng-container matColumnDef="status">
+      <th mat-header-cell *matHeaderCellDef>Statut</th>
+      <td mat-cell *matCellDef="let incident">
+        <span [ngClass]="{
+          'status-non-traite': incident.status === 'NON_TRAITE',
+          'status-en-cours': incident.status === 'EN_COURS',
+          'status-resolu': incident.status === 'RESOLU'
+        }">
+          {{ incident.status === 'NON_TRAITE' ? 'Non traité' : incident.status === 'EN_COURS' ? 'En cours' : incident.status === 'RESOLU' ? 'Résolu' : incident.status }}
+        </span>
+      </td>
+    </ng-container>
     <ng-container matColumnDef="dateTime">
       <th mat-header-cell *matHeaderCellDef>Date</th>
       <td mat-cell *matCellDef="let incident">{{incident.dateTime | date:'short'}}</td>

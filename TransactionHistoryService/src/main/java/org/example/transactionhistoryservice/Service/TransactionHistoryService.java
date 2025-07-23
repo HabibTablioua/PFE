@@ -2,6 +2,7 @@ package org.example.transactionhistoryservice.Service;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.RequiredArgsConstructor;
 import net.sf.jasperreports.engine.*;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
@@ -51,7 +52,24 @@ public class TransactionHistoryService {
             history.setFieldsJson(fieldsJson);
             history.setMessage(request.getMessage());
             history.setFormat(request.getFormat());
-            history.setSource(request.getSource());
+            // Mapping élargi de la source à partir du champ 22
+            String entryMode = request.getFields().get("22");
+            String source = "Autre";
+            if (entryMode != null) {
+                switch (entryMode) {
+                    case "010": source = "ATM"; break;
+                    case "021":
+                    case "022": source = "Mobile"; break;
+                    case "051":
+                    case "052": source = "POS"; break;
+                    case "071": source = "E-commerce"; break;
+                    case "081": source = "Web"; break;
+                    case "091": source = "Call Center"; break;
+                    case "111": source = "Kiosk"; break;
+                    default: source = "Autre";
+                }
+            }
+            history.setSource(source);
             history.setStatus(request.getStatus());
 
             // Extraire le processing code depuis les champs (champ 3)
@@ -198,6 +216,52 @@ public class TransactionHistoryService {
             stats.add(map);
         }
         return stats;
+    }
+
+    public List<Map<String, Object>> countTransactionsBySource() {
+        List<Object[]> results = repository.countBySource();
+        List<Map<String, Object>> stats = new ArrayList<>();
+        for (Object[] row : results) {
+            Map<String, Object> map = new HashMap<>();
+            map.put("source", row[0]);
+            map.put("count", ((Number) row[1]).intValue());
+            stats.add(map);
+        }
+        return stats;
+    }
+
+    public long countAllTransactions() {
+        return repository.count();
+    }
+
+    public void updateSourcesFromFieldsJson() {
+        List<TransactionHistory> all = repository.findAll();
+        for (TransactionHistory tx : all) {
+            try {
+                Map<String, String> fields = objectMapper.readValue(
+                    tx.getFieldsJson(), new TypeReference<Map<String, String>>() {});
+                String entryMode = fields.get("22");
+                String source = "Autre";
+                if (entryMode != null) {
+                    switch (entryMode) {
+                        case "010": source = "ATM"; break;
+                        case "021":
+                        case "022": source = "Mobile"; break;
+                        case "051":
+                        case "052": source = "POS"; break;
+                        case "071": source = "E-commerce"; break;
+                        case "081": source = "Web"; break;
+                        case "091": source = "Call Center"; break;
+                        case "111": source = "Kiosk"; break;
+                        default: source = "Autre";
+                    }
+                }
+                tx.setSource(source);
+                repository.save(tx);
+            } catch (Exception e) {
+                // Log ou ignorer
+            }
+        }
     }
 
     @Service

@@ -952,4 +952,12 @@ public class ResponseISOService {
         // TODO: Ajoute ici ta logique de vérification du PIN réel
         return true; // ou false selon le test
     }
+
+    public long countSuccessResponses() {
+        return historyRepository.countByStatus("SUCCESS");
+    }
+
+    public long countFailedResponses() {
+        return historyRepository.countByStatus("FAILED");
+    }
 }

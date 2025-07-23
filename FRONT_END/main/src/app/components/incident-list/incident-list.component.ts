@@ -26,7 +26,7 @@ import { ReactiveFormsModule } from '@angular/forms';
   styleUrls: ['./incident-list.component.css']
 })
 export class IncidentListComponent implements OnInit {
-  displayedColumns: string[] = ['id', 'title', 'description', 'dateTime', 'actions'];
+  displayedColumns: string[] = ['id', 'title', 'description', 'status', 'dateTime', 'actions'];
   dataSource = new MatTableDataSource<Incident>([]);
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
