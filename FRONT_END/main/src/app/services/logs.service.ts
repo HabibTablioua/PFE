@@ -29,4 +29,9 @@ export class LogsService {
     const headers = new HttpHeaders().set('Authorization', 'Bearer ' + localStorage.getItem('token'));
     return this.http.post(`${this.apiUrl}/delete-batch`, ids, { headers });
   }
+
+  getLogsFromDatabase(): Observable<any[]> {
+    const headers = new HttpHeaders().set('Authorization', 'Bearer ' + localStorage.getItem('token'));
+    return this.http.get<any[]>(`${this.apiUrl}/db`, { headers });
+  }
 } 

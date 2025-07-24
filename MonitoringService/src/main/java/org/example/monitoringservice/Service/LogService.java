@@ -55,11 +55,12 @@ public class LogService {
     }
 
 
-    public void saveLog(String level, String message) {
+    public void saveLog(String level, String message, String userEmail) {
         LogEntry entry = new LogEntry();
         entry.setDateTime(LocalDateTime.now());
         entry.setLevel(level);
         entry.setMessage(message);
+        entry.setUserEmail(userEmail);
         logEntryRepository.save(entry);
 
         // Optionnel : écrire dans le fichier log aussi
@@ -87,6 +88,11 @@ public class LogService {
         return logEntryRepository.findAll();
     }
 
+    public List<LogEntry> getLogsByUserEmail(String userEmail) {
+        return logEntryRepository.findAll().stream()
+            .filter(log -> userEmail == null || userEmail.isEmpty() || (log.getUserEmail() != null && log.getUserEmail().equalsIgnoreCase(userEmail)))
+            .collect(Collectors.toList());
+    }
 
 
 }

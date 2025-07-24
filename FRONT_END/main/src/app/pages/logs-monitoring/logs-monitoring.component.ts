@@ -14,6 +14,7 @@ import { CommonModule } from '@angular/common';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmationDialogComponent, ConfirmationDialogData } from 'src/app/components/confirmation-dialog/confirmation-dialog.component';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { DecodeUriPipe } from 'src/app/pipe/decode-uri.pipe';
 
 @Component({
   selector: 'app-logs-monitoring',
@@ -29,7 +30,8 @@ import { MatSnackBar } from '@angular/material/snack-bar';
     MatTableModule,
     MatNativeDateModule,
     MatPaginatorModule,
-    MatIconModule
+    MatIconModule,
+    DecodeUriPipe
   ],
   templateUrl: './logs-monitoring.component.html',
   styleUrls: ['./logs-monitoring.component.scss']
@@ -49,11 +51,12 @@ export class LogsMonitoringComponent implements OnInit {
   showFilterPanel = false;
   role = '';
   filterBy = '';
+  // showDbLogs = false; // plus besoin
 
   constructor(private logsService: LogsService, private dialog: MatDialog, private snackBar: MatSnackBar) {}
 
   ngOnInit() {
-    this.fetchLogs();
+    this.fetchLogsFromDatabase();
   }
 
   private formatDate(date: string | Date): string | null {
@@ -90,6 +93,33 @@ export class LogsMonitoringComponent implements OnInit {
     });
   }
 
+  fetchLogsFromDatabase() {
+    this.logsService.getLogsFromDatabase().subscribe((data: any[]) => {
+      // Filtrage côté frontend
+      let filtered = data;
+      if (this.keyword) {
+        const keyword = this.keyword.toLowerCase();
+        filtered = filtered.filter(log => (log.message || '').toLowerCase().includes(keyword));
+      }
+      if (this.level) {
+        filtered = filtered.filter(log => (log.level || '').toLowerCase() === this.level.toLowerCase());
+      }
+      if (this.startDate) {
+        const start = new Date(this.startDate).getTime();
+        filtered = filtered.filter(log => new Date(log.dateTime || log.date_time || log.date).getTime() >= start);
+      }
+      if (this.endDate) {
+        const end = new Date(this.endDate).getTime();
+        filtered = filtered.filter(log => new Date(log.dateTime || log.date_time || log.date).getTime() <= end);
+      }
+      this.total = filtered.length;
+      const startIdx = this.page * this.size;
+      const endIdx = startIdx + this.size;
+      this.logs = filtered.slice(startIdx, endIdx);
+      this.updateStats();
+    });
+  }
+
   applyFilters() {
     // Cette méthode peut être gardée si vous avez des filtres purement UI, sinon elle est vide
     // La logique de filtrage est maintenant côté serveur
@@ -97,7 +127,7 @@ export class LogsMonitoringComponent implements OnInit {
 
   filterLogs() {
     this.page = 0;
-    this.fetchLogs();
+    this.fetchLogsFromDatabase();
   }
 
   updateStats() {
@@ -143,7 +173,7 @@ export class LogsMonitoringComponent implements OnInit {
   onPaginateChange(event: any) {
     this.size = event.pageSize;
     this.page = event.pageIndex;
-    this.fetchLogs();
+    this.fetchLogsFromDatabase();
   }
 
   toggleDetails(index: number) {

@@ -10,6 +10,7 @@
 
 <div class="logs-table-container">
   <div class="table-header-actions">
+    <!-- Le bouton de bascule est supprimé -->
     <button mat-raised-button
             color="warn"
             class="delete-selected-btn"
@@ -43,9 +44,8 @@
           <mat-option value="">Tous</mat-option>
           <mat-option value="SUCCESS">SUCCESS</mat-option>
           <mat-option value="ERROR">ERROR</mat-option>
-          <mat-option value="FAILED">FAILED</mat-option>
-          <mat-option value="INFO">INFO</mat-option>
           <mat-option value="DEBUG">DEBUG</mat-option>
+          <mat-option value="INFO">INFO</mat-option>
           <mat-option value="WARN">WARN</mat-option>
         </mat-select>
       </mat-form-field>
@@ -72,9 +72,7 @@
       <tr>
         <th><input type="checkbox" [checked]="allSelected()" (change)="toggleSelectAll()" /></th>
         <th>Date</th>
-        <th>Niveau</th>
         <th>Message</th>
-        <th>Détail</th>
         <th>Statut</th>
         <th>Actions</th>
       </tr>
@@ -82,15 +80,8 @@
     <tbody>
       <tr *ngFor="let log of logs; let i = index">
         <td><input type="checkbox" [checked]="isSelected(log)" (change)="toggleSelect(log)" /></td>
-        <td>{{ log.date }}</td>
-        <td>{{ log.level }}</td>
-        <td>{{ log.message }}</td>
-        <td>
-          <button mat-icon-button (click)="toggleDetails(i)">
-            <mat-icon>{{ log.showDetails ? 'expand_less' : 'expand_more' }}</mat-icon>
-          </button>
-          <div *ngIf="log.showDetails">{{ log.details }}</div>
-        </td>
+        <td style="white-space: nowrap;">{{ (log.dateTime || log.date_time || log.date) | date:'yyyy-MM-dd HH:mm:ss' }}</td>
+        <td>{{ log.message | decodeUri }}</td>
         <td>
           <ng-container [ngSwitch]="log.level">
             <span *ngSwitchCase="'SUCCESS'" class="status-badge success">

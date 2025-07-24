@@ -21,6 +21,7 @@ public class LogEntry {
     private String level; // "INFO", "SUCCESS", "ERROR", "FAILED", etc.
 
     private String message;
+    private String userEmail;
 
     public Long getId() {
         return id;
@@ -52,5 +53,12 @@ public class LogEntry {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public String getUserEmail() {
+        return userEmail;
+    }
+    public void setUserEmail(String userEmail) {
+        this.userEmail = userEmail;
     }
 }

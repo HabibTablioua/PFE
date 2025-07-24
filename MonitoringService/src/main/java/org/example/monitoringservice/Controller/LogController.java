@@ -487,14 +487,15 @@ public class LogController {
     public ResponseEntity<String> saveLog(@RequestBody Map<String, String> body) {
         String level = body.get("level");
         String message = body.get("message");
-        logService.saveLog(level, message);
+        String userEmail = body.get("userEmail");
+        logService.saveLog(level, message, userEmail);
         return ResponseEntity.ok("Log enregistré avec succès ✅");
     }
 
 
     @GetMapping("/db")
-    public ResponseEntity<List<LogEntry>> getLogsFromDatabase() {
-        return ResponseEntity.ok(logService.getAllLogsFromDatabase());
+    public ResponseEntity<List<LogEntry>> getLogsFromDatabase(@RequestParam(required = false) String userEmail) {
+        return ResponseEntity.ok(logService.getLogsByUserEmail(userEmail));
     }
 
     // Suppression simple
