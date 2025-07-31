@@ -1,0 +1,87 @@
+<div class="dashboard-container">
+
+  <!-- Indicateur de chargement -->
+  <div *ngIf="loading" style="text-align: center; padding: 40px;">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>Chargement des statistiques...</p>
+  </div>
+
+  <!-- Message d'erreur -->
+  <div *ngIf="error" style="text-align: center; padding: 20px; background: #fee2e2; border-radius: 8px; margin-bottom: 24px;">
+    <mat-icon style="color: #dc2626;">error</mat-icon>
+    <p style="color: #dc2626; margin: 8px 0;">Erreur de connexion aux services</p>
+    <button mat-raised-button color="primary" (click)="loadStats()">
+      <mat-icon>refresh</mat-icon>
+      Réessayer
+    </button>
+  </div>
+
+  <!-- Grille des métriques avec nouveaux widgets -->
+  <div class="metrics-section" *ngIf="!loading">
+    <div class="metrics-grid">
+      <app-metric-widget 
+        *ngFor="let metric of metricsData"
+        [data]="metric"
+        (widgetClick)="onMetricWidgetClick($event)">
+      </app-metric-widget>
+    </div>
+  </div>
+
+  <!-- Section des graphiques -->
+  <div class="charts-section" *ngIf="!loading">
+    <div class="charts-grid">
+      <!-- Graphique des Transactions -->
+      <div class="chart-card">
+        <h4 class="chart-title">Évolution des Transactions</h4>
+        <div class="chart-container">
+          <canvas id="transactionChart" width="400" height="300"></canvas>
+        </div>
+      </div>
+
+      <!-- Graphique des Incidents -->
+      <div class="chart-card">
+        <h4 class="chart-title">Répartition des Incidents</h4>
+        <div class="chart-container">
+          <canvas id="incidentChart" width="400" height="300"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section des graphiques supplémentaires -->
+  <div class="charts-section" *ngIf="!loading">
+    <div class="charts-grid">
+      <!-- Top 5 des Sources de Transactions -->
+      <div class="chart-card">
+        <h4 class="chart-title">Top 5 des Sources de Transactions</h4>
+        <div class="chart-container">
+          <canvas id="sourceChart" width="400" height="300"></canvas>
+        </div>
+      </div>
+
+      <!-- Graphique des Statuts de Transactions -->
+      <div class="chart-card">
+        <h4 class="chart-title">Répartition par Statut</h4>
+        <div class="chart-container">
+          <canvas id="statusChart" width="400" height="300"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Widget d'alertes -->
+  <div class="alerts-section" *ngIf="!loading">
+    <app-alert-widget 
+      [alerts]="alerts"
+      (alertClick)="onAlertClick($event)"
+      (actionClick)="onAlertActionClick($event)"
+      (refresh)="onRefreshAlerts()">
+    </app-alert-widget>
+  </div>
+
+  <!-- Widget de métriques temps-réel -->
+  <div class="live-metrics-section" *ngIf="!loading">
+    <app-live-metrics-widget></app-live-metrics-widget>
+  </div>
+
+</div> 

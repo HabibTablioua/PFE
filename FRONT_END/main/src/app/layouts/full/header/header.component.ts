@@ -61,6 +61,9 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   notifications: Notification[] = [];
   private pollingSubscription!: Subscription;
+  
+  // Configuration pour la suppression automatique des notifications lues
+  autoDeleteReadNotifications = true; // Mettre à false pour désactiver
 
   constructor(
     private notificationService: NotificationService,
@@ -92,6 +95,28 @@ export class HeaderComponent implements OnInit, OnDestroy {
           dateTime: n.dateTime,
         }))
         .sort((a, b) => new Date(b.dateTime).getTime() - new Date(a.dateTime).getTime());
+      
+      // Supprimer automatiquement les notifications lues si activé
+      if (this.autoDeleteReadNotifications) {
+        this.removeReadNotifications();
+      }
+    });
+  }
+
+  removeReadNotifications(): void {
+    const readNotifications = this.notifications.filter(n => n.read);
+    
+    readNotifications.forEach(notification => {
+      this.notificationService.deleteNotification(notification.id).subscribe({
+        next: () => {
+          console.log('✅ Notification lue supprimée:', notification.id);
+          // Retirer de la liste locale
+          this.notifications = this.notifications.filter(n => n.id !== notification.id);
+        },
+        error: (error: any) => {
+          console.error('❌ Erreur lors de la suppression de la notification:', error);
+        }
+      });
     });
   }
 
@@ -100,15 +125,80 @@ export class HeaderComponent implements OnInit, OnDestroy {
   }
 
   markAllAsRead(): void {
-    this.notifications.forEach((n) => (n.read = true));
-    // Here you would also call a service method to update the backend
-    // this.notificationService.markAllAsRead().subscribe();
+    this.notificationService.markAllAsRead().subscribe({
+      next: () => {
+        // Marquer toutes les notifications comme lues localement
+        this.notifications.forEach((n) => (n.read = true));
+        console.log('✅ Toutes les notifications ont été marquées comme lues');
+        
+        // Supprimer automatiquement toutes les notifications lues si activé
+        if (this.autoDeleteReadNotifications) {
+          this.removeReadNotifications();
+        }
+      },
+      error: (error: any) => {
+        console.error('❌ Erreur lors du marquage des notifications:', error);
+        // En cas d'erreur, on marque quand même localement pour l'UX
+        this.notifications.forEach((n) => (n.read = true));
+        // Et on supprime quand même si activé
+        if (this.autoDeleteReadNotifications) {
+          this.removeReadNotifications();
+        }
+      }
+    });
   }
 
   deleteNotification(notificationId: number, event: MouseEvent): void {
     event.stopPropagation(); // Empêche le menu de se fermer
     this.notificationService.deleteNotification(notificationId).subscribe(() => {
       this.notifications = this.notifications.filter(n => n.id !== notificationId);
+    });
+  }
+
+  markNotificationAsRead(notificationId: number): void {
+    this.notificationService.markNotificationAsRead(notificationId).subscribe({
+      next: () => {
+        // Marquer la notification comme lue localement
+        const notification = this.notifications.find(n => n.id === notificationId);
+        if (notification) {
+          notification.read = true;
+          
+          // Supprimer automatiquement la notification lue si activé
+          if (this.autoDeleteReadNotifications) {
+            this.notificationService.deleteNotification(notificationId).subscribe({
+              next: () => {
+                console.log('✅ Notification lue supprimée:', notificationId);
+                // Retirer de la liste locale
+                this.notifications = this.notifications.filter(n => n.id !== notificationId);
+              },
+              error: (error: any) => {
+                console.error('❌ Erreur lors de la suppression de la notification:', error);
+              }
+            });
+          }
+        }
+        console.log('✅ Notification marquée comme lue:', notificationId);
+      },
+      error: (error: any) => {
+        console.error('❌ Erreur lors du marquage de la notification:', error);
+        // En cas d'erreur, on marque quand même localement pour l'UX
+        const notification = this.notifications.find(n => n.id === notificationId);
+        if (notification) {
+          notification.read = true;
+          
+          // Supprimer quand même si activé
+          if (this.autoDeleteReadNotifications) {
+            this.notificationService.deleteNotification(notificationId).subscribe({
+              next: () => {
+                this.notifications = this.notifications.filter(n => n.id !== notificationId);
+              },
+              error: (deleteError: any) => {
+                console.error('❌ Erreur lors de la suppression de la notification:', deleteError);
+              }
+            });
+          }
+        }
+      }
     });
   }
 
@@ -120,6 +210,15 @@ export class HeaderComponent implements OnInit, OnDestroy {
     this.notificationService.deleteAllNotifications().subscribe(() => {
       this.notifications = [];
     });
+  }
+
+  trackByNotification(index: number, notification: Notification): number {
+    return notification.id;
+  }
+
+  toggleAutoDelete(): void {
+    this.autoDeleteReadNotifications = !this.autoDeleteReadNotifications;
+    console.log('🔄 Auto-suppression des notifications:', this.autoDeleteReadNotifications ? 'ACTIVÉE' : 'DÉSACTIVÉE');
   }
 
   logout(): void {

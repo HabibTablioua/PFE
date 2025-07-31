@@ -83,6 +83,22 @@ spring:
             - StripPrefix=1
             - JwtAuthentication
 
+        - id: ResponseISOService-accounts
+          uri: lb://Response-Service
+          predicates:
+            - Path=/api/accounts/**
+          filters:
+            - StripPrefix=1
+            - JwtAuthentication
+
+        - id: ResponseISOService-cards
+          uri: lb://Response-Service
+          predicates:
+            - Path=/api/cards/**
+          filters:
+            - StripPrefix=1
+            - JwtAuthentication
+
 
 
       globalcors:

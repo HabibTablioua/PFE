@@ -691,10 +691,33 @@ public class ResponseISOService {
                 ThreadLocalDetailsHolder.details = null;
                 return response;
             }
+            // Validation et gestion du PIN
             String pin = isoMsg.hasField(52) ? isoMsg.getString(52) : null;
+            log.info("🔒 Traitement PIN pour PAN : {} - PIN fourni : {}", pan, pin != null ? "***" : "AUCUN");
+            
+            // Vérifier si le PIN est requis pour cette transaction
+            if (isPinRequired(isoMsg) && (pin == null || pin.isEmpty())) {
+                log.warn("🔒 PIN manquant pour transaction nécessitant authentification");
+                isoMsg.set(39, "55"); // PIN manquant
+                response.setStatus("FAILED");
+                response.setMessage("PIN manquant pour cette transaction.");
+                Map<String, Object> details = new HashMap<>();
+                details.put("isoCode", "55");
+                details.put("isoField", "52");
+                details.put("reason", "Le PIN est requis pour cette transaction mais n'a pas été fourni.");
+                details.put("pan", pan);
+                details.put("action", "Fournissez un PIN valide pour continuer.");
+                response.setDetails(details);
+                saveTransactionHistory(isoMsg, fields, response);
+                return response;
+            }
+            
+            // Valider et traiter le PIN
             boolean pinCorrect = isPinCorrect(pan, pin);
             handlePinTry(pan, pinCorrect, isoMsg);
-            if (isoMsg.hasField(39) && "75".equals(isoMsg.getString(39))) {
+            
+            // Gérer les erreurs de PIN
+            if ("75".equals(isoMsg.getString(39))) {
                 response.setStatus("FAILED");
                 response.setMessage("Nombre de tentatives PIN dépassé, carte bloquée.");
                 Map<String, Object> details = new HashMap<>();
@@ -702,23 +725,22 @@ public class ResponseISOService {
                 details.put("isoField", "52");
                 details.put("reason", "Le nombre de tentatives PIN a été dépassé, la carte est bloquée.");
                 details.put("pan", pan);
+                details.put("remainingTries", 0);
                 details.put("action", "Contactez la banque pour débloquer la carte.");
                 response.setDetails(details);
-                fields.clear();
-                if (isoMsg != null) {
-                    for (int i = 0; i <= isoMsg.getMaxField(); i++) {
-                        if (isoMsg.hasField(i)) {
-                            fields.put(String.valueOf(i), isoMsg.getString(i));
-                        }
-                    }
-                }
-                log.info("[DEBUG] Champs extraits pour historique : {}", fields);
-                messageIso = "";
-                try { if (isoMsg != null) messageIso = new String(isoMsg.pack()); } catch (Exception e) { messageIso = request.getIsoMessage(); }
-                log.info("[DEBUG] Message ISO généré pour historique : {}", messageIso);
-                ThreadLocalDetailsHolder.details = response.getDetails();
-                saveToHistory("0210", fields, messageIso, "RAW", response.getStatus(), response.getMessage());
-                ThreadLocalDetailsHolder.details = null;
+                saveTransactionHistory(isoMsg, fields, response);
+                return response;
+            } else if ("55".equals(responseCode)) {
+                response.setStatus("FAILED");
+                response.setMessage("PIN incorrect.");
+                Map<String, Object> details = new HashMap<>();
+                details.put("isoCode", "55");
+                details.put("isoField", "52");
+                details.put("reason", "Le PIN fourni est incorrect.");
+                details.put("pan", pan);
+                details.put("action", "Vérifiez votre PIN et réessayez.");
+                response.setDetails(details);
+                saveTransactionHistory(isoMsg, fields, response);
                 return response;
             }
             String cancellationIndicator = isoMsg.hasField(25) ? isoMsg.getString(25) : null;
@@ -926,31 +948,114 @@ public class ResponseISOService {
         static Map<String, Object> details = null;
     }
 
-    // Logique de gestion des tentatives PIN
+    // Logique de gestion des tentatives PIN améliorée
     private void handlePinTry(String pan, boolean pinCorrect, ISOMsg isoMsg) {
-        if (pan == null) return;
-        PinTryCounter counter = pinTryCounterRepository.findById(pan).orElse(new PinTryCounter());
-        counter.setPan(pan);
-        if (counter.isBlocked()) {
-            isoMsg.set(39, "75"); // Carte déjà bloquée
+        if (pan == null) {
+            log.warn("🔒 Gestion PIN : PAN manquant");
             return;
         }
-        if (pinCorrect) {
-            counter.setTries(0); // Reset en cas de succès
-        } else {
-            counter.setTries(counter.getTries() + 1);
-            if (counter.getTries() >= MAX_PIN_TRIES) {
-                counter.setBlocked(true);
-                isoMsg.set(39, "75"); // Nombre de tentatives dépassé
+        
+        try {
+            PinTryCounter counter = pinTryCounterRepository.findById(pan).orElse(new PinTryCounter());
+            counter.setPan(pan);
+            
+            // Vérifier si la carte est déjà bloquée
+            if (counter.isBlocked()) {
+                log.warn("🔒 Carte bloquée pour PAN : {} (tentatives: {})", pan, counter.getTries());
+                isoMsg.set(39, "75"); // Carte déjà bloquée
+                return;
             }
+            
+            if (pinCorrect) {
+                // PIN correct - reset du compteur
+                if (counter.getTries() > 0) {
+                    log.info("🔒 PIN correct pour PAN : {} - Reset du compteur de tentatives", pan);
+                }
+                counter.setTries(0);
+                counter.setBlocked(false);
+                isoMsg.set(39, "00"); // Succès
+            } else {
+                // PIN incorrect - incrémenter le compteur
+                counter.setTries(counter.getTries() + 1);
+                int remainingTries = MAX_PIN_TRIES - counter.getTries();
+                
+                log.warn("🔒 PIN incorrect pour PAN : {} - Tentative {}/{} (reste: {})", 
+                        pan, counter.getTries(), MAX_PIN_TRIES, remainingTries);
+                
+                if (counter.getTries() >= MAX_PIN_TRIES) {
+                    // Bloquer la carte
+                    counter.setBlocked(true);
+                    isoMsg.set(39, "75"); // Nombre de tentatives dépassé
+                    log.error("🔒 Carte bloquée pour PAN : {} - Nombre de tentatives dépassé", pan);
+                } else {
+                    // PIN incorrect mais pas encore bloqué
+                    isoMsg.set(39, "55"); // PIN incorrect
+                }
+            }
+            
+            // Sauvegarder l'état
+            pinTryCounterRepository.save(counter);
+            log.info("🔒 État PIN sauvegardé pour PAN : {} - Tentatives: {}, Bloqué: {}", 
+                    pan, counter.getTries(), counter.isBlocked());
+                    
+        } catch (Exception e) {
+            log.error("🔒 Erreur lors de la gestion des tentatives PIN pour PAN {} : {}", pan, e.getMessage());
+            // En cas d'erreur, on refuse la transaction par sécurité
+            isoMsg.set(39, "96"); // Erreur système
         }
-        pinTryCounterRepository.save(counter);
     }
 
-    // À adapter selon ta logique de vérification du PIN
+    // Validation complète du PIN
     private boolean isPinCorrect(String pan, String pin) {
-        // TODO: Ajoute ici ta logique de vérification du PIN réel
-        return true; // ou false selon le test
+        if (pan == null || pin == null) {
+            log.warn("🔒 Validation PIN échouée : PAN ou PIN manquant");
+            return false;
+        }
+        
+        // Validation du format du PIN
+        if (!isValidPinFormat(pin)) {
+            log.warn("🔒 Validation PIN échouée : Format PIN invalide pour PAN {}", pan);
+            return false;
+        }
+        
+        // Vérification du PIN dans la base de données
+        try {
+            Optional<Card> card = cardRepository.findByPan(pan);
+            if (card.isPresent()) {
+                String storedPin = card.get().getPin();
+                boolean isValid = storedPin != null && storedPin.equals(pin);
+                log.info("🔒 Validation PIN pour PAN {} : {}", pan, isValid ? "SUCCÈS" : "ÉCHEC");
+                return isValid;
+            } else {
+                log.warn("🔒 Carte non trouvée pour PAN : {}", pan);
+                return false;
+            }
+        } catch (Exception e) {
+            log.error("🔒 Erreur lors de la validation du PIN pour PAN {} : {}", pan, e.getMessage());
+            return false;
+        }
+    }
+    
+    // Validation du format du PIN
+    private boolean isValidPinFormat(String pin) {
+        if (pin == null || pin.isEmpty()) {
+            return false;
+        }
+        
+        // Le PIN doit être numérique et avoir une longueur entre 4 et 12 caractères
+        if (!pin.matches("\\d{4,12}")) {
+            return false;
+        }
+        
+        // Vérifications de sécurité supplémentaires
+        // 1. Pas de séquences répétitives (ex: 1111, 1234, 0000)
+        if (pin.matches("(\\d)\\1{3,}") || // Répétition du même chiffre
+            pin.matches("(0123|1234|2345|3456|4567|5678|6789|9876|8765|7654|6543|5432|4321|3210)") || // Séquences
+            pin.equals("0000") || pin.equals("1111") || pin.equals("9999")) {
+            return false;
+        }
+        
+        return true;
     }
 
     public long countSuccessResponses() {
@@ -960,4 +1065,127 @@ public class ResponseISOService {
     public long countFailedResponses() {
         return historyRepository.countByStatus("FAILED");
     }
+    
+    // Vérifier si le PIN est requis pour cette transaction
+    private boolean isPinRequired(ISOMsg isoMsg) {
+        try {
+            // Le PIN est généralement requis pour les transactions de retrait et d'achat
+            String processingCode = isoMsg.hasField(3) ? isoMsg.getString(3) : null;
+            if (processingCode != null && processingCode.length() >= 2) {
+                String transactionType = processingCode.substring(0, 2);
+                // 01 = Retrait, 00 = Achat, 20 = Retrait, 21 = Achat
+                return "01".equals(transactionType) || "00".equals(transactionType) || 
+                       "20".equals(transactionType) || "21".equals(transactionType);
+            }
+            return false;
+        } catch (Exception e) {
+            log.warn("🔒 Erreur lors de la vérification du type de transaction : {}", e.getMessage());
+            return true; // Par sécurité, on considère que le PIN est requis
+        }
+    }
+    
+    // Méthode utilitaire pour sauvegarder l'historique des transactions
+    private void saveTransactionHistory(ISOMsg isoMsg, Map<String, String> fields, ResponseISOResponse response) {
+        try {
+            fields.clear();
+            if (isoMsg != null) {
+                for (int i = 0; i <= isoMsg.getMaxField(); i++) {
+                    if (isoMsg.hasField(i)) {
+                        fields.put(String.valueOf(i), isoMsg.getString(i));
+                    }
+                }
+            }
+            log.info("[DEBUG] Champs extraits pour historique : {}", fields);
+            String messageIso = "";
+            try { 
+                if (isoMsg != null) messageIso = new String(isoMsg.pack()); 
+            } catch (Exception e) { 
+                messageIso = ""; 
+            }
+            log.info("[DEBUG] Message ISO généré pour historique : {}", messageIso);
+            ThreadLocalDetailsHolder.details = response.getDetails();
+            saveToHistory("0210", fields, messageIso, "RAW", response.getStatus(), response.getMessage());
+            ThreadLocalDetailsHolder.details = null;
+        } catch (Exception e) {
+            log.error("❌ Erreur lors de la sauvegarde de l'historique : {}", e.getMessage());
+        }
+    }
+
+    // --- Gestion des cartes ---
+    private boolean isCardValid(String pan) {
+        Optional<Card> cardOpt = cardRepository.findByPan(pan);
+        if (cardOpt.isEmpty()) return false;
+        Card card = cardOpt.get();
+        // Statuts valides : ACTIVE, non bloquée, non volée, non perdue, non blacklistée, non restreinte, non expirée
+        if (!"ACTIVE".equalsIgnoreCase(card.getStatus())) return false;
+        if (card.isBlacklisted() || card.isLost() || card.isStolen() || card.isRestricted()) return false;
+        if (card.getExpiryDate() != null && card.getExpiryDate().isBefore(java.time.LocalDate.now())) return false;
+        return true;
+    }
+
+    private String getCardStatusReason(String pan) {
+        Optional<Card> cardOpt = cardRepository.findByPan(pan);
+        if (cardOpt.isEmpty()) return "Carte inconnue";
+        Card card = cardOpt.get();
+        if (!"ACTIVE".equalsIgnoreCase(card.getStatus())) return "Carte inactive";
+        if (card.isBlacklisted()) return "Carte blacklistée";
+        if (card.isLost()) return "Carte déclarée perdue";
+        if (card.isStolen()) return "Carte déclarée volée";
+        if (card.isRestricted()) return "Carte restreinte";
+        if (card.getExpiryDate() != null && card.getExpiryDate().isBefore(java.time.LocalDate.now())) return "Carte expirée";
+        return "OK";
+    }
+
+    // --- Gestion des comptes ---
+    private boolean isAccountValid(String pan) {
+        Optional<Account> accOpt = accountRepository.findByPan(pan);
+        if (accOpt.isEmpty()) return false;
+        Account acc = accOpt.get();
+        if (!"OPEN".equalsIgnoreCase(acc.getStatus())) return false;
+        if (acc.isBlacklisted() || acc.isLost() || acc.isStolen() || acc.isRestricted()) return false;
+        return true;
+    }
+
+    private String getAccountStatusReason(String pan) {
+        Optional<Account> accOpt = accountRepository.findByPan(pan);
+        if (accOpt.isEmpty()) return "Compte inconnu";
+        Account acc = accOpt.get();
+        if (!"OPEN".equalsIgnoreCase(acc.getStatus())) return "Compte fermé";
+        if (acc.isBlacklisted()) return "Compte blacklisté";
+        if (acc.isLost()) return "Compte déclaré perdu";
+        if (acc.isStolen()) return "Compte déclaré volé";
+        if (acc.isRestricted()) return "Compte restreint";
+        return "OK";
+    }
+
+    private boolean hasSufficientBalance(String pan, java.math.BigDecimal amount) {
+        Optional<Account> accOpt = accountRepository.findByPan(pan);
+        if (accOpt.isEmpty()) return false;
+        Account acc = accOpt.get();
+        return acc.getBalance() != null && acc.getBalance().compareTo(amount) >= 0;
+    }
+
+    private void debitAccount(String pan, java.math.BigDecimal amount) {
+        Optional<Account> accOpt = accountRepository.findByPan(pan);
+        if (accOpt.isPresent()) {
+            Account acc = accOpt.get();
+            acc.setBalance(acc.getBalance().subtract(amount));
+            accountRepository.save(acc);
+        }
+    }
+
+    private void creditAccount(String pan, java.math.BigDecimal amount) {
+        Optional<Account> accOpt = accountRepository.findByPan(pan);
+        if (accOpt.isPresent()) {
+            Account acc = accOpt.get();
+            acc.setBalance(acc.getBalance().add(amount));
+            accountRepository.save(acc);
+        }
+    }
+
+    // --- Intégration dans le flux principal (exemple à placer dans processISO avant le traitement du PIN) ---
+    // if (!isCardValid(pan)) { ... set code 54 ou 56 ... }
+    // if (!isAccountValid(pan)) { ... set code 62 ... }
+    // if (!hasSufficientBalance(pan, montant)) { ... set code 51 ... }
+    // debitAccount(pan, montant); // après validation
 }

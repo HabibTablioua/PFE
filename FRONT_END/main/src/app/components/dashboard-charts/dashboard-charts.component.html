@@ -1,0 +1,247 @@
+<div class="dashboard-charts">
+  
+  <!-- Message d'erreur global -->
+  <div *ngIf="hasErrors()" class="error-message">
+    <mat-icon>error</mat-icon>
+    <span>{{ getErrorMessage() }}</span>
+    <button mat-button (click)="loadCharts()">
+      <mat-icon>refresh</mat-icon>
+      Réessayer
+    </button>
+  </div>
+
+  <!-- Graphiques des Transactions -->
+  <div class="charts-section">
+    <div class="section-header">
+      <h3>📊 Graphiques des Transactions</h3>
+      <button mat-icon-button (click)="refreshTransactionCharts()" [disabled]="loading.transactions">
+        <mat-icon>refresh</mat-icon>
+      </button>
+    </div>
+
+    <div class="charts-grid">
+      <!-- Transactions par Jour -->
+      <div class="chart-card">
+        <h4>Transactions par Jour</h4>
+        <div class="chart-container">
+          <div *ngIf="loading.transactions" class="loading-spinner">
+            <mat-spinner diameter="40"></mat-spinner>
+          </div>
+          <canvas *ngIf="!loading.transactions && transactionCharts" 
+                  #transactionPerDayChart 
+                  width="400" 
+                  height="200">
+          </canvas>
+          <div *ngIf="!loading.transactions && !transactionCharts" class="no-data">
+            Aucune donnée disponible
+          </div>
+        </div>
+      </div>
+
+      <!-- Transactions par Statut -->
+      <div class="chart-card">
+        <h4>Transactions par Statut</h4>
+        <div class="chart-container">
+          <div *ngIf="loading.transactions" class="loading-spinner">
+            <mat-spinner diameter="40"></mat-spinner>
+          </div>
+          <canvas *ngIf="!loading.transactions && transactionCharts" 
+                  #transactionPerStatusChart 
+                  width="400" 
+                  height="200">
+          </canvas>
+          <div *ngIf="!loading.transactions && !transactionCharts" class="no-data">
+            Aucune donnée disponible
+          </div>
+        </div>
+      </div>
+
+      <!-- Transactions par Source -->
+      <div class="chart-card">
+        <h4>Transactions par Source</h4>
+        <div class="chart-container">
+          <div *ngIf="loading.transactions" class="loading-spinner">
+            <mat-spinner diameter="40"></mat-spinner>
+          </div>
+          <canvas *ngIf="!loading.transactions && transactionCharts" 
+                  #transactionPerSourceChart 
+                  width="400" 
+                  height="200">
+          </canvas>
+          <div *ngIf="!loading.transactions && !transactionCharts" class="no-data">
+            Aucune donnée disponible
+          </div>
+        </div>
+      </div>
+
+      <!-- Transactions par Mois -->
+      <div class="chart-card">
+        <h4>Évolution Mensuelle</h4>
+        <div class="chart-container">
+          <div *ngIf="loading.transactions" class="loading-spinner">
+            <mat-spinner diameter="40"></mat-spinner>
+          </div>
+          <canvas *ngIf="!loading.transactions && transactionCharts" 
+                  #transactionPerMonthChart 
+                  width="400" 
+                  height="200">
+          </canvas>
+          <div *ngIf="!loading.transactions && !transactionCharts" class="no-data">
+            Aucune donnée disponible
+          </div>
+        </div>
+      </div>
+
+      <!-- Transactions par Heure -->
+      <div class="chart-card">
+        <h4>Répartition Horaire</h4>
+        <div class="chart-container">
+          <div *ngIf="loading.transactions" class="loading-spinner">
+            <mat-spinner diameter="40"></mat-spinner>
+          </div>
+          <canvas *ngIf="!loading.transactions && transactionCharts" 
+                  #transactionPerHourChart 
+                  width="400" 
+                  height="200">
+          </canvas>
+          <div *ngIf="!loading.transactions && !transactionCharts" class="no-data">
+            Aucune donnée disponible
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Graphiques des Incidents -->
+  <div class="charts-section">
+    <div class="section-header">
+      <h3>🚨 Graphiques des Incidents</h3>
+      <button mat-icon-button (click)="refreshIncidentCharts()" [disabled]="loading.incidents">
+        <mat-icon>refresh</mat-icon>
+      </button>
+    </div>
+
+    <div class="charts-grid">
+      <!-- Incidents par Statut -->
+      <div class="chart-card">
+        <h4>Incidents par Statut</h4>
+        <div class="chart-container">
+          <div *ngIf="loading.incidents" class="loading-spinner">
+            <mat-spinner diameter="40"></mat-spinner>
+          </div>
+          <canvas *ngIf="!loading.incidents && incidentCharts" 
+                  #incidentPerStatusChart 
+                  width="400" 
+                  height="200">
+          </canvas>
+          <div *ngIf="!loading.incidents && !incidentCharts" class="no-data">
+            Aucune donnée disponible
+          </div>
+        </div>
+      </div>
+
+      <!-- Incidents par Mois -->
+      <div class="chart-card">
+        <h4>Évolution Mensuelle</h4>
+        <div class="chart-container">
+          <div *ngIf="loading.incidents" class="loading-spinner">
+            <mat-spinner diameter="40"></mat-spinner>
+          </div>
+          <canvas *ngIf="!loading.incidents && incidentCharts" 
+                  #incidentPerMonthChart 
+                  width="400" 
+                  height="200">
+          </canvas>
+          <div *ngIf="!loading.incidents && !incidentCharts" class="no-data">
+            Aucune donnée disponible
+          </div>
+        </div>
+      </div>
+
+      <!-- Incidents par Priorité -->
+      <div class="chart-card">
+        <h4>Incidents par Priorité</h4>
+        <div class="chart-container">
+          <div *ngIf="loading.incidents" class="loading-spinner">
+            <mat-spinner diameter="40"></mat-spinner>
+          </div>
+          <canvas *ngIf="!loading.incidents && incidentCharts" 
+                  #incidentPerPriorityChart 
+                  width="400" 
+                  height="200">
+          </canvas>
+          <div *ngIf="!loading.incidents && !incidentCharts" class="no-data">
+            Aucune donnée disponible
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Graphiques des Réponses -->
+  <div class="charts-section">
+    <div class="section-header">
+      <h3>📤 Graphiques des Réponses ISO</h3>
+      <button mat-icon-button (click)="refreshResponseCharts()" [disabled]="loading.responses">
+        <mat-icon>refresh</mat-icon>
+      </button>
+    </div>
+
+    <div class="charts-grid">
+      <!-- Réponses par Statut -->
+      <div class="chart-card">
+        <h4>Réponses par Statut</h4>
+        <div class="chart-container">
+          <div *ngIf="loading.responses" class="loading-spinner">
+            <mat-spinner diameter="40"></mat-spinner>
+          </div>
+          <canvas *ngIf="!loading.responses && responseCharts" 
+                  #responsePerStatusChart 
+                  width="400" 
+                  height="200">
+          </canvas>
+          <div *ngIf="!loading.responses && !responseCharts" class="no-data">
+            Aucune donnée disponible
+          </div>
+        </div>
+      </div>
+
+      <!-- Réponses par Mois -->
+      <div class="chart-card">
+        <h4>Évolution Mensuelle</h4>
+        <div class="chart-container">
+          <div *ngIf="loading.responses" class="loading-spinner">
+            <mat-spinner diameter="40"></mat-spinner>
+          </div>
+          <canvas *ngIf="!loading.responses && responseCharts" 
+                  #responsePerMonthChart 
+                  width="400" 
+                  height="200">
+          </canvas>
+          <div *ngIf="!loading.responses && !responseCharts" class="no-data">
+            Aucune donnée disponible
+          </div>
+        </div>
+      </div>
+
+      <!-- Taux de Succès -->
+      <div class="chart-card">
+        <h4>Taux de Succès</h4>
+        <div class="chart-container">
+          <div *ngIf="loading.responses" class="loading-spinner">
+            <mat-spinner diameter="40"></mat-spinner>
+          </div>
+          <canvas *ngIf="!loading.responses && responseCharts" 
+                  #responseSuccessRateChart 
+                  width="400" 
+                  height="200">
+          </canvas>
+          <div *ngIf="!loading.responses && !responseCharts" class="no-data">
+            Aucune donnée disponible
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div> 

@@ -15,7 +15,7 @@ export const routes: Routes = [
       {
         path: 'dashboard',
         loadChildren: () =>
-          import('./pages/pages.routes').then((m) => m.PagesRoutes),
+          import('./pages/pages.routes').then((m) => m.routes),
       },
       {
         path: 'message-form',
@@ -47,6 +47,21 @@ export const routes: Routes = [
         path: 'profile',
         loadComponent: () => import('./pages/profile/profile.component').then(m => m.ProfileComponent),
       },
+      {
+        path: 'accounts',
+        loadComponent: () =>
+          import('./pages/accounts/account-list.component').then(
+            (m) => m.AccountListComponent
+          ),
+      },
+      {
+        path: 'accounts/new',
+        loadComponent: () =>
+          import('./pages/accounts/account-form.component').then(
+            (m) => m.AccountFormComponent
+          ),
+      },
+
       {
         path: 'ui-components',
         loadChildren: () =>

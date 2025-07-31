@@ -1,0 +1,580 @@
+.dashboard-container {
+  padding: 24px;
+  background: #f8fafc;
+  min-height: 100vh;
+
+  .section-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 32px 0 24px 0;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #e2e8f0;
+  }
+
+  // Grille des statistiques
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+    margin-bottom: 32px;
+
+    .stat-card {
+      background: white;
+      border-radius: 16px;
+      padding: 28px;
+      box-shadow: 0 8px 25px -5px rgba(0, 0, 0, 0.1);
+      border: none;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+      color: white;
+
+      &.blue {
+        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+        box-shadow: 0 8px 25px -5px rgba(59, 130, 246, 0.3);
+      }
+
+      &.red {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        box-shadow: 0 8px 25px -5px rgba(239, 68, 68, 0.3);
+      }
+
+      &.green {
+        background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+        box-shadow: 0 8px 25px -5px rgba(34, 197, 94, 0.3);
+      }
+
+      &.orange {
+        background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+        box-shadow: 0 8px 25px -5px rgba(249, 115, 22, 0.3);
+      }
+
+      &.purple {
+        background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+        box-shadow: 0 8px 25px -5px rgba(139, 92, 246, 0.3);
+      }
+
+      &.teal {
+        background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
+        box-shadow: 0 8px 25px -5px rgba(20, 184, 166, 0.3);
+      }
+
+      &:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.25);
+      }
+
+      .stat-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+
+        .stat-title {
+          font-size: 1rem;
+          font-weight: 600;
+          color: rgba(255, 255, 255, 0.9);
+        }
+
+        .stat-icon {
+          width: 48px;
+          height: 48px;
+          border-radius: 12px;
+          background: rgba(255, 255, 255, 0.2);
+          backdrop-filter: blur(10px);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 1.5rem;
+
+          mat-icon {
+            color: white;
+            font-size: 1.5rem;
+            width: 1.5rem;
+            height: 1.5rem;
+          }
+        }
+      }
+
+      .stat-value {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: white;
+        margin-bottom: 8px;
+        line-height: 1;
+      }
+
+      .stat-change {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: 8px;
+
+        mat-icon {
+          font-size: 18px;
+          width: 18px;
+          height: 18px;
+        }
+
+        &.positive {
+          color: rgba(255, 255, 255, 0.95);
+        }
+
+        &.negative {
+          color: rgba(255, 255, 255, 0.8);
+        }
+
+        &.error {
+          color: rgba(255, 255, 255, 0.8);
+        }
+
+        &.neutral {
+          color: rgba(255, 255, 255, 0.8);
+        }
+      }
+
+      .stat-description {
+        font-size: 0.875rem;
+        color: rgba(255, 255, 255, 0.8);
+        margin-top: 8px;
+      }
+    }
+  }
+
+  // Section des graphiques - AMÉLIORÉE
+  .charts-section {
+    margin-bottom: 32px;
+
+    .charts-grid {
+      display: flex; // Utiliser flexbox au lieu de grid
+      flex-direction: row; // Disposition horizontale
+      justify-content: center; // Centrer les graphiques
+      align-items: stretch; // Même hauteur
+      gap: 32px; // Espacement entre les graphiques
+      max-width: 1200px; // Largeur maximale
+      margin: 0 auto; // Centrer la grille
+      flex-wrap: nowrap; // Empêcher le retour à la ligne
+
+      .chart-card {
+        flex: 1; // Chaque carte prend la moitié de l'espace
+        min-width: 0; // Permettre la réduction
+        max-width: calc(50% - 16px); // Largeur maximale de 50% moins la moitié du gap
+      }
+
+      @media (max-width: 768px) {
+        flex-direction: column; // Disposition verticale sur mobile
+        gap: 24px;
+        
+        .chart-card {
+          max-width: 100%; // Pleine largeur sur mobile
+        }
+      }
+
+      .chart-card {
+        background: white;
+        border-radius: 20px; // Plus arrondi
+        padding: 32px; // Plus d'espace
+        box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.15);
+        border: 1px solid #e2e8f0;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+
+        // Effet de survol amélioré
+        &:hover {
+          transform: translateY(-6px);
+          box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.2);
+        }
+
+        // Bordure colorée selon le type
+        &::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: 4px;
+          background: linear-gradient(90deg, #3b82f6, #1d4ed8);
+          border-radius: 20px 20px 0 0;
+        }
+
+        // Premier graphique (Transactions)
+        &:nth-child(1)::before {
+          background: linear-gradient(90deg, #3b82f6, #1d4ed8);
+        }
+
+        // Deuxième graphique (Incidents)
+        &:nth-child(2)::before {
+          background: linear-gradient(90deg, #ef4444, #dc2626);
+        }
+
+        // Troisième graphique (Réponses)
+        &:nth-child(3)::before {
+          background: linear-gradient(90deg, #22c55e, #16a34a);
+        }
+
+        .chart-title {
+          margin: 0 0 24px 0;
+          font-size: 1.25rem;
+          font-weight: 700;
+          color: #1e293b;
+          text-align: center;
+          position: relative;
+          
+          // Icône avant le titre
+          &::before {
+            content: '📊';
+            margin-right: 8px;
+            font-size: 1.1em;
+          }
+        }
+
+        .chart-container {
+          position: relative;
+          height: 350px; // Plus haut
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+          border-radius: 12px;
+          margin-top: 16px;
+          width: 100%; // Prendre toute la largeur disponible
+
+          canvas {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            width: 100% !important; // Forcer la largeur
+            height: 100% !important; // Forcer la hauteur
+          }
+        }
+
+        // Indicateur de performance
+        .performance-indicator {
+          position: absolute;
+          top: 16px;
+          right: 16px;
+          background: rgba(34, 197, 94, 0.1);
+          color: #16a34a;
+          padding: 4px 8px;
+          border-radius: 6px;
+          font-size: 0.75rem;
+          font-weight: 600;
+        }
+      }
+    }
+  }
+
+  // Activités récentes
+  .recent-activity {
+    background: white;
+    border-radius: 20px;
+    padding: 32px;
+    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.15);
+    border: 1px solid #e2e8f0;
+    margin-bottom: 32px;
+
+    .activity-title {
+      margin: 0 0 24px 0;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #1e293b;
+      position: relative;
+      
+      &::before {
+        content: '🕒';
+        margin-right: 8px;
+        font-size: 1.1em;
+      }
+    }
+
+    .activity-item {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 16px 0;
+      border-bottom: 1px solid #f1f5f9;
+      transition: all 0.3s ease;
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      &:hover {
+        background: #f8fafc;
+        border-radius: 8px;
+        padding-left: 8px;
+        padding-right: 8px;
+      }
+
+      .activity-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+
+        &.blue {
+          background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(59, 130, 246, 0.2) 100%);
+          color: #3b82f6;
+        }
+
+        &.green {
+          background: linear-gradient(135deg, rgba(34, 197, 94, 0.1) 0%, rgba(34, 197, 94, 0.2) 100%);
+          color: #22c55e;
+        }
+
+        &.orange {
+          background: linear-gradient(135deg, rgba(249, 115, 22, 0.1) 0%, rgba(249, 115, 22, 0.2) 100%);
+          color: #f97316;
+        }
+
+        &.red {
+          background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(239, 68, 68, 0.2) 100%);
+          color: #ef4444;
+        }
+
+        mat-icon {
+          font-size: 1.25rem;
+          width: 1.25rem;
+          height: 1.25rem;
+        }
+      }
+
+      .activity-content {
+        flex: 1;
+
+        .activity-text {
+          font-weight: 600;
+          color: #374151;
+          margin-bottom: 4px;
+          font-size: 1rem;
+        }
+
+        .activity-time {
+          font-size: 0.875rem;
+          color: #6b7280;
+          font-weight: 500;
+        }
+      }
+    }
+  }
+
+  // Actions rapides
+  .quick-actions {
+    .actions-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px;
+
+      .action-card {
+        background: white;
+        border-radius: 20px;
+        padding: 32px;
+        box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.15);
+        border: 1px solid #e2e8f0;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+
+        // Effet de survol
+        &:hover {
+          transform: translateY(-6px);
+          box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.2);
+        }
+
+        // Bordure colorée
+        &::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: 4px;
+          border-radius: 20px 20px 0 0;
+        }
+
+        &:nth-child(1)::before {
+          background: linear-gradient(90deg, #3b82f6, #1d4ed8);
+        }
+
+        &:nth-child(2)::before {
+          background: linear-gradient(90deg, #22c55e, #16a34a);
+        }
+
+        .action-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 20px;
+
+          .action-title {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: #1e293b;
+          }
+
+          .action-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+
+            &.blue {
+              background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(59, 130, 246, 0.2) 100%);
+              color: #3b82f6;
+            }
+
+            &.green {
+              background: linear-gradient(135deg, rgba(34, 197, 94, 0.1) 0%, rgba(34, 197, 94, 0.2) 100%);
+              color: #22c55e;
+            }
+
+            mat-icon {
+              font-size: 1.5rem;
+              width: 1.5rem;
+              height: 1.5rem;
+            }
+          }
+        }
+
+        .action-value {
+          font-size: 2rem;
+          font-weight: 800;
+          color: #1e293b;
+          margin-bottom: 12px;
+        }
+
+        .action-change {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          font-size: 1rem;
+          font-weight: 600;
+
+          &.positive {
+            color: #22c55e;
+          }
+
+          mat-icon {
+            font-size: 18px;
+            width: 18px;
+            height: 18px;
+          }
+        }
+      }
+    }
+  }
+
+  // Responsive design amélioré
+  @media (max-width: 768px) {
+    padding: 16px;
+
+    .stats-grid {
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+
+    .actions-grid {
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+
+    .chart-card {
+      padding: 20px;
+
+      .chart-container {
+        height: 250px; // Plus petit sur mobile
+      }
+    }
+
+    .stat-card {
+      padding: 20px;
+
+      .stat-value {
+        font-size: 2rem;
+      }
+    }
+
+    .section-title {
+      font-size: 1.25rem;
+    }
+  }
+
+  // Animations améliorées
+  .stat-card,
+  .chart-card,
+  .action-card {
+    animation: fadeInUp 0.8s ease-out;
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  }
+
+  // États de chargement
+  .loading {
+    text-align: center;
+    padding: 60px;
+
+    mat-spinner {
+      margin-bottom: 20px;
+    }
+
+    p {
+      color: #6b7280;
+      font-size: 1.125rem;
+      font-weight: 500;
+    }
+  }
+
+  // États d'erreur
+  .error {
+    text-align: center;
+    padding: 32px;
+    background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+    border-radius: 16px;
+    margin-bottom: 24px;
+    border: 1px solid #fecaca;
+
+    mat-icon {
+      color: #dc2626;
+      font-size: 2.5rem;
+      width: 2.5rem;
+      height: 2.5rem;
+      margin-bottom: 12px;
+    }
+
+    p {
+      color: #dc2626;
+      margin: 12px 0;
+      font-weight: 600;
+      font-size: 1.125rem;
+    }
+
+    button {
+      margin-top: 16px;
+      background: #dc2626;
+      color: white;
+      border-radius: 8px;
+      padding: 12px 24px;
+      font-weight: 600;
+    }
+  }
+} 

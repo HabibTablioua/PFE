@@ -59,6 +59,12 @@ public class UserController {
         return userService.countUsers();
     }
 
+    @GetMapping("/count/connected")
+    public long countConnectedUsers() {
+        log.info("[UserController] GET /users/count/connected appelé");
+        return userService.countConnectedUsers();
+    }
+
     @PostMapping
     public ResponseEntity<User> createUser(@Valid @RequestBody User user) {
         log.info("[UserController] POST /users appelé avec user: {}", user.getEmail());

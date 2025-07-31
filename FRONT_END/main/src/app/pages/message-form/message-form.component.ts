@@ -134,7 +134,9 @@ export class MessageFormComponent implements OnInit {
     id46: 'Additional Data - ISO',
     id47: 'Additional Data - National',
     id48: 'Additional Data - Private',
-    id49: 'Currency Code, Transaction'
+    id49: 'Currency Code, Transaction',
+    id52: 'PIN Code',
+    id60: 'Custom Text Field'
   };
 
   mtiOptions = [
@@ -154,7 +156,7 @@ export class MessageFormComponent implements OnInit {
     'id11', 'id12', 'id13', 'id14', 'id15', 'id16', 'id17', 'id18', 'id19', 'id20',
     'id21', 'id22', 'id23', 'id24', 'id25', 'id26', 'id27', 'id28', 'id29', 'id30',
     'id31', 'id32', 'id33', 'id34', 'id35', 'id36', 'id37', 'id38', 'id39', 'id40',
-    'id41', 'id42', 'id43', 'id44', 'id45', 'id46', 'id47', 'id48', 'id49'
+    'id41', 'id42', 'id43', 'id44', 'id45', 'id46', 'id47', 'id48', 'id49', 'id52', 'id60'
   ];
 
   constructor(private fb: FormBuilder, private http: HttpClient, private snackBar: MatSnackBar) {
@@ -208,7 +210,9 @@ export class MessageFormComponent implements OnInit {
       id46: [''], // Additional Data - ISO
       id47: [''], // Additional Data - National
       id48: [''], // Additional Data - Private
-      id49: ['']  // Currency Code, Transaction
+      id49: [''], // Currency Code, Transaction
+      id52: [''], // PIN Code
+      id60: ['']  // Custom Text Field
     });
   }
 

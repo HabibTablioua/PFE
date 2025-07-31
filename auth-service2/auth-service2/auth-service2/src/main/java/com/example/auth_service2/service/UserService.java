@@ -88,4 +88,9 @@ public class UserService {
     public long countUsers() {
         return userRepository.count();
     }
+
+    public long countConnectedUsers() {
+        log.info("[UserService] Comptage des utilisateurs connectés");
+        return userRepository.countByStatus("online");
+    }
 }

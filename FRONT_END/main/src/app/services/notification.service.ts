@@ -35,4 +35,22 @@ export class NotificationService {
     }
     return this.http.delete(this.apiUrl, { headers });
   }
+
+  markAllAsRead(): Observable<any> {
+    const token = localStorage.getItem('token');
+    let headers = new HttpHeaders();
+    if (token) {
+      headers = headers.set('Authorization', `Bearer ${token}`);
+    }
+    return this.http.put(`${this.apiUrl}/mark-all-read`, {}, { headers });
+  }
+
+  markNotificationAsRead(id: number): Observable<any> {
+    const token = localStorage.getItem('token');
+    let headers = new HttpHeaders();
+    if (token) {
+      headers = headers.set('Authorization', `Bearer ${token}`);
+    }
+    return this.http.put(`${this.apiUrl}/${id}/mark-read`, {}, { headers });
+  }
 } 

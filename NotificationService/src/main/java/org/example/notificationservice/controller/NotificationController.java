@@ -48,5 +48,17 @@ public class NotificationController {
         notificationService.deleteAllNotifications();
         return ResponseEntity.noContent().build();
     }
+
+    @PutMapping("/mark-all-read")
+    public ResponseEntity<String> markAllAsRead() {
+        notificationService.markAllAsRead();
+        return ResponseEntity.ok("Toutes les notifications ont été marquées comme lues");
+    }
+
+    @PutMapping("/{id}/mark-read")
+    public ResponseEntity<String> markNotificationAsRead(@PathVariable Long id) {
+        notificationService.markNotificationAsRead(id);
+        return ResponseEntity.ok("Notification marquée comme lue");
+    }
 }
 

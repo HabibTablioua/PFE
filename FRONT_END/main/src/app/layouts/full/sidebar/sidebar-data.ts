@@ -1,5 +1,7 @@
 import { NavItem } from './nav-item/nav-item';
 
+console.log('Chargement des navItems...');
+
 export const navItems: NavItem[] = [
   {
     navCap: 'Home',
@@ -40,6 +42,15 @@ export const navItems: NavItem[] = [
     iconName: 'users',
     route: '/users',
   },
+  {
+    navCap: 'Gestion des Comptes',
+  },
+  {
+    displayName: 'Gestion des Comptes',
+    iconName: 'credit-card',
+    route: '/accounts',
+  },
+
   {
     navCap: 'Gestion Incidents',
   },

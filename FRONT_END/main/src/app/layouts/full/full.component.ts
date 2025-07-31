@@ -88,7 +88,9 @@ export class FullComponent implements OnInit {
       });
   }
 
-  ngOnInit(): void { }
+  ngOnInit(): void { 
+    console.log('NavItems chargés:', this.navItems);
+  }
 
   ngOnDestroy() {
     this.layoutChangesSubscription.unsubscribe();

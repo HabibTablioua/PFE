@@ -201,3 +201,19 @@
 2025-07-22T12:21:42.406181100 SUCCESS - Packing ASCII réussi pour MTI : 0200
 2025-07-23T15:27:44.461386400 SUCCESS - Message enregistré dans historique pour MTI : 0200
 2025-07-23T15:27:44.534497800 SUCCESS - Packing ASCII réussi pour MTI : 0200
+2025-07-31T14:33:06.960720300 ERROR - Erreur de packing pour MTI : 0200 - org.xml.sax.SAXException: java.lang.IllegalArgumentException: Length 100 too long for org.jpos.iso.IFA_LLCHAR
+java.lang.IllegalArgumentException: Length 100 too long for org.jpos.iso.IFA_LLCHAR
+2025-07-31T14:33:06.960720300 ERROR - Erreur de packing pour MTI : 0200 - org.xml.sax.SAXException: java.lang.IllegalArgumentException: Length 100 too long for org.jpos.iso.IFA_LLCHAR
+java.lang.IllegalArgumentException: Length 100 too long for org.jpos.iso.IFA_LLCHAR
+2025-07-31T14:34:21.040317300 ERROR - Erreur de packing pour MTI : 0200 - org.xml.sax.SAXException: java.lang.IllegalArgumentException: Length 100 too long for org.jpos.iso.IFA_LLCHAR
+java.lang.IllegalArgumentException: Length 100 too long for org.jpos.iso.IFA_LLCHAR
+2025-07-31T14:34:45.234359600 ERROR - Erreur de packing pour MTI : 0200 - org.xml.sax.SAXException: java.lang.IllegalArgumentException: Length 100 too long for org.jpos.iso.IFA_LLCHAR
+java.lang.IllegalArgumentException: Length 100 too long for org.jpos.iso.IFA_LLCHAR
+2025-07-31T14:34:52.400671 ERROR - Erreur de packing pour MTI : 0200 - org.xml.sax.SAXException: java.lang.IllegalArgumentException: Length 100 too long for org.jpos.iso.IFA_LLCHAR
+java.lang.IllegalArgumentException: Length 100 too long for org.jpos.iso.IFA_LLCHAR
+2025-07-31T14:35:46.532427700 ERROR - Erreur de packing pour MTI : 0200 - org.xml.sax.SAXException: java.lang.IllegalArgumentException: Length 100 too long for org.jpos.iso.IFA_LLCHAR
+java.lang.IllegalArgumentException: Length 100 too long for org.jpos.iso.IFA_LLCHAR
+2025-07-31T15:01:05.932079300 ERROR - Erreur de packing pour MTI : 0200 - org.xml.sax.SAXException: java.lang.IllegalArgumentException: Length 100 too long for org.jpos.iso.IFA_LLCHAR
+java.lang.IllegalArgumentException: Length 100 too long for org.jpos.iso.IFA_LLCHAR
+2025-07-31T15:14:29.344495700 SUCCESS - Message enregistré dans historique pour MTI : 0200
+2025-07-31T15:14:29.579165700 SUCCESS - Packing ASCII réussi pour MTI : 0200

@@ -45,5 +45,21 @@ public class NotificationService {
         log.info("✅ Toutes les notifications ont été supprimées.");
     }
 
+    public void markAllAsRead() {
+        List<Notification> notifications = notificationRepository.findAll();
+        for (Notification notification : notifications) {
+            notification.setRead(true);
+        }
+        notificationRepository.saveAll(notifications);
+        log.info("✅ Toutes les notifications ont été marquées comme lues.");
+    }
+
+    public void markNotificationAsRead(Long id) {
+        notificationRepository.findById(id).ifPresent(notification -> {
+            notification.setRead(true);
+            notificationRepository.save(notification);
+            log.info("✅ Notification marquée comme lue : ID {}", id);
+        });
+    }
 }
 

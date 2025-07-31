@@ -1,0 +1,223 @@
+<div class="account-form-container" [@fadeIn]>
+  <div class="form-header">
+    <h1 class="form-title">Nouveau Compte</h1>
+    <p class="form-subtitle">Créez un nouveau compte bancaire avec tous les détails nécessaires</p>
+  </div>
+
+  <form [formGroup]="accountForm" (ngSubmit)="onSubmit()">
+    <!-- Informations de base -->
+    <div class="form-section">
+      <h2 class="section-title">Informations de base</h2>
+      
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>PAN (Primary Account Number)</mat-label>
+          <input matInput formControlName="pan" placeholder="1234567890123456" maxlength="16">
+          <mat-error *ngIf="isFieldInvalid('pan')">
+            {{ getErrorMessage('pan') }}
+          </mat-error>
+          <mat-hint>16 chiffres requis - Doit respecter l'algorithme de Luhn</mat-hint>
+          <button mat-icon-button matSuffix type="button" 
+                  (click)="generateValidPan()" 
+                  matTooltip="Générer un PAN valide"
+                  class="generate-pan-btn">
+            <mat-icon>refresh</mat-icon>
+          </button>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Numéro de compte</mat-label>
+          <input matInput formControlName="accountNumber" placeholder="ACC001">
+          <mat-error *ngIf="isFieldInvalid('accountNumber')">
+            {{ getErrorMessage('accountNumber') }}
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <!-- Statut du PAN -->
+      <div *ngIf="accountForm.get('pan')?.value" class="pan-status" [ngClass]="getPanStatusClass()">
+        <mat-icon *ngIf="panChecking" class="loading-spinner"></mat-icon>
+        <mat-icon *ngIf="!panChecking && panValid && !panExists">check_circle</mat-icon>
+        <mat-icon *ngIf="!panChecking && (!panValid || panExists)">error</mat-icon>
+        <span>{{ getPanStatusMessage() }}</span>
+      </div>
+
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Nom du titulaire</mat-label>
+          <input matInput formControlName="holderName" placeholder="John Doe">
+          <mat-error *ngIf="isFieldInvalid('holderName')">
+            {{ getErrorMessage('holderName') }}
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Email</mat-label>
+          <input matInput formControlName="email" placeholder="john.doe@example.com" type="email">
+          <mat-error *ngIf="isFieldInvalid('email')">
+            {{ getErrorMessage('email') }}
+          </mat-error>
+        </mat-form-field>
+      </div>
+    </div>
+
+    <!-- Informations financières -->
+    <div class="form-section">
+      <h2 class="section-title">Informations financières</h2>
+      
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Solde initial</mat-label>
+          <input matInput formControlName="balance" placeholder="1000.00" type="number" min="0" step="0.01">
+          <mat-error *ngIf="isFieldInvalid('balance')">
+            {{ getErrorMessage('balance') }}
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Devise</mat-label>
+          <mat-select formControlName="currency">
+            <mat-option *ngFor="let currency of currencyOptions" [value]="currency.value">
+              {{ currency.label }}
+            </mat-option>
+          </mat-select>
+          <mat-error *ngIf="isFieldInvalid('currency')">
+            {{ getErrorMessage('currency') }}
+          </mat-error>
+        </mat-form-field>
+      </div>
+    </div>
+
+    <!-- Statut et type -->
+    <div class="form-section">
+      <h2 class="section-title">Statut et type</h2>
+      
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Statut du compte</mat-label>
+          <mat-select formControlName="status">
+            <mat-option *ngFor="let status of statusOptions" [value]="status.value">
+              {{ status.label }}
+            </mat-option>
+          </mat-select>
+          <mat-error *ngIf="isFieldInvalid('status')">
+            {{ getErrorMessage('status') }}
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Type de compte</mat-label>
+          <mat-select formControlName="type">
+            <mat-option *ngFor="let type of typeOptions" [value]="type.value">
+              {{ type.label }}
+            </mat-option>
+          </mat-select>
+          <mat-error *ngIf="isFieldInvalid('type')">
+            {{ getErrorMessage('type') }}
+          </mat-error>
+        </mat-form-field>
+      </div>
+    </div>
+
+    <!-- Restrictions et opérations -->
+    <div class="form-section">
+      <h2 class="section-title">Restrictions et opérations</h2>
+      
+      <div class="checkbox-group">
+        <div class="checkbox-item">
+          <mat-checkbox formControlName="stolen">
+            Carte volée
+          </mat-checkbox>
+        </div>
+        
+        <div class="checkbox-item">
+          <mat-checkbox formControlName="lost">
+            Carte perdue
+          </mat-checkbox>
+        </div>
+        
+        <div class="checkbox-item">
+          <mat-checkbox formControlName="blacklisted">
+            Blacklisté
+          </mat-checkbox>
+        </div>
+        
+        <div class="checkbox-item">
+          <mat-checkbox formControlName="restricted">
+            Restreint
+          </mat-checkbox>
+        </div>
+      </div>
+
+      <!-- Opérations autorisées -->
+      <div class="operations-section">
+        <h3 class="operations-title">Opérations autorisées</h3>
+        <p class="operations-subtitle">Sélectionnez les opérations autorisées pour ce compte</p>
+        
+        <!-- Bouton de débogage temporaire -->
+        <button mat-button color="accent" (click)="debugSelections()" style="margin-bottom: 16px;">
+          Debug Sélections
+        </button>
+        
+        <div class="operations-categories">
+          <div *ngFor="let category of getCategories()" class="category-section">
+            <div class="category-header">
+              <h4 class="category-title">{{ category }}</h4>
+              <div class="category-actions">
+                <span class="category-count">
+                  {{ getSelectedCountForCategory(category) }}/{{ getOperationsByCategory(category).length }} sélectionnées
+                </span>
+                <mat-checkbox 
+                  [checked]="isAllCategorySelected(category)"
+                  [indeterminate]="isSomeCategorySelected(category) && !isAllCategorySelected(category)"
+                  (change)="isAllCategorySelected(category) ? deselectAllCategory(category) : selectAllCategory(category)">
+                  Tout sélectionner
+                </mat-checkbox>
+              </div>
+            </div>
+            <div class="operations-grid">
+              <div *ngFor="let operation of getOperationsByCategory(category)" 
+                   class="operation-item">
+                <mat-checkbox 
+                  [checked]="isOperationSelected(operation.code)"
+                  (change)="toggleOperation(operation.code)">
+                  <div class="operation-content">
+                    <div class="operation-name">{{ operation.name }}</div>
+                    <div class="operation-code">{{ operation.code }}</div>
+                    <div class="operation-description">{{ operation.description }}</div>
+                  </div>
+                </mat-checkbox>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="selected-operations-summary" *ngIf="selectedOperations.length > 0">
+          <h4>Opérations sélectionnées ({{ selectedOperations.length }})</h4>
+          <div class="selected-codes">
+            <span *ngFor="let code of selectedOperations" class="code-badge">
+              {{ code }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Actions du formulaire -->
+    <div class="form-actions">
+      <div class="action-buttons">
+        <button mat-stroked-button type="button" (click)="onCancel()" [disabled]="loading">
+          <mat-icon>cancel</mat-icon>
+        Annuler
+      </button>
+      
+        <button mat-raised-button color="primary" type="submit" 
+                [disabled]="loading || accountForm.invalid || panExists">
+          <mat-spinner diameter="20" *ngIf="loading"></mat-spinner>
+          <mat-icon *ngIf="!loading">save</mat-icon>
+        {{ loading ? 'Création...' : 'Créer le compte' }}
+      </button>
+      </div>
+    </div>
+  </form>
+</div> 

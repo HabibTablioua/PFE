@@ -1,5 +1,6 @@
 package org.example.notificationservice.Entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -23,6 +24,8 @@ public class Notification {
     private String subject;
     private String message;
     private LocalDateTime dateTime;
+    @Column(name = "`read`")
+    private Boolean read = false; // Par défaut, une notification n'est pas lue
 
     public Long getId() {
         return id;
@@ -54,5 +57,13 @@ public class Notification {
 
     public void setDateTime(LocalDateTime dateTime) {
         this.dateTime = dateTime;
+    }
+
+    public Boolean getRead() {
+        return read;
+    }
+
+    public void setRead(Boolean read) {
+        this.read = read;
     }
 }

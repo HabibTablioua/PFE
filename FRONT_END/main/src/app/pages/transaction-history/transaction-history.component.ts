@@ -11,6 +11,14 @@ import { MatSort } from '@angular/material/sort';
 import { trigger, state, style, transition, animate } from '@angular/animations';
 import { SelectionModel } from '@angular/cdk/collections';
 
+interface FieldDetail {
+  fieldNumber: string;
+  fieldName: string;
+  value: string;
+  label: string;
+  explanation?: string;
+}
+
 interface Transaction {
   id: string;
   mti: string;
@@ -20,6 +28,7 @@ interface Transaction {
   createdAt: string;
   messageContent?: string; // Optional for detail view
   fieldsJson?: string; // Optional for detail view
+  fields?: FieldDetail[]; // Ajout du détail dynamique des champs ISO
 }
 
 @Component({

@@ -66,6 +66,35 @@ public class TransactionHistoryController {
         private String fieldsJson;
         private String message;
         private java.util.Date createdAt;
+        // Ajout pour la devise
+        private String currencyCode;
+        private String currencyLabel;
+        private String countryCode;
+        private String countryLabel;
+        private String terminalType;
+        private String terminalLabel;
+        private String processingCode;
+        private String processingLabel;
+        private List<FieldDetail> fields; // Liste dynamique de tous les champs ISO de la transaction
+        public static class FieldDetail {
+            private String fieldNumber;
+            private String fieldName;
+            private String value;
+            private String label;
+            private String explanation;
+            public FieldDetail(String fieldNumber, String fieldName, String value, String label, String explanation) {
+                this.fieldNumber = fieldNumber;
+                this.fieldName = fieldName;
+                this.value = value;
+                this.label = label;
+                this.explanation = explanation;
+            }
+            public String getFieldNumber() { return fieldNumber; }
+            public String getFieldName() { return fieldName; }
+            public String getValue() { return value; }
+            public String getLabel() { return label; }
+            public String getExplanation() { return explanation; }
+        }
         public TransactionHistoryDTO(TransactionHistory entity) {
             this.id = entity.getId();
             this.mti = entity.getMti();
@@ -76,6 +105,140 @@ public class TransactionHistoryController {
             this.message = entity.getMessage();
             this.createdAt = entity.getCreatedAt();
             this.rrn = extractRRN(entity.getFieldsJson());
+            try {
+                ObjectMapper mapper = new ObjectMapper();
+                java.util.Map<String, String> map = mapper.readValue(fieldsJson, java.util.Map.class);
+                this.currencyCode = map.getOrDefault("49", "");
+                this.currencyLabel = org.example.transactionhistoryservice.Service.TransactionHistoryService.CURRENCY_CODE_MAP.getOrDefault(this.currencyCode, "Inconnu");
+                this.countryCode = map.getOrDefault("19", "");
+                this.countryLabel = org.example.transactionhistoryservice.Service.TransactionHistoryService.COUNTRY_CODE_MAP.getOrDefault(this.countryCode, "Inconnu");
+                this.terminalType = map.getOrDefault("41", "");
+                this.terminalLabel = org.example.transactionhistoryservice.Service.TransactionHistoryService.TERMINAL_TYPE_MAP.getOrDefault(this.terminalType, "Inconnu");
+                this.processingCode = map.getOrDefault("3", "");
+                this.processingLabel = org.example.transactionhistoryservice.Service.TransactionHistoryService.PROCESSING_CODE_MAP.getOrDefault(this.processingCode, "Inconnu");
+                // Générer la liste des champs dynamiquement
+                this.fields = new java.util.ArrayList<>();
+                for (Map.Entry<String, String> entry : map.entrySet()) {
+                    String fieldNumber = entry.getKey();
+                    String value = entry.getValue();
+                    String fieldName = org.example.transactionhistoryservice.Service.TransactionHistoryService.FIELD_NAME_MAP.getOrDefault(fieldNumber, "Champ inconnu");
+                    String label = "";
+                    // Pour les montants, décoder la valeur humaine
+                    if (fieldNumber.equals("4") || fieldNumber.equals("5") || fieldNumber.equals("6") || fieldNumber.equals("28") || fieldNumber.equals("29") || fieldNumber.equals("30") || fieldNumber.equals("31")) {
+                        try {
+                            long amount = Long.parseLong(value);
+                            String currency = map.getOrDefault("49", "");
+                            String currencyLabel = org.example.transactionhistoryservice.Service.TransactionHistoryService.CURRENCY_CODE_MAP.getOrDefault(currency, null);
+                            if (currencyLabel != null) {
+                                label = String.format("%.2f %s", amount / 100.0, currencyLabel);
+                            } else if (currency != null && !currency.isEmpty()) {
+                                label = String.format("%.2f (%s)", amount / 100.0, currency);
+                            } else {
+                                label = String.format("%.2f", amount / 100.0);
+                            }
+                        } catch (Exception ex) {
+                            label = "";
+                        }
+                    } else if (fieldNumber.equals("7")) {
+                        // Champ 7 : Transmission Date & Time (MMDDhhmmss)
+                        if (value != null && value.length() == 10) {
+                            try {
+                                int month = Integer.parseInt(value.substring(0, 2));
+                                int day = Integer.parseInt(value.substring(2, 4));
+                                int hour = Integer.parseInt(value.substring(4, 6));
+                                int minute = Integer.parseInt(value.substring(6, 8));
+                                int second = Integer.parseInt(value.substring(8, 10));
+                                String[] mois = {"", "janv.", "févr.", "mars", "avr.", "mai", "juin", "juil.", "août", "sept.", "oct.", "nov.", "déc."};
+                                String moisStr = (month >= 1 && month <= 12) ? mois[month] : String.valueOf(month);
+                                label = String.format("%02d %s, %02d:%02d:%02d", day, moisStr, hour, minute, second);
+                            } catch (Exception ex) {
+                                label = "";
+                            }
+                        }
+                    } else if (fieldNumber.equals("12")) {
+                        // Champ 12 : Time, Local Transaction (hhmmss)
+                        if (value != null && value.length() == 6) {
+                            try {
+                                int hour = Integer.parseInt(value.substring(0, 2));
+                                int minute = Integer.parseInt(value.substring(2, 4));
+                                int second = Integer.parseInt(value.substring(4, 6));
+                                label = String.format("%02d:%02d:%02d", hour, minute, second);
+                            } catch (Exception ex) {
+                                label = "";
+                            }
+                        }
+                    } else if (fieldNumber.equals("13")) {
+                        // Champ 13 : Date, Local Transaction (MMDD)
+                        if (value != null && value.length() == 4) {
+                            try {
+                                int month = Integer.parseInt(value.substring(0, 2));
+                                int day = Integer.parseInt(value.substring(2, 4));
+                                String[] mois = {"", "janv.", "févr.", "mars", "avr.", "mai", "juin", "juil.", "août", "sept.", "oct.", "nov.", "déc."};
+                                String moisStr = (month >= 1 && month <= 12) ? mois[month] : String.valueOf(month);
+                                label = String.format("%02d %s", day, moisStr);
+                            } catch (Exception ex) {
+                                label = "";
+                            }
+                        }
+                    } else if (fieldNumber.equals("49")) {
+                        label = org.example.transactionhistoryservice.Service.TransactionHistoryService.CURRENCY_CODE_MAP.getOrDefault(value, "");
+                    } else if (fieldNumber.equals("19")) {
+                        label = org.example.transactionhistoryservice.Service.TransactionHistoryService.COUNTRY_CODE_MAP.getOrDefault(value, "");
+                    } else if (fieldNumber.equals("20")) {
+                        label = org.example.transactionhistoryservice.Service.TransactionHistoryService.COUNTRY_CODE_MAP.getOrDefault(value, "");
+                    } else if (fieldNumber.equals("21")) {
+                        label = org.example.transactionhistoryservice.Service.TransactionHistoryService.COUNTRY_CODE_MAP.getOrDefault(value, "");
+                    } else if (fieldNumber.equals("41")) {
+                        label = org.example.transactionhistoryservice.Service.TransactionHistoryService.TERMINAL_TYPE_MAP.getOrDefault(value, "");
+                    } else if (fieldNumber.equals("3")) {
+                        label = org.example.transactionhistoryservice.Service.TransactionHistoryService.PROCESSING_CODE_MAP.getOrDefault(value, "");
+                    } else if (fieldNumber.equals("22")) {
+                        label = org.example.transactionhistoryservice.Service.TransactionHistoryService.ENTRY_MODE_MAP.getOrDefault(value, "");
+                    } else if (fieldNumber.equals("39")) {
+                        label = org.example.transactionhistoryservice.Service.TransactionHistoryService.RESPONSE_CODE_MAP.getOrDefault(value, "");
+                    } else if (fieldNumber.equals("18")) {
+                        label = org.example.transactionhistoryservice.Service.TransactionHistoryService.MCC_MAP.getOrDefault(value, "");
+                    } else if (fieldNumber.equals("14")) {
+                        // Champ 14 : Date, Expiration (YYMM)
+                        if (value != null && value.length() == 4) {
+                            try {
+                                String yy = value.substring(0, 2);
+                                String mm = value.substring(2, 4);
+                                label = String.format("%s/%s", mm, yy);
+                            } catch (Exception ex) {
+                                label = "";
+                            }
+                        }
+                    } else if (fieldNumber.equals("15") || fieldNumber.equals("16") || fieldNumber.equals("17")) {
+                        // Champs 15, 16, 17 : MMDD
+                        if (value != null && value.length() == 4) {
+                            try {
+                                int month = Integer.parseInt(value.substring(0, 2));
+                                int day = Integer.parseInt(value.substring(2, 4));
+                                String[] mois = {"", "janv.", "févr.", "mars", "avr.", "mai", "juin", "juil.", "août", "sept.", "oct.", "nov.", "déc."};
+                                String moisStr = (month >= 1 && month <= 12) ? mois[month] : String.valueOf(month);
+                                label = String.format("%02d %s", day, moisStr);
+                            } catch (Exception ex) {
+                                label = "";
+                            }
+                        }
+                    } else if (fieldNumber.equals("24")) {
+                        label = org.example.transactionhistoryservice.Service.TransactionHistoryService.FUNCTION_CODE_MAP.getOrDefault(value, "");
+                    }
+                    String explanation = org.example.transactionhistoryservice.Service.TransactionHistoryService.FIELD_EXPLANATION_MAP.getOrDefault(fieldNumber, "");
+                    this.fields.add(new FieldDetail(fieldNumber, fieldName, value, label, explanation));
+                }
+            } catch (Exception e) {
+                this.currencyCode = "";
+                this.currencyLabel = "";
+                this.countryCode = "";
+                this.countryLabel = "";
+                this.terminalType = "";
+                this.terminalLabel = "";
+                this.processingCode = "";
+                this.processingLabel = "";
+                this.fields = new java.util.ArrayList<>();
+            }
         }
         private String extractRRN(String fieldsJson) {
             try {
@@ -95,6 +258,15 @@ public class TransactionHistoryController {
         public String getFieldsJson() { return fieldsJson; }
         public String getMessage() { return message; }
         public java.util.Date getCreatedAt() { return createdAt; }
+        public String getCurrencyCode() { return currencyCode; }
+        public String getCurrencyLabel() { return currencyLabel; }
+        public String getCountryCode() { return countryCode; }
+        public String getCountryLabel() { return countryLabel; }
+        public String getTerminalType() { return terminalType; }
+        public String getTerminalLabel() { return terminalLabel; }
+        public String getProcessingCode() { return processingCode; }
+        public String getProcessingLabel() { return processingLabel; }
+        public List<FieldDetail> getFields() { return fields; }
     }
 
     @GetMapping("/search")

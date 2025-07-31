@@ -266,7 +266,9 @@ export class IsoDepackerComponent implements OnInit {
     46: 'Additional Data - ISO',
     47: 'Additional Data - National',
     48: 'Additional Data - Private',
-    49: 'Currency Code, Transaction'
+    49: 'Currency Code, Transaction',
+    52: 'PIN Code',
+    60: 'Custom Text Field'
   };
 
   fieldMeta: { [key: number]: { type: string, description: string } } = {
@@ -285,6 +287,8 @@ export class IsoDepackerComponent implements OnInit {
     39: { type: 'an2', description: 'Code de réponse' },
     41: { type: 'ans8', description: 'ID terminal' },
     49: { type: 'a3', description: 'Code devise' },
+    52: { type: 'n16', description: 'Code PIN (numérique)' },
+    60: { type: 'ans..100', description: 'Champ texte personnalisé' },
     // ... Ajoute d'autres champs selon besoin ...
   };
 

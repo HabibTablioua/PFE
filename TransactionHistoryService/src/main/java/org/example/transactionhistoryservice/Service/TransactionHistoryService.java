@@ -35,6 +35,207 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class TransactionHistoryService {
 
+    public static final Map<String, String> CURRENCY_CODE_MAP = new HashMap<>();
+    static {
+        CURRENCY_CODE_MAP.put("504", "MAD");
+        CURRENCY_CODE_MAP.put("788", "TND"); // Dinar tunisien
+        CURRENCY_CODE_MAP.put("978", "EUR"); // Euro
+        CURRENCY_CODE_MAP.put("840", "USD"); // Dollar américain
+        CURRENCY_CODE_MAP.put("826", "GBP"); // Livre sterling
+        CURRENCY_CODE_MAP.put("124", "CAD"); // Dollar canadien
+        CURRENCY_CODE_MAP.put("392", "JPY"); // Yen japonais
+        CURRENCY_CODE_MAP.put("156", "CNY"); // Yuan chinois
+        // Ajoutez d'autres codes si besoin
+    }
+
+    public static final Map<String, String> COUNTRY_CODE_MAP = new HashMap<>();
+    static {
+        COUNTRY_CODE_MAP.put("504", "Maroc");
+        COUNTRY_CODE_MAP.put("250", "France");
+        // Ajoutez d'autres codes pays si besoin
+    }
+
+    public static final Map<String, String> TERMINAL_TYPE_MAP = new HashMap<>();
+    static {
+        TERMINAL_TYPE_MAP.put("01", "ATM");
+        TERMINAL_TYPE_MAP.put("02", "POS");
+        // Ajoutez d'autres types de terminaux si besoin
+    }
+
+    public static final Map<String, String> PROCESSING_CODE_MAP = new HashMap<>();
+    static {
+        PROCESSING_CODE_MAP.put("000000", "Achat");
+        PROCESSING_CODE_MAP.put("200000", "Retrait");
+        PROCESSING_CODE_MAP.put("310000", "Solde");
+        PROCESSING_CODE_MAP.put("380000", "Paiement facture");
+        PROCESSING_CODE_MAP.put("400000", "Virement");
+        // Ajoutez d'autres codes de traitement si besoin
+    }
+    // Ajoutez ici d'autres mappings pour d'autres champs ISO8583 si besoin
+
+    public static final Map<String, String> ENTRY_MODE_MAP = new HashMap<>();
+    static {
+        ENTRY_MODE_MAP.put("010", "ATM");
+        ENTRY_MODE_MAP.put("021", "Mobile");
+        ENTRY_MODE_MAP.put("022", "Mobile");
+        ENTRY_MODE_MAP.put("051", "POS");
+        ENTRY_MODE_MAP.put("052", "POS");
+        ENTRY_MODE_MAP.put("071", "E-commerce");
+        ENTRY_MODE_MAP.put("081", "Web");
+        ENTRY_MODE_MAP.put("091", "Call Center");
+        ENTRY_MODE_MAP.put("111", "Kiosk");
+        // ... autres modes d'entrée
+    }
+
+    public static final Map<String, String> RESPONSE_CODE_MAP = new HashMap<>();
+    static {
+        RESPONSE_CODE_MAP.put("00", "Succès");
+        RESPONSE_CODE_MAP.put("05", "Refusé");
+        RESPONSE_CODE_MAP.put("12", "Transaction invalide");
+        RESPONSE_CODE_MAP.put("14", "Numéro de carte invalide");
+        RESPONSE_CODE_MAP.put("51", "Fonds insuffisants");
+        RESPONSE_CODE_MAP.put("54", "Carte expirée");
+        RESPONSE_CODE_MAP.put("91", "Émetteur injoignable");
+        // ... autres codes réponse
+    }
+
+    public static final Map<String, String> MCC_MAP = new HashMap<>();
+    static {
+        MCC_MAP.put("5411", "Épiceries/Supermarchés");
+        MCC_MAP.put("5812", "Restaurants");
+        MCC_MAP.put("4111", "Transport");
+        MCC_MAP.put("6011", "Distributeurs automatiques de billets");
+        // ... autres MCC
+    }
+
+    public static final Map<String, String> FIELD_NAME_MAP = new HashMap<>();
+    static {
+        FIELD_NAME_MAP.put("0", "Message Type Indicator");
+        FIELD_NAME_MAP.put("1", "Bitmap");
+        FIELD_NAME_MAP.put("2", "Primary Account Number");
+        FIELD_NAME_MAP.put("3", "Processing Code");
+        FIELD_NAME_MAP.put("4", "Amount, Transaction");
+        FIELD_NAME_MAP.put("5", "Amount, Settlement");
+        FIELD_NAME_MAP.put("6", "Amount, Cardholder Billing");
+        FIELD_NAME_MAP.put("7", "Transmission Date & Time");
+        FIELD_NAME_MAP.put("8", "Amount, Cardholder Billing Fee");
+        FIELD_NAME_MAP.put("9", "Conversion Rate, Settlement");
+        FIELD_NAME_MAP.put("10", "Conversion Rate, Cardholder Billing");
+        FIELD_NAME_MAP.put("11", "System Trace Audit Number");
+        FIELD_NAME_MAP.put("12", "Time, Local Transaction");
+        FIELD_NAME_MAP.put("13", "Date, Local Transaction");
+        FIELD_NAME_MAP.put("14", "Date, Expiration");
+        FIELD_NAME_MAP.put("15", "Date, Settlement");
+        FIELD_NAME_MAP.put("16", "Date, Conversion");
+        FIELD_NAME_MAP.put("17", "Date, Capture");
+        FIELD_NAME_MAP.put("18", "Merchant Category Code");
+        FIELD_NAME_MAP.put("19", "Acquiring Institution Country Code");
+        FIELD_NAME_MAP.put("20", "PAN Extended Country Code");
+        FIELD_NAME_MAP.put("21", "Forwarding Institution Country Code");
+        FIELD_NAME_MAP.put("22", "Point of Service Entry Mode");
+        FIELD_NAME_MAP.put("23", "Card Sequence Number");
+        FIELD_NAME_MAP.put("24", "Function Code");
+        FIELD_NAME_MAP.put("25", "Point of Service Condition Code");
+        FIELD_NAME_MAP.put("26", "POS Capture Code");
+        FIELD_NAME_MAP.put("27", "Authorizing Identification Response Length");
+        FIELD_NAME_MAP.put("28", "Amount, Transaction Fee");
+        FIELD_NAME_MAP.put("29", "Amount, Settlement Fee");
+        FIELD_NAME_MAP.put("30", "Amount, Transaction Processing Fee");
+        FIELD_NAME_MAP.put("31", "Amount, Settlement Processing Fee");
+        FIELD_NAME_MAP.put("32", "Acquiring Institution ID Code");
+        FIELD_NAME_MAP.put("33", "Forwarding Institution ID Code");
+        FIELD_NAME_MAP.put("34", "Primary Account Number, Extended");
+        FIELD_NAME_MAP.put("35", "Track 2 Data");
+        FIELD_NAME_MAP.put("36", "Track 3 Data");
+        FIELD_NAME_MAP.put("37", "Retrieval Reference Number");
+        FIELD_NAME_MAP.put("38", "Authorization Identification Response");
+        FIELD_NAME_MAP.put("39", "Response Code");
+        FIELD_NAME_MAP.put("40", "Service Restriction Code");
+        FIELD_NAME_MAP.put("41", "Card Acceptor Terminal Identification");
+        FIELD_NAME_MAP.put("42", "Card Acceptor Identification Code");
+        FIELD_NAME_MAP.put("43", "Card Acceptor Name/Location");
+        FIELD_NAME_MAP.put("44", "Additional Response Data");
+        FIELD_NAME_MAP.put("45", "Track 1 Data");
+        FIELD_NAME_MAP.put("46", "Additional Data - ISO");
+        FIELD_NAME_MAP.put("47", "Additional Data - National");
+        FIELD_NAME_MAP.put("48", "Additional Data - Private");
+        FIELD_NAME_MAP.put("49", "Currency Code, Transaction");
+    }
+
+    public static final Map<String, String> FIELD_EXPLANATION_MAP = new HashMap<>();
+    static {
+        FIELD_EXPLANATION_MAP.put("0", "Type de message ISO (ex : 0200 = demande financière, 0210 = réponse)");
+        FIELD_EXPLANATION_MAP.put("1", "Bitmap : indique quels champs sont présents dans le message");
+        FIELD_EXPLANATION_MAP.put("2", "Numéro de carte (PAN) du porteur");
+        FIELD_EXPLANATION_MAP.put("3", "Code de traitement (ex : 000000 = achat, 310000 = solde)");
+        FIELD_EXPLANATION_MAP.put("4", "Montant de la transaction (en centimes)");
+        FIELD_EXPLANATION_MAP.put("5", "Montant du règlement");
+        FIELD_EXPLANATION_MAP.put("6", "Montant facturé au porteur");
+        FIELD_EXPLANATION_MAP.put("7", "Date et heure de transmission (MMDDhhmmss)");
+        FIELD_EXPLANATION_MAP.put("8", "Frais facturés au porteur");
+        FIELD_EXPLANATION_MAP.put("9", "Taux de conversion pour le règlement");
+        FIELD_EXPLANATION_MAP.put("10", "Taux de conversion pour la facturation au porteur");
+        FIELD_EXPLANATION_MAP.put("11", "Numéro d'audit de la transaction (STAN)");
+        FIELD_EXPLANATION_MAP.put("12", "Heure locale de la transaction (hhmmss)");
+        FIELD_EXPLANATION_MAP.put("13", "Date locale de la transaction (MMDD)");
+        FIELD_EXPLANATION_MAP.put("14", "Date d'expiration de la carte (YYMM)");
+        FIELD_EXPLANATION_MAP.put("15", "Date de règlement");
+        FIELD_EXPLANATION_MAP.put("16", "Date de conversion");
+        FIELD_EXPLANATION_MAP.put("17", "Date de capture");
+        FIELD_EXPLANATION_MAP.put("18", "Code catégorie commerçant (MCC)");
+        FIELD_EXPLANATION_MAP.put("19", "Code pays de l’institution acquéreuse (ex : 504 = Maroc)");
+        FIELD_EXPLANATION_MAP.put("20", "Code pays PAN étendu");
+        FIELD_EXPLANATION_MAP.put("21", "Code pays de l’institution de routage");
+        FIELD_EXPLANATION_MAP.put("22", "Mode de saisie au point de service (ex : 010 = ATM, 021 = Mobile)");
+        FIELD_EXPLANATION_MAP.put("23", "Numéro de séquence de la carte");
+        FIELD_EXPLANATION_MAP.put("24", "Code fonction");
+        FIELD_EXPLANATION_MAP.put("25", "Code condition au point de service");
+        FIELD_EXPLANATION_MAP.put("26", "Code de capture POS");
+        FIELD_EXPLANATION_MAP.put("27", "Longueur de la réponse d'autorisation");
+        FIELD_EXPLANATION_MAP.put("28", "Frais de transaction");
+        FIELD_EXPLANATION_MAP.put("29", "Frais de règlement");
+        FIELD_EXPLANATION_MAP.put("30", "Frais de traitement de la transaction");
+        FIELD_EXPLANATION_MAP.put("31", "Frais de traitement du règlement");
+        FIELD_EXPLANATION_MAP.put("32", "Code d'identification de l’institution acquéreuse");
+        FIELD_EXPLANATION_MAP.put("33", "Code d'identification de l’institution de routage");
+        FIELD_EXPLANATION_MAP.put("34", "Numéro de carte étendu");
+        FIELD_EXPLANATION_MAP.put("35", "Données piste 2");
+        FIELD_EXPLANATION_MAP.put("36", "Données piste 3");
+        FIELD_EXPLANATION_MAP.put("37", "Numéro de référence de récupération (RRN)");
+        FIELD_EXPLANATION_MAP.put("38", "Code d'autorisation");
+        FIELD_EXPLANATION_MAP.put("39", "Code de réponse (ex : 00 = succès, 05 = refus)");
+        FIELD_EXPLANATION_MAP.put("40", "Code de restriction de service");
+        FIELD_EXPLANATION_MAP.put("41", "Identifiant du terminal commerçant");
+        FIELD_EXPLANATION_MAP.put("42", "Code d'identification du commerçant");
+        FIELD_EXPLANATION_MAP.put("43", "Nom et localisation du commerçant");
+        FIELD_EXPLANATION_MAP.put("44", "Données de réponse additionnelles");
+        FIELD_EXPLANATION_MAP.put("45", "Données piste 1");
+        FIELD_EXPLANATION_MAP.put("46", "Données additionnelles ISO");
+        FIELD_EXPLANATION_MAP.put("47", "Données additionnelles nationales");
+        FIELD_EXPLANATION_MAP.put("48", "Données additionnelles privées");
+        FIELD_EXPLANATION_MAP.put("49", "Code de la devise de la transaction (ex : 504 = MAD, 840 = USD)");
+    }
+
+    public static final Map<String, String> FUNCTION_CODE_MAP = new HashMap<>();
+    static {
+        FUNCTION_CODE_MAP.put("200", "Demande d'autorisation");
+        FUNCTION_CODE_MAP.put("220", "Demande de solde");
+        FUNCTION_CODE_MAP.put("400", "Annulation");
+        FUNCTION_CODE_MAP.put("420", "Remboursement");
+        // ... autres codes fonction
+    }
+
+    public static final Map<String, String> POS_CONDITION_CODE_MAP = new HashMap<>();
+    static {
+        POS_CONDITION_CODE_MAP.put("00", "Transaction normale");
+        POS_CONDITION_CODE_MAP.put("01", "Carte absente");
+        POS_CONDITION_CODE_MAP.put("02", "Transaction manuelle");
+        POS_CONDITION_CODE_MAP.put("03", "Transaction par téléphone");
+        POS_CONDITION_CODE_MAP.put("08", "Transaction par distributeur (ATM)");
+        POS_CONDITION_CODE_MAP.put("51", "Transaction par internet");
+        // ... autres codes si besoin
+    }
+
     @Autowired
     private TransactionHistoryRepository repository;
 

@@ -1,54 +1,68 @@
 import { Routes } from '@angular/router';
-import { StarterComponent } from './starter/starter.component';
-import { LogsMonitoringComponent } from './logs-monitoring/logs-monitoring.component';
 import { AuthGuard } from '../guards/auth.guard';
-import { IncidentsPage } from './incidents/incidents.page';
-import { IsoResponseComponent } from './iso-response/iso-response.component';
-import { ProfileComponent } from './profile/profile.component';
+import { AdminGuard } from '../guards/admin.guard';
 
-export const PagesRoutes: Routes = [
+export const routes: Routes = [
   {
     path: '',
-    component: StarterComponent,
-    data: {
-      title: 'Starter Page',
-      urls: [
-        { title: 'Dashboard', url: '/dashboards/dashboard1' },
-        { title: 'Starter Page' },
-      ],
-    },
+    loadComponent: () => import('./dashboard/dashboard.component').then(m => m.DashboardComponent),
+    canActivate: [AuthGuard]
   },
   {
-    path: 'logs-monitoring',
-    component: LogsMonitoringComponent,
-    canActivate: [AuthGuard],
-    data: {
-      title: 'Monitoring des Logs',
-    },
+    path: 'accounts',
+    loadComponent: () => import('./accounts/account-list.component').then(m => m.AccountListComponent),
+    canActivate: [AuthGuard]
   },
+  {
+    path: 'accounts/create',
+    loadComponent: () => import('./accounts/account-form.component').then(m => m.AccountFormComponent),
+    canActivate: [AuthGuard, AdminGuard]
+  },
+
   {
     path: 'incidents',
-    component: IncidentsPage,
-    canActivate: [AuthGuard],
-    data: {
-      title: 'Gestion des Incidents',
-    },
+    loadComponent: () => import('./incidents/incidents.page').then(m => m.IncidentsPage),
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'iso-depacker',
+    loadComponent: () => import('./iso-depacker/iso-depacker.component').then(m => m.IsoDepackerComponent),
+    canActivate: [AuthGuard]
   },
   {
     path: 'iso-response',
-    component: IsoResponseComponent,
-    canActivate: [AuthGuard],
-    data: {
-      title: 'Réponse ISO',
-    },
+    loadComponent: () => import('./iso-response/iso-response.component').then(m => m.IsoResponseComponent),
+    canActivate: [AuthGuard]
+  },
+
+  {
+    path: 'logs-monitoring',
+    loadComponent: () => import('./logs-monitoring/logs-monitoring.component').then(m => m.LogsMonitoringComponent),
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'transaction-history',
+    loadComponent: () => import('./transaction-history/transaction-history.component').then(m => m.TransactionHistoryComponent),
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'message-form',
+    loadComponent: () => import('./message-form/message-form.component').then(m => m.MessageFormComponent),
+    canActivate: [AuthGuard]
   },
   {
     path: 'profile',
-    component: ProfileComponent,
-    canActivate: [AuthGuard],
-    data: {
-      title: 'Mon Profil',
-    },
+    loadComponent: () => import('./profile/profile.component').then(m => m.ProfileComponent),
+    canActivate: [AuthGuard]
   },
-  // La route 'message' a été supprimée car le composant iso-form n'existe plus
+  {
+    path: 'starter',
+    loadComponent: () => import('./starter/starter.component').then(m => m.StarterComponent),
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'users',
+    loadComponent: () => import('./users/users.component').then(m => m.UsersComponent),
+    canActivate: [AuthGuard, AdminGuard]
+  }
 ];

@@ -10,55 +10,69 @@
     <i-tabler class="d-flex" name="bell" [matBadge]="unreadCount > 0 ? unreadCount : null" matBadgeColor="primary"></i-tabler>
   </button>
   <mat-menu #menu="matMenu" class="notification-dropdown cardWithShadow">
-    <div class="d-flex align-items-center p-x-12">
-      <h6 class="f-s-16 f-w-600 m-b-0">Notifications</h6>
-      <span class="flex-1-auto"></span>
+    <!-- Header amélioré -->
+    <div class="notification-header">
+      <div class="header-content">
+        <h6 class="header-title">Notifications</h6>
+        <div class="header-badge" *ngIf="unreadCount > 0">
+          <span class="badge-count">{{ unreadCount }}</span>
+        </div>
+      </div>
       <div class="notification-actions">
-        <button mat-flat-button color="primary" (click)="markAllAsRead()" [disabled]="unreadCount === 0">
+        <button mat-flat-button color="primary" (click)="markAllAsRead()" [disabled]="unreadCount === 0" class="action-btn">
           <i-tabler name="circle-check" class="action-icon"></i-tabler>
           Tout lu
         </button>
-        <button mat-flat-button color="warn" (click)="deleteAllNotifications()">
+        <button mat-flat-button color="warn" (click)="deleteAllNotifications()" class="action-btn">
           <i-tabler name="trash" class="action-icon"></i-tabler>
           Supprimer tout
         </button>
       </div>
     </div>
 
-    <mat-divider class="m-t-12"></mat-divider>
+    <mat-divider class="notification-divider"></mat-divider>
 
-    <div *ngIf="notifications.length === 0; else showNotifications" class="p-y-24 p-x-12 text-center">
-      <span class="f-s-14 f-w-500 text-muted">Aucune nouvelle notification</span>
-    </div>
+    <!-- Contenu des notifications -->
+    <div class="notification-content">
+      <div *ngIf="notifications.length === 0; else showNotifications" class="empty-state">
+        <div class="empty-icon">
+          <i-tabler name="bell-off" class="icon-24"></i-tabler>
+        </div>
+        <span class="empty-text">Aucune nouvelle notification</span>
+      </div>
 
-    <ng-template #showNotifications>
-      <button *ngFor="let notif of notifications"
-        mat-menu-item
-        class="notification-item"
-        [class.unread]="!notif.read">
+      <ng-template #showNotifications>
+        <div class="notification-list" [@listAnimation]="notifications.length">
+          <div *ngFor="let notif of notifications; trackBy: trackByNotification"
+            class="notification-item"
+            [class.unread]="!notif.read"
+            [class.success]="notif.type === 'success'"
+            [class.error]="notif.type === 'error'"
+            [class.info]="notif.type === 'info'"
+            (click)="markNotificationAsRead(notif.id)">
 
-        <div class="d-flex align-items-center w-100 justify-content-between">
-          <div class="d-flex align-items-center">
-            <i-tabler
-              [name]="notif.type === 'success' ? 'circle-check' : (notif.type === 'error' ? 'alert-circle' : 'info-circle')"
-              [ngClass]="{
-                'text-primary': notif.type === 'info' || notif.type === 'success',
-                'text-error': notif.type === 'error'
-              }"
-            ></i-tabler>
-            <span class="f-s-14 m-l-12">{{ notif.message }}</span>
-          </div>
-          <div class="d-flex align-items-center">
-            <span class="f-s-12 text-muted m-l-12 flex-shrink-0">{{ notif.dateTime | date:'HH:mm:ss' }}</span>
-            <button mat-icon-button (click)="deleteNotification(notif.id, $event)" class="delete-btn m-l-2">
-              <i-tabler name="trash" class="icon-14"></i-tabler>
-            </button>
+            <div class="notification-icon">
+              <i-tabler
+                [name]="notif.type === 'success' ? 'circle-check' : (notif.type === 'error' ? 'alert-circle' : 'info-circle')"
+                class="icon-20"
+              ></i-tabler>
+              <div class="status-indicator" *ngIf="!notif.read"></div>
+            </div>
+
+            <div class="notification-body">
+              <div class="notification-message">{{ notif.message }}</div>
+              <div class="notification-time">{{ notif.dateTime | date:'HH:mm:ss' }}</div>
+            </div>
+
+            <div class="notification-actions-item">
+              <button mat-icon-button (click)="deleteNotification(notif.id, $event)" class="delete-btn">
+                <i-tabler name="trash" class="icon-16"></i-tabler>
+              </button>
+            </div>
           </div>
         </div>
-
-      </button>
-    </ng-template>
-
+      </ng-template>
+    </div>
   </mat-menu>
 
 
