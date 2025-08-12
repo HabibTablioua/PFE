@@ -49,6 +49,11 @@ public class ResponseISOService {
     private AccountTransactionHistoryRepository accountTransactionHistoryRepository;
     private static final int MAX_PIN_TRIES = 3;
     private static final java.util.Set<String> SUPPORTED_CURRENCIES = java.util.Set.of("MAD", "USD", "EUR");
+    private static final java.util.Map<String, String> CURRENCY_CODES = java.util.Map.of(
+        "788", "MAD", // Moroccan Dirham
+        "840", "USD", // US Dollar
+        "978", "EUR"  // Euro
+    );
 
     public ResponseISOService(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
@@ -124,17 +129,8 @@ public class ResponseISOService {
                 details.put("action", "Vérifiez le numéro de carte saisi.");
                 response.setDetails(details);
                 // Remplir fields et messageIso même en cas d'échec
-                fields.clear();
-                if (isoMsg != null) {
-                    for (int i = 0; i <= isoMsg.getMaxField(); i++) {
-                        if (isoMsg.hasField(i)) {
-                            fields.put(String.valueOf(i), isoMsg.getString(i));
-                        }
-                    }
-                    try { messageIso = new String(isoMsg.pack()); } catch (Exception e) { messageIso = request.getIsoMessage(); }
-                } else {
-                    messageIso = request.getIsoMessage();
-                }
+                extractFields(isoMsg, fields);
+                try { messageIso = new String(isoMsg.pack()); } catch (Exception e) { messageIso = request.getIsoMessage(); }
                 ThreadLocalDetailsHolder.details = details;
                 saveToHistory("0210", fields, messageIso, "RAW", response.getStatus(), response.getMessage());
                 ThreadLocalDetailsHolder.details = null;
@@ -691,58 +687,8 @@ public class ResponseISOService {
                 ThreadLocalDetailsHolder.details = null;
                 return response;
             }
-            // Validation et gestion du PIN
-            String pin = isoMsg.hasField(52) ? isoMsg.getString(52) : null;
-            log.info("🔒 Traitement PIN pour PAN : {} - PIN fourni : {}", pan, pin != null ? "***" : "AUCUN");
-            
-            // Vérifier si le PIN est requis pour cette transaction
-            if (isPinRequired(isoMsg) && (pin == null || pin.isEmpty())) {
-                log.warn("🔒 PIN manquant pour transaction nécessitant authentification");
-                isoMsg.set(39, "55"); // PIN manquant
-                response.setStatus("FAILED");
-                response.setMessage("PIN manquant pour cette transaction.");
-                Map<String, Object> details = new HashMap<>();
-                details.put("isoCode", "55");
-                details.put("isoField", "52");
-                details.put("reason", "Le PIN est requis pour cette transaction mais n'a pas été fourni.");
-                details.put("pan", pan);
-                details.put("action", "Fournissez un PIN valide pour continuer.");
-                response.setDetails(details);
-                saveTransactionHistory(isoMsg, fields, response);
-                return response;
-            }
-            
-            // Valider et traiter le PIN
-            boolean pinCorrect = isPinCorrect(pan, pin);
-            handlePinTry(pan, pinCorrect, isoMsg);
-            
-            // Gérer les erreurs de PIN
-            if ("75".equals(isoMsg.getString(39))) {
-                response.setStatus("FAILED");
-                response.setMessage("Nombre de tentatives PIN dépassé, carte bloquée.");
-                Map<String, Object> details = new HashMap<>();
-                details.put("isoCode", "75");
-                details.put("isoField", "52");
-                details.put("reason", "Le nombre de tentatives PIN a été dépassé, la carte est bloquée.");
-                details.put("pan", pan);
-                details.put("remainingTries", 0);
-                details.put("action", "Contactez la banque pour débloquer la carte.");
-                response.setDetails(details);
-                saveTransactionHistory(isoMsg, fields, response);
-                return response;
-            } else if ("55".equals(responseCode)) {
-                response.setStatus("FAILED");
-                response.setMessage("PIN incorrect.");
-                Map<String, Object> details = new HashMap<>();
-                details.put("isoCode", "55");
-                details.put("isoField", "52");
-                details.put("reason", "Le PIN fourni est incorrect.");
-                details.put("pan", pan);
-                details.put("action", "Vérifiez votre PIN et réessayez.");
-                response.setDetails(details);
-                saveTransactionHistory(isoMsg, fields, response);
-                return response;
-            }
+            // Validation du PIN supprimée - le PIN n'est plus requis
+            log.info("🔒 Validation PIN désactivée pour PAN : {}", pan);
             String cancellationIndicator = isoMsg.hasField(25) ? isoMsg.getString(25) : null;
             if ("06".equals(cancellationIndicator)) {
                 isoMsg.set(39, "17"); // Annulation client
@@ -772,7 +718,15 @@ public class ResponseISOService {
                 return response;
             }
             String currency = isoMsg.hasField(49) ? isoMsg.getString(49) : null;
-            if (currency == null || !SUPPORTED_CURRENCIES.contains(currency)) {
+            
+            // Convertir le code numérique en code alphabétique si nécessaire
+            String currencyCode = currency;
+            if (currency != null && CURRENCY_CODES.containsKey(currency)) {
+                currencyCode = CURRENCY_CODES.get(currency);
+                log.info("🔍 Devise convertie : {} -> {}", currency, currencyCode);
+            }
+            
+            if (currency == null || !SUPPORTED_CURRENCIES.contains(currencyCode)) {
                 isoMsg.set(39, "39"); // Devise non supportée
                 response.setStatus("FAILED");
                 response.setMessage("Devise non supportée.");
@@ -918,6 +872,11 @@ public class ResponseISOService {
 
     private void saveToHistory(String mti, Map<String, String> fields, String messageIso, String format, String status, String cause) {
         try {
+            // Ajouter le champ 52 même s'il n'est pas présent
+            if (fields != null && !fields.containsKey("52")) {
+                fields.put("52", "****");
+            }
+            
             ResponseISOHistory history = new ResponseISOHistory();
             history.setMti(mti);
             // Toujours sérialiser les fields même si vide
@@ -1012,6 +971,12 @@ public class ResponseISOService {
             return false;
         }
         
+        // Nettoyer le PIN en supprimant les zéros au début
+        String cleanPin = pin.replaceAll("^0+", "");
+        if (cleanPin.isEmpty()) {
+            cleanPin = "0"; // Si tous les caractères étaient des zéros
+        }
+        
         // Validation du format du PIN
         if (!isValidPinFormat(pin)) {
             log.warn("🔒 Validation PIN échouée : Format PIN invalide pour PAN {}", pan);
@@ -1023,8 +988,9 @@ public class ResponseISOService {
             Optional<Card> card = cardRepository.findByPan(pan);
             if (card.isPresent()) {
                 String storedPin = card.get().getPin();
-                boolean isValid = storedPin != null && storedPin.equals(pin);
-                log.info("🔒 Validation PIN pour PAN {} : {}", pan, isValid ? "SUCCÈS" : "ÉCHEC");
+                boolean isValid = storedPin != null && storedPin.equals(cleanPin);
+                log.info("🔒 Validation PIN pour PAN {} : {} (PIN reçu: {}, PIN nettoyé: {}, PIN stocké: {})", 
+                        pan, isValid ? "SUCCÈS" : "ÉCHEC", pin, cleanPin, storedPin);
                 return isValid;
             } else {
                 log.warn("🔒 Carte non trouvée pour PAN : {}", pan);
@@ -1042,19 +1008,27 @@ public class ResponseISOService {
             return false;
         }
         
+        // Nettoyer le PIN en supprimant les zéros au début
+        String cleanPin = pin.replaceAll("^0+", "");
+        if (cleanPin.isEmpty()) {
+            cleanPin = "0"; // Si tous les caractères étaient des zéros
+        }
+        
         // Le PIN doit être numérique et avoir une longueur entre 4 et 12 caractères
-        if (!pin.matches("\\d{4,12}")) {
+        if (!cleanPin.matches("\\d{4,12}")) {
+            log.warn("🔒 PIN nettoyé invalide : {} (original: {})", cleanPin, pin);
             return false;
         }
         
         // Vérifications de sécurité supplémentaires
         // 1. Pas de séquences répétitives (ex: 1111, 1234, 0000)
-        if (pin.matches("(\\d)\\1{3,}") || // Répétition du même chiffre
-            pin.matches("(0123|1234|2345|3456|4567|5678|6789|9876|8765|7654|6543|5432|4321|3210)") || // Séquences
-            pin.equals("0000") || pin.equals("1111") || pin.equals("9999")) {
+        if (cleanPin.matches("(\\d)\\1{3,}") || // Répétition du même chiffre
+            cleanPin.matches("(0123|1234|2345|3456|4567|5678|6789|9876|8765|7654|6543|5432|4321|3210)") || // Séquences
+            cleanPin.equals("0000") || cleanPin.equals("1111") || cleanPin.equals("9999")) {
             return false;
         }
         
+        log.info("🔒 PIN nettoyé valide : {} (original: {})", cleanPin, pin);
         return true;
     }
 
@@ -1066,35 +1040,24 @@ public class ResponseISOService {
         return historyRepository.countByStatus("FAILED");
     }
     
-    // Vérifier si le PIN est requis pour cette transaction
-    private boolean isPinRequired(ISOMsg isoMsg) {
-        try {
-            // Le PIN est généralement requis pour les transactions de retrait et d'achat
-            String processingCode = isoMsg.hasField(3) ? isoMsg.getString(3) : null;
-            if (processingCode != null && processingCode.length() >= 2) {
-                String transactionType = processingCode.substring(0, 2);
-                // 01 = Retrait, 00 = Achat, 20 = Retrait, 21 = Achat
-                return "01".equals(transactionType) || "00".equals(transactionType) || 
-                       "20".equals(transactionType) || "21".equals(transactionType);
+    // Méthode isPinRequired supprimée
+    
+    // Méthode utilitaire pour extraire les champs
+    private void extractFields(ISOMsg isoMsg, Map<String, String> fields) {
+        fields.clear();
+        if (isoMsg != null) {
+            for (int i = 0; i <= isoMsg.getMaxField(); i++) {
+                if (isoMsg.hasField(i)) {
+                    fields.put(String.valueOf(i), isoMsg.getString(i));
+                }
             }
-            return false;
-        } catch (Exception e) {
-            log.warn("🔒 Erreur lors de la vérification du type de transaction : {}", e.getMessage());
-            return true; // Par sécurité, on considère que le PIN est requis
         }
     }
-    
+
     // Méthode utilitaire pour sauvegarder l'historique des transactions
     private void saveTransactionHistory(ISOMsg isoMsg, Map<String, String> fields, ResponseISOResponse response) {
         try {
-            fields.clear();
-            if (isoMsg != null) {
-                for (int i = 0; i <= isoMsg.getMaxField(); i++) {
-                    if (isoMsg.hasField(i)) {
-                        fields.put(String.valueOf(i), isoMsg.getString(i));
-                    }
-                }
-            }
+            extractFields(isoMsg, fields);
             log.info("[DEBUG] Champs extraits pour historique : {}", fields);
             String messageIso = "";
             try { 
@@ -1181,6 +1144,19 @@ public class ResponseISOService {
             acc.setBalance(acc.getBalance().add(amount));
             accountRepository.save(acc);
         }
+    }
+    
+    // Méthode utilitaire pour diagnostiquer les champs disponibles
+    private String getAvailableFields(ISOMsg isoMsg) {
+        if (isoMsg == null) return "ISO Message null";
+        
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i <= isoMsg.getMaxField(); i++) {
+            if (isoMsg.hasField(i)) {
+                sb.append(i).append(":").append(isoMsg.getString(i).substring(0, Math.min(10, isoMsg.getString(i).length()))).append("... ");
+            }
+        }
+        return sb.toString();
     }
 
     // --- Intégration dans le flux principal (exemple à placer dans processISO avant le traitement du PIN) ---

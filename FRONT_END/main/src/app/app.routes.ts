@@ -61,6 +61,13 @@ export const routes: Routes = [
             (m) => m.AccountFormComponent
           ),
       },
+      {
+        path: 'cards',
+        loadComponent: () =>
+          import('./pages/cards/card-list.component').then(
+            (m) => m.CardListComponent
+          ),
+      },
 
       {
         path: 'ui-components',

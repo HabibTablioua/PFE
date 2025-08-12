@@ -51,5 +51,4 @@
     <isofield id="47" length="999" name="Additional Data - National" class="org.jpos.iso.IFA_LLLCHAR"/>
     <isofield id="48" length="999" name="Additional Data - Private" class="org.jpos.iso.IFA_LLLCHAR"/>
     <isofield id="49" length="3" name="Currency Code, Transaction" class="org.jpos.iso.IFA_NUMERIC"/>
-    <isofield id="52" length="16" name="PIN Code" class="org.jpos.iso.IFA_NUMERIC"/>
 </isopackager>

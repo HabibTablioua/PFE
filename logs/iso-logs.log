@@ -217,3 +217,57 @@ java.lang.IllegalArgumentException: Length 100 too long for org.jpos.iso.IFA_LLC
 java.lang.IllegalArgumentException: Length 100 too long for org.jpos.iso.IFA_LLCHAR
 2025-07-31T15:14:29.344495700 SUCCESS - Message enregistré dans historique pour MTI : 0200
 2025-07-31T15:14:29.579165700 SUCCESS - Packing ASCII réussi pour MTI : 0200
+2025-08-01T01:46:58.629278 SUCCESS - Message enregistré dans historique pour MTI : 0200
+2025-08-01T01:46:58.684562200 SUCCESS - Packing ASCII réussi pour MTI : 0200
+2025-08-01T01:58:54.180649800 SUCCESS - Message enregistré dans historique pour MTI : 0200
+2025-08-01T01:58:54.224966500 SUCCESS - Packing ASCII réussi pour MTI : 0200
+2025-08-01T02:01:06.089593700 SUCCESS - Message enregistré dans historique pour MTI : 0200
+2025-08-01T02:01:06.118557200 SUCCESS - Packing ASCII réussi pour MTI : 0200
+2025-08-01T02:03:43.830655200 SUCCESS - Message enregistré dans historique pour MTI : 0200
+2025-08-01T02:03:43.862242500 SUCCESS - Packing ASCII réussi pour MTI : 0200
+2025-08-01T02:32:25.385687200 SUCCESS - Message enregistré dans historique pour MTI : 0200
+2025-08-01T02:32:25.437803400 SUCCESS - Packing ASCII réussi pour MTI : 0200
+2025-08-01T02:33:01.782822500 SUCCESS - Message enregistré dans historique pour MTI : 0200
+2025-08-01T02:33:01.851745900 SUCCESS - Packing ASCII réussi pour MTI : 0200
+2025-08-01T02:45:11.199199600 SUCCESS - Message enregistré dans historique pour MTI : 0200
+2025-08-01T02:45:11.231657800 SUCCESS - Packing ASCII réussi pour MTI : 0200
+2025-08-01T02:48:18.679479200 SUCCESS - Message enregistré dans historique pour MTI : 0200
+2025-08-01T02:48:18.737018900 SUCCESS - Packing ASCII réussi pour MTI : 0200
+2025-08-01T10:40:54.476472700 SUCCESS - Message enregistré dans historique pour MTI : 0200
+2025-08-01T10:40:54.521324100 SUCCESS - Packing ASCII réussi pour MTI : 0200
+2025-08-01T10:42:26.565070900 SUCCESS - Message enregistré dans historique pour MTI : 0200
+2025-08-01T10:42:26.617293900 SUCCESS - Packing ASCII réussi pour MTI : 0200
+2025-08-01T10:47:02.789719100 SUCCESS - Message enregistré dans historique pour MTI : 0200
+2025-08-01T10:47:02.855506100 SUCCESS - Packing HEX réussi pour MTI : 0200
+2025-08-01T10:49:35.750909800 SUCCESS - Message enregistré dans historique pour MTI : 0200
+2025-08-01T10:49:35.954133100 SUCCESS - Packing ASCII réussi pour MTI : 0200
+2025-08-01T10:50:19.550389600 SUCCESS - Message enregistré dans historique pour MTI : 0200
+2025-08-01T10:50:19.584742400 SUCCESS - Packing HEX réussi pour MTI : 0200
+2025-08-01T10:56:59.181110900 SUCCESS - Message enregistré dans historique pour MTI : 0200
+2025-08-01T10:56:59.257454700 SUCCESS - Packing ASCII réussi pour MTI : 0200
+2025-08-01T11:06:14.099454200 SUCCESS - Message enregistré dans historique pour MTI : 0200
+2025-08-01T11:06:14.168940800 SUCCESS - Packing ASCII réussi pour MTI : 0200
+2025-08-01T11:12:03.062561300 SUCCESS - Message enregistré dans historique pour MTI : 0200
+2025-08-01T11:12:03.121871500 SUCCESS - Packing ASCII réussi pour MTI : 0200
+2025-08-01T11:16:57.645580800 SUCCESS - Message enregistré dans historique pour MTI : 0200
+2025-08-01T11:16:57.702024300 SUCCESS - Packing ASCII réussi pour MTI : 0200
+2025-08-01T11:19:54.807469200 SUCCESS - Message enregistré dans historique pour MTI : 0200
+2025-08-01T11:19:54.884602800 SUCCESS - Packing ASCII réussi pour MTI : 0200
+2025-08-01T11:26:45.425155100 SUCCESS - Message enregistré dans historique pour MTI : 0200
+2025-08-01T11:26:45.515891300 SUCCESS - Packing ASCII réussi pour MTI : 0200
+2025-08-01T11:31:47.000973100 SUCCESS - Message enregistré dans historique pour MTI : 0200
+2025-08-01T11:31:47.032879500 SUCCESS - Packing ASCII réussi pour MTI : 0200
+2025-08-01T11:41:20.834456200 SUCCESS - Message enregistré dans historique pour MTI : 0200
+2025-08-01T11:41:20.911604300 SUCCESS - Packing ASCII réussi pour MTI : 0200
+2025-08-01T11:57:00.083814500 SUCCESS - Message enregistré dans historique pour MTI : 0200
+2025-08-01T11:57:00.148512 SUCCESS - Packing ASCII réussi pour MTI : 0200
+2025-08-01T11:59:36.416935200 SUCCESS - Message enregistré dans historique pour MTI : 0200
+2025-08-01T11:59:36.527679300 SUCCESS - Packing ASCII réussi pour MTI : 0200
+2025-08-01T12:36:04.628415600 SUCCESS - Message enregistré dans historique pour MTI : 0200
+2025-08-01T12:36:04.854835300 SUCCESS - Packing ASCII réussi pour MTI : 0200
+2025-08-01T14:58:29.414660100 SUCCESS - Message enregistré dans historique pour MTI : 0200
+2025-08-01T14:58:29.479023200 SUCCESS - Packing ASCII réussi pour MTI : 0200
+2025-08-01T14:58:54.406696700 SUCCESS - Message enregistré dans historique pour MTI : 0200
+2025-08-01T14:58:54.457437100 SUCCESS - Packing ASCII réussi pour MTI : 0200
+2025-08-01T14:59:15.781159300 SUCCESS - Message enregistré dans historique pour MTI : 0200
+2025-08-01T14:59:15.832675200 SUCCESS - Packing ASCII réussi pour MTI : 0200

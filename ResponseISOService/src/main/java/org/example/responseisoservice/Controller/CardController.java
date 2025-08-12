@@ -1,7 +1,9 @@
 package org.example.responseisoservice.Controller;
 
 import lombok.RequiredArgsConstructor;
+import org.example.responseisoservice.DTO.CardResponseDto;
 import org.example.responseisoservice.Entity.Card;
+import org.example.responseisoservice.Service.CardService;
 import org.example.responseisoservice.repository.CardRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -13,46 +15,54 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/cards")
-@CrossOrigin(origins = "*")
 @RequiredArgsConstructor
 public class CardController {
 
     @Autowired
     private CardRepository cardRepository;
 
+    @Autowired
+    private CardService cardService;
+
     // GET - Récupérer toutes les cartes
     @GetMapping
-    public ResponseEntity<List<Card>> getAllCards() {
-        List<Card> cards = cardRepository.findAll();
+    public ResponseEntity<List<CardResponseDto>> getAllCards() {
+        List<CardResponseDto> cards = cardService.getAllCards();
         return ResponseEntity.ok(cards);
     }
 
     // GET - Récupérer une carte par PAN
     @GetMapping("/{pan}")
-    public ResponseEntity<Card> getCardByPan(@PathVariable String pan) {
-        Optional<Card> card = cardRepository.findByPan(pan);
-        return card.map(ResponseEntity::ok)
-                   .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<CardResponseDto> getCardByPan(@PathVariable String pan) {
+        CardResponseDto card = cardService.getCardByPan(pan);
+        return card != null ? ResponseEntity.ok(card) : ResponseEntity.notFound().build();
     }
 
     // GET - Compter le nombre total de cartes
     @GetMapping("/count")
     public ResponseEntity<Long> countCards() {
-        long count = cardRepository.count();
+        long count = cardService.countCards();
         return ResponseEntity.ok(count);
     }
 
     // GET - Compter les cartes actives
     @GetMapping("/count/active")
     public ResponseEntity<Long> countActiveCards() {
-        long count = cardRepository.countByStatus("ACTIVE");
+        long count = cardService.countCardsByStatus("ACTIVE");
         return ResponseEntity.ok(count);
     }
 
     // GET - Compter les cartes bloquées
     @GetMapping("/count/blocked")
     public ResponseEntity<Long> countBlockedCards() {
-        long count = cardRepository.countByStatus("BLOCKED");
+        long count = cardService.countCardsByStatus("BLOCKED");
+        return ResponseEntity.ok(count);
+    }
+
+    // GET - Compter les cartes expirées
+    @GetMapping("/count/expired")
+    public ResponseEntity<Long> countExpiredCards() {
+        long count = cardService.countCardsByStatus("EXPIRED");
         return ResponseEntity.ok(count);
     }
 
@@ -157,15 +167,15 @@ public class CardController {
 
     // GET - Récupérer les cartes par statut
     @GetMapping("/status/{status}")
-    public ResponseEntity<List<Card>> getCardsByStatus(@PathVariable String status) {
-        List<Card> cards = cardRepository.findByStatus(status);
+    public ResponseEntity<List<CardResponseDto>> getCardsByStatus(@PathVariable String status) {
+        List<CardResponseDto> cards = cardService.getCardsByStatus(status);
         return ResponseEntity.ok(cards);
     }
 
     // GET - Récupérer les cartes par type
     @GetMapping("/type/{type}")
-    public ResponseEntity<List<Card>> getCardsByType(@PathVariable String type) {
-        List<Card> cards = cardRepository.findByType(type);
+    public ResponseEntity<List<CardResponseDto>> getCardsByType(@PathVariable String type) {
+        List<CardResponseDto> cards = cardService.getCardsByType(type);
         return ResponseEntity.ok(cards);
     }
 } 

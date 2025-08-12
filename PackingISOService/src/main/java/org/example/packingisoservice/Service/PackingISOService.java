@@ -30,6 +30,8 @@ public class PackingISOService {
 
 
     public PackingISOResponse packAscii(IsoFieldsRequest request) {
+        log.info("🚀 === DEBUT PACKING ASCII ===");
+        log.info("🚀 Request reçue - MTI: {}, Fields: {}", request.getMti(), request.getFields());
         String packed = pack(request, false);
         saveToHistory(request.getMti(), request.getFields(), packed, "ASCII");
         log.info("Packing ISO Response: " + packed);
@@ -37,6 +39,7 @@ public class PackingISOService {
         sendNotificationToNotificationService("Le message pour MTI " + request.getMti() + " a été généré avec succès.");
         // Envoi automatique via Gateway
         sendToResponseISOService(packed, request.getMti(), "ASCII", Map.of());
+        log.info("🚀 === FIN PACKING ASCII ===");
         return new PackingISOResponse(packed);
     }
 
@@ -58,8 +61,27 @@ public class PackingISOService {
             isoMsg.setPackager(packager);
             isoMsg.setMTI(request.getMti());
 
+            log.info("📦 Champs reçus du frontend : {}", request.getFields());
+            log.info("📦 Champ 52 présent dans la requête : {}", request.getFields().containsKey("52"));
+            if (request.getFields().containsKey("52")) {
+                log.info("📦 Valeur du champ 52 : {}", request.getFields().get("52"));
+            }
             for (Map.Entry<String, String> entry : request.getFields().entrySet()) {
                 isoMsg.set(Integer.parseInt(entry.getKey()), entry.getValue());
+                log.info("📦 Champ {} défini avec valeur : {}", entry.getKey(), entry.getValue());
+            }
+            
+            // Forcer l'inclusion du champ 52 si il est présent dans la requête
+            if (request.getFields().containsKey("52")) {
+                String pinValue = request.getFields().get("52");
+                if (pinValue != null && !pinValue.isEmpty()) {
+                    isoMsg.set(52, pinValue);
+                    log.info("📦 Champ 52 forcé avec valeur : {}", pinValue);
+                    
+                    // Forcer la régénération du bitmap pour inclure le champ 52
+                    isoMsg.recalcBitMap();
+                    log.info("📦 Bitmap recalculé pour inclure le champ 52");
+                }
             }
 
             byte[] packed = isoMsg.pack();

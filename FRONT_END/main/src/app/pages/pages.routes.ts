@@ -18,6 +18,11 @@ export const routes: Routes = [
     loadComponent: () => import('./accounts/account-form.component').then(m => m.AccountFormComponent),
     canActivate: [AuthGuard, AdminGuard]
   },
+  {
+    path: 'cards',
+    loadComponent: () => import('./cards/card-list.component').then(m => m.CardListComponent),
+    canActivate: [AuthGuard]
+  },
 
   {
     path: 'incidents',

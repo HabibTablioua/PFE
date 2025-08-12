@@ -50,6 +50,11 @@ export const navItems: NavItem[] = [
     iconName: 'credit-card',
     route: '/accounts',
   },
+  {
+    displayName: 'Gestion des Cartes',
+    iconName: 'credit-card',
+    route: '/cards',
+  },
 
   {
     navCap: 'Gestion Incidents',

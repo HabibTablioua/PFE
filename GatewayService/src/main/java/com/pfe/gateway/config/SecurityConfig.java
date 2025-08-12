@@ -18,6 +18,7 @@ public class SecurityConfig {
                         .pathMatchers("/api/auth/**").permitAll()
                         .pathMatchers("/api/response/**").permitAll()
                         .pathMatchers("/api/accounts/**").permitAll()
+                        .pathMatchers("/api/cards/**").permitAll()
                         .pathMatchers("/api/users/**").permitAll()
                         .pathMatchers("/api/incidents/**").permitAll()
                         .pathMatchers("/api/packing/**").permitAll()

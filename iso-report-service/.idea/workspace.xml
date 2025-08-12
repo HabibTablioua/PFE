@@ -5,9 +5,28 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c6e00066-295b-4e87-90f9-157c53874940" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/../FRONT_END/main/src/app/pages/iso-response/iso-response.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/../FRONT_END/main/src/app/pages/iso-response/iso-response.component.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../FRONT_END/main/src/app/pages/iso-response/iso-response.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../FRONT_END/main/src/app/pages/iso-response/iso-response.component.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../ResponseISOService/src/main/java/org/example/responseisoservice/Controller/ResponseISOController.java" beforeDir="false" afterPath="$PROJECT_DIR$/../ResponseISOService/src/main/java/org/example/responseisoservice/Controller/ResponseISOController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../FRONT_END/main/src/app/app.routes.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../FRONT_END/main/src/app/app.routes.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../FRONT_END/main/src/app/layouts/full/sidebar/sidebar-data.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../FRONT_END/main/src/app/layouts/full/sidebar/sidebar-data.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../FRONT_END/main/src/app/pages/dashboard/dashboard.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../FRONT_END/main/src/app/pages/dashboard/dashboard.component.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../FRONT_END/main/src/app/pages/iso-response/response-detail-dialog.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../FRONT_END/main/src/app/pages/iso-response/response-detail-dialog.component.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../FRONT_END/main/src/app/pages/pages.routes.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../FRONT_END/main/src/app/pages/pages.routes.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../FRONT_END/main/src/assets/exemple_message.txt" beforeDir="false" afterPath="$PROJECT_DIR$/../FRONT_END/main/src/assets/exemple_message.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../GatewayService/src/main/java/com/pfe/gateway/config/CorsConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/../GatewayService/src/main/java/com/pfe/gateway/config/CorsConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../GatewayService/src/main/java/com/pfe/gateway/config/SecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/../GatewayService/src/main/java/com/pfe/gateway/config/SecurityConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../GatewayService/src/main/resources/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/../GatewayService/src/main/resources/application.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../GatewayService/target/classes/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/../GatewayService/target/classes/application.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../GatewayService/target/classes/com/pfe/gateway/config/CorsConfig.class" beforeDir="false" afterPath="$PROJECT_DIR$/../GatewayService/target/classes/com/pfe/gateway/config/CorsConfig.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../GatewayService/target/classes/com/pfe/gateway/config/SecurityConfig.class" beforeDir="false" afterPath="$PROJECT_DIR$/../GatewayService/target/classes/com/pfe/gateway/config/SecurityConfig.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../PackingISOService/src/main/java/org/example/packingisoservice/Service/PackingISOService.java" beforeDir="false" afterPath="$PROJECT_DIR$/../PackingISOService/src/main/java/org/example/packingisoservice/Service/PackingISOService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../PackingISOService/src/main/resources/iso87ascii.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../PackingISOService/src/main/resources/iso87ascii.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../PackingISOService/test_iso_message.json" beforeDir="false" afterPath="$PROJECT_DIR$/../PackingISOService/test_iso_message.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ResponseISOService/src/main/java/org/example/responseisoservice/Controller/CardController.java" beforeDir="false" afterPath="$PROJECT_DIR$/../ResponseISOService/src/main/java/org/example/responseisoservice/Controller/CardController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ResponseISOService/src/main/java/org/example/responseisoservice/Controller/DataImportController.java" beforeDir="false" afterPath="$PROJECT_DIR$/../ResponseISOService/src/main/java/org/example/responseisoservice/Controller/DataImportController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ResponseISOService/src/main/java/org/example/responseisoservice/Entity/Card.java" beforeDir="false" afterPath="$PROJECT_DIR$/../ResponseISOService/src/main/java/org/example/responseisoservice/Entity/Card.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ResponseISOService/src/main/java/org/example/responseisoservice/Service/DataImportService.java" beforeDir="false" afterPath="$PROJECT_DIR$/../ResponseISOService/src/main/java/org/example/responseisoservice/Service/DataImportService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ResponseISOService/src/main/java/org/example/responseisoservice/Service/ResponseISOService.java" beforeDir="false" afterPath="$PROJECT_DIR$/../ResponseISOService/src/main/java/org/example/responseisoservice/Service/ResponseISOService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ResponseISOService/src/main/java/org/example/responseisoservice/config/JwtAuthFilter.java" beforeDir="false" afterPath="$PROJECT_DIR$/../ResponseISOService/src/main/java/org/example/responseisoservice/config/JwtAuthFilter.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ResponseISOService/src/main/resources/iso87ascii-packager.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../ResponseISOService/src/main/resources/iso87ascii-packager.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../logs/iso-logs.log" beforeDir="false" afterPath="$PROJECT_DIR$/../logs/iso-logs.log" afterDir="false" />
     </list>
@@ -70,6 +89,7 @@
       <updated>1750079399901</updated>
       <workItem from="1750079401098" duration="2416000" />
       <workItem from="1751383915381" duration="1266000" />
+      <workItem from="1754006634547" duration="592000" />
     </task>
     <servers />
   </component>

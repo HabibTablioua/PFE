@@ -664,7 +664,27 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
   // Widget event handlers
   onMetricWidgetClick(metric: MetricWidgetData): void {
     console.log('Metric widget clicked:', metric);
-    // Ici vous pouvez ajouter la logique pour naviguer vers une page détaillée
+    
+    // Navigation basée sur le type de métrique
+    switch (metric.title) {
+      case 'Comptes Bancaires':
+        this.router.navigate(['/accounts']);
+        break;
+      case 'Cartes Bancaires':
+        this.router.navigate(['/cards']);
+        break;
+      case 'Incidents Ouverts':
+        this.router.navigate(['/incidents']);
+        break;
+      case 'Total Transactions':
+        this.router.navigate(['/transaction-history']);
+        break;
+      case 'Taux de Succès':
+        this.router.navigate(['/iso-response']);
+        break;
+      default:
+        console.log('Aucune navigation définie pour:', metric.title);
+    }
   }
 
   onAlertClick(alert: AlertData): void {

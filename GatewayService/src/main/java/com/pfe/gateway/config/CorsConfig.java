@@ -12,17 +12,24 @@ public class CorsConfig {
     @Bean
     public CorsWebFilter corsWebFilter() {
         CorsConfiguration corsConfig = new CorsConfiguration();
-        // Définir une seule origine autorisée pour éviter les doublons d'en-têtes
-        corsConfig.setAllowedOriginPatterns(java.util.Arrays.asList("http://localhost:4200/"));
-        // Autoriser toutes les méthodes HTTP (GET, POST, PUT, DELETE, etc.)
+        
+        // Utiliser setAllowedOrigins au lieu de setAllowedOriginPatterns pour éviter les conflits
+        corsConfig.setAllowedOrigins(java.util.Arrays.asList("http://localhost:4200"));
+        
+        // Autoriser toutes les méthodes HTTP
         corsConfig.addAllowedMethod("*");
+        
         // Autoriser tous les en-têtes HTTP
         corsConfig.addAllowedHeader("*");
+        
         // Autoriser l'envoi de cookies et d'informations d'authentification
         corsConfig.setAllowCredentials(true);
+        
+        // Autoriser les en-têtes d'exposition
+        corsConfig.addExposedHeader("Authorization");
+        corsConfig.addExposedHeader("Content-Type");
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        // Appliquer cette configuration CORS à tous les chemins d'URL
         source.registerCorsConfiguration("/**", corsConfig);
 
         return new CorsWebFilter(source);
