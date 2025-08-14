@@ -82,6 +82,17 @@ export class CardService {
     return this.http.delete<void>(`${this.apiUrl}/${pan}`, { headers });
   }
 
+  deleteMultipleCards(pans: string[]): Observable<any> {
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
+    return this.http.delete<any>(`${this.apiUrl}/bulk`, { 
+      headers,
+      body: pans 
+    });
+  }
+
   // Créer ou mettre à jour une carte
   createOrUpdateCard(card: Partial<Card>): Observable<Card> {
     if (card.pan) {
@@ -167,4 +178,5 @@ export class CardService {
       });
     });
   }
-} 
+}
+ 

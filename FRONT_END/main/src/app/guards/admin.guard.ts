@@ -27,13 +27,13 @@ export class AdminGuard implements CanActivate {
       map((user: User | null) => {
         console.log('AdminGuard: Utilisateur courant:', user);
         
-        if (user && user.role === 'ADMIN') {
+        if (user && user.roles && user.roles.includes('ADMIN')) {
           console.log('AdminGuard: Accès autorisé pour l\'admin');
           return true;
         } else {
           console.log('AdminGuard: Accès refusé - rôle insuffisant ou utilisateur null');
-          // Rediriger vers le dashboard au lieu de la page de login
-          this.router.navigate(['/dashboard']);
+          // Rediriger vers la génération de messages au lieu du dépacking ISO
+          this.router.navigate(['/message-form']);
           return false;
         }
       }),

@@ -10,7 +10,8 @@ export interface User {
   lastname: string;
   email: string;
   password?: string;
-  role?: string;
+  roles?: string[];
+  status?: string;
 }
 
 export interface LoginResponse {
@@ -32,7 +33,7 @@ export class AuthService {
   }
 
   private loadStoredUser(): void {
-    const userJson = localStorage.getItem('user');
+    const userJson = localStorage.getItem('currentUser');
     if (userJson && userJson !== 'undefined') {
       try {
         this.currentUserSubject.next(JSON.parse(userJson));
@@ -78,13 +79,50 @@ export class AuthService {
     return this.currentUserSubject.value;
   }
 
-  hasRole(role: string): boolean {
-    const user = this.getCurrentUserValue();
-    return user?.role === role;
+  /**
+   * Met à jour l'utilisateur courant
+   */
+  updateCurrentUser(user: User): void {
+    this.currentUserSubject.next(user);
   }
 
+  /**
+   * Vérifie si l'utilisateur a un rôle spécifique
+   */
+  hasRole(role: string): boolean {
+    const user = this.getCurrentUserValue();
+    return user?.roles?.includes(role) || false;
+  }
+
+  /**
+   * Vérifie si l'utilisateur est admin
+   */
   isAdmin(): boolean {
     return this.hasRole('ADMIN');
+  }
+
+  /**
+   * Vérifie si l'utilisateur est un utilisateur normal
+   */
+  isUser(): boolean {
+    return this.hasRole('USER');
+  }
+
+  /**
+   * Vérifie si l'utilisateur a au moins un des rôles spécifiés
+   */
+  hasAnyRole(...roles: string[]): boolean {
+    const user = this.getCurrentUserValue();
+    if (!user?.roles) return false;
+    
+    return roles.some(role => user.roles!.includes(role));
+  }
+
+  /**
+   * Vérifie le statut admin via l'API
+   */
+  checkAdminStatus(): Observable<any> {
+    return this.http.get(`${this.authUrl}/check-admin`);
   }
 
   // Méthodes de gestion des utilisateurs (déplacées vers UserService)
@@ -111,4 +149,5 @@ export class AuthService {
   deleteMultipleUsers(ids: number[]): Observable<void> {
     return this.http.post<void>(`${this.authUrl}/users/delete-multiple`, { ids });
   }
-} 
+}
+ 

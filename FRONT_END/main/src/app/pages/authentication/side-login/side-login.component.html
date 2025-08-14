@@ -34,6 +34,20 @@
 
             <div class="or-border m-t-30">or sign in with</div>
 
+            <!-- Informations de connexion par défaut -->
+            <div class="alert alert-info m-t-20" role="alert">
+              <div class="d-flex align-items-center">
+                <i class="ti ti-info-circle me-2"></i>
+                <div>
+                  <strong>Comptes de test :</strong><br>
+                  <small>
+                    👑 <strong>Admin:</strong> admin&#64;gmail.com / 123456<br>
+                    👤 <strong>User:</strong> Créez un compte ou utilisez un compte existant
+                  </small>
+                </div>
+              </div>
+            </div>
+
             <form [formGroup]="form" (ngSubmit)="submit()" class="m-t-30">
               <mat-label class="f-s-14 f-w-600 m-b-12 d-block">Email</mat-label>
               <mat-form-field appearance="outline" class="w-100" color="primary">
@@ -65,4 +79,3 @@
       </div>
     </div>
   </div>
-</div>

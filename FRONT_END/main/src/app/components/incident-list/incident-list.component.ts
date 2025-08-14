@@ -16,6 +16,7 @@ import { FormBuilder, FormGroup } from '@angular/forms';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { ReactiveFormsModule } from '@angular/forms';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-incident-list',
@@ -33,8 +34,14 @@ export class IncidentListComponent implements OnInit {
 
   showFilterPanel = false;
   filterForm: FormGroup;
+  isAdmin = false;
 
-  constructor(private incidentService: IncidentService, private dialog: MatDialog, private fb: FormBuilder) {
+  constructor(
+    private incidentService: IncidentService, 
+    private dialog: MatDialog, 
+    private fb: FormBuilder,
+    private authService: AuthService
+  ) {
     this.filterForm = this.fb.group({
       startDate: [''],
       endDate: [''],
@@ -45,6 +52,12 @@ export class IncidentListComponent implements OnInit {
   }
 
   ngOnInit() {
+    // Vérifier le rôle de l'utilisateur
+    this.isAdmin = this.authService.isAdmin();
+    
+    // Afficher la colonne utilisateur pour tous (admin et utilisateurs normaux)
+    this.displayedColumns = ['id', 'title', 'description', 'status', 'dateTime', 'user', 'actions'];
+    
     this.loadIncidents();
   }
 
@@ -53,7 +66,8 @@ export class IncidentListComponent implements OnInit {
   }
 
   loadIncidents() {
-    this.incidentService.getAll().subscribe({
+    // Utiliser la nouvelle logique par rôle
+    this.incidentService.getIncidentsByRole().subscribe({
       next: data => {
         // Trier par dateTime décroissante (plus récent en premier)
         this.dataSource.data = data.sort((a, b) => new Date(b.dateTime).getTime() - new Date(a.dateTime).getTime());
@@ -143,4 +157,4 @@ export class IncidentListComponent implements OnInit {
     this.filterForm.reset();
     this.dataSource.filter = '';
   }
-} 
+}

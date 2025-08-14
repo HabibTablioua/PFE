@@ -1,21 +1,25 @@
 import { Routes } from '@angular/router';
 import { BlankComponent } from './layouts/blank/blank.component';
 import { FullComponent } from './layouts/full/full.component';
+import { AuthGuard } from './guards/auth.guard';
+import { AdminGuard } from './guards/admin.guard';
 
 export const routes: Routes = [
   {
     path: '',
     component: FullComponent,
+    canActivate: [AuthGuard],
     children: [
       {
         path: '',
-        redirectTo: '/authentication/login',
+        redirectTo: '/message-form', // L'utilisateur normal commence par la génération de messages
         pathMatch: 'full',
       },
       {
         path: 'dashboard',
         loadChildren: () =>
           import('./pages/pages.routes').then((m) => m.routes),
+        canActivate: [AdminGuard], // Seuls les admins peuvent accéder au dashboard
       },
       {
         path: 'message-form',
@@ -30,6 +34,13 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'iso-response',
+        loadComponent: () =>
+          import('./pages/iso-response/iso-response.component').then(
+            (m) => m.IsoResponseComponent
+          ),
+      },
+      {
         path: 'transaction-history',
         loadComponent: () =>
           import('./pages/transaction-history/transaction-history.component').then(
@@ -37,11 +48,28 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'logs',
+        loadComponent: () =>
+          import('./pages/logs-monitoring/logs-monitoring.component').then(
+            (m) => m.LogsMonitoringComponent
+          ),
+        // Accessible à tous les utilisateurs authentifiés
+      },
+      {
+        path: 'incidents',
+        loadComponent: () =>
+          import('./pages/incidents/incidents.page').then(
+            (m) => m.IncidentsPage
+          ),
+        // Accessible à tous les utilisateurs authentifiés
+      },
+      {
         path: 'users',
         loadComponent: () =>
           import('./pages/users/users.component').then(
             (m) => m.UsersComponent
           ),
+        canActivate: [AdminGuard], // Seuls les admins peuvent gérer les utilisateurs
       },
       {
         path: 'profile',
@@ -53,6 +81,7 @@ export const routes: Routes = [
           import('./pages/accounts/account-list.component').then(
             (m) => m.AccountListComponent
           ),
+        canActivate: [AdminGuard], // Seuls les admins peuvent gérer les comptes
       },
       {
         path: 'accounts/new',
@@ -60,6 +89,7 @@ export const routes: Routes = [
           import('./pages/accounts/account-form.component').then(
             (m) => m.AccountFormComponent
           ),
+        canActivate: [AdminGuard], // Seuls les admins peuvent créer des comptes
       },
       {
         path: 'cards',
@@ -67,8 +97,8 @@ export const routes: Routes = [
           import('./pages/cards/card-list.component').then(
             (m) => m.CardListComponent
           ),
+        canActivate: [AdminGuard], // Seuls les admins peuvent gérer les cartes
       },
-
       {
         path: 'ui-components',
         loadChildren: () =>

@@ -47,6 +47,10 @@ public class IncidentReportService {
         return incidentReportRepository.findAll();
     }
 
+    public List<IncidentReport> getIncidentsByUserId(Long userId) {
+        return incidentReportRepository.findByUserId(userId);
+    }
+
     public void updateIncidentStatus(Long id, String status) {
         IncidentReport incident = incidentReportRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Incident non trouvé"));
@@ -124,4 +128,3 @@ public class IncidentReportService {
         return incidentReportRepository.countByStatus(status);
     }
 }
-

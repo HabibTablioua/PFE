@@ -8,11 +8,22 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSelectModule } from '@angular/material/select';
 import { MatOptionModule } from '@angular/material/core';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 @Component({
   selector: 'app-incident-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule, MatSelectModule, MatOptionModule],
+  imports: [
+    CommonModule, 
+    ReactiveFormsModule, 
+    MatFormFieldModule, 
+    MatInputModule, 
+    MatButtonModule, 
+    MatIconModule, 
+    MatSelectModule, 
+    MatOptionModule,
+    MatProgressSpinnerModule
+  ],
   templateUrl: './incident-form.component.html',
   styleUrls: ['./incident-form.component.css']
 })
@@ -21,6 +32,7 @@ export class IncidentFormComponent implements OnInit {
   @Output() submitIncident = new EventEmitter<Partial<Incident>>();
 
   form: FormGroup;
+  isSubmitting = false;
   statusOptions = [
     { value: 'NON_TRAITE', label: 'Non traité' },
     { value: 'EN_COURS', label: 'En cours' },
@@ -47,11 +59,34 @@ export class IncidentFormComponent implements OnInit {
 
   onSubmit() {
     if (this.form.valid) {
+      this.isSubmitting = true;
       this.submitIncident.emit(this.form.value);
+      
+      // Réinitialiser l'état de soumission après un délai
+      setTimeout(() => {
+        this.isSubmitting = false;
+      }, 2000);
     }
   }
 
   resetForm() {
-    this.form.reset();
+    this.form.reset({
+      title: '',
+      description: '',
+      status: 'NON_TRAITE'
+    });
   }
-} 
+
+  getStatusIcon(status: string): string {
+    switch (status) {
+      case 'NON_TRAITE':
+        return 'error';
+      case 'EN_COURS':
+        return 'pending';
+      case 'RESOLU':
+        return 'check_circle';
+      default:
+        return 'flag';
+    }
+  }
+}

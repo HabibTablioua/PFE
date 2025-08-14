@@ -89,32 +89,43 @@ export class AccountService {
     return this.http.delete(`${this.apiUrl}/${pan}`, { headers });
   }
 
-  // Récupérer les comptes par statut
-  getAccountsByStatus(status: string): Observable<Account[]> {
+  // Supprimer plusieurs comptes avec suppression en cascade
+  deleteMultipleAccounts(pans: string[]): Observable<any> {
     const token = localStorage.getItem('token');
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${token}`
     });
-    return this.http.get<Account[]>(`${this.apiUrl}/status/${status}`, { headers });
+    return this.http.delete<any>(`${this.apiUrl}/bulk`, { 
+      headers,
+      body: pans 
+    });
   }
 
-  // Récupérer les comptes avec solde positif
-  getAccountsWithPositiveBalance(): Observable<Account[]> {
+  // Récupérer les statistiques des comptes
+  getAccountStats(): Observable<any> {
     const token = localStorage.getItem('token');
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${token}`
     });
-    return this.http.get<Account[]>(`${this.apiUrl}/positive-balance`, { headers });
+    return this.http.get<any>(`${this.apiUrl}/stats`, { headers });
   }
 
-  // Validation de l'algorithme de Luhn pour le PAN
-  validateLuhn(pan: string): boolean {
-    if (!pan || pan.length < 13) return false;
+  // Rechercher des comptes par critères
+  searchAccounts(criteria: any): Observable<Account[]> {
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
+    return this.http.post<Account[]>(`${this.apiUrl}/search`, criteria, { headers });
+  }
+
+  // Validation de l'algorithme de Luhn
+  isValidLuhn(pan: string): boolean {
+    if (pan.length < 13) return false;
     
     let sum = 0;
     let alternate = false;
     
-    // Parcourir le PAN de droite à gauche
     for (let i = pan.length - 1; i >= 0; i--) {
       let digit = parseInt(pan.charAt(i));
       
@@ -130,6 +141,11 @@ export class AccountService {
     }
     
     return (sum % 10) === 0;
+  }
+
+  // Alias pour la compatibilité (ancienne méthode)
+  validateLuhn(pan: string): boolean {
+    return this.isValidLuhn(pan);
   }
 
   // Générer un PAN valide pour les tests
@@ -224,4 +240,5 @@ export class AccountService {
       return 'Date invalide';
     }
   }
-} 
+}
+ 

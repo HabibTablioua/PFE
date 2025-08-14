@@ -47,18 +47,37 @@ export class AppSideLoginComponent {
       password: this.f['password'].value!
     }).subscribe({
       next: (response) => {
-        // Stocker le token dans le localStorage
+        // Stocker le token et les informations utilisateur
         if (response.token) {
           localStorage.setItem('token', response.token);
         }
         
-        this.snackBar.open('Connexion réussie ! Redirection vers le tableau de bord...', 'Fermer', {
+        if (response.user) {
+          localStorage.setItem('currentUser', JSON.stringify(response.user));
+          // Mettre à jour l'utilisateur courant via le service
+          this.auth.updateCurrentUser(response.user);
+        }
+        
+        // Déterminer la route de redirection selon le rôle
+        let redirectRoute = '/message-form'; // Route par défaut pour tous les utilisateurs
+        
+        if (response.user && response.user.roles) {
+          if (response.user.roles.includes('ADMIN')) {
+            redirectRoute = '/dashboard'; // Les admins vont au dashboard
+          } else {
+            redirectRoute = '/message-form'; // Les utilisateurs normaux vont à la génération de messages
+          }
+        }
+        
+        const roleText = response.user?.roles?.includes('ADMIN') ? 'tableau de bord' : 'génération de messages ISO';
+        
+        this.snackBar.open(`Connexion réussie ! Redirection vers ${roleText}...`, 'Fermer', {
           duration: 3000,
           panelClass: ['success-snackbar']
         });
         
         setTimeout(() => {
-          this.router.navigate(['/dashboard']);
+          this.router.navigate([redirectRoute]);
         }, 2000);
       },
       error: (err) => {

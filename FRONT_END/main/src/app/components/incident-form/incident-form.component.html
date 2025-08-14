@@ -1,3 +1,82 @@
+<div class="incident-form-container">
+  <div class="form-header">
+    <div class="header-icon">
+      <mat-icon>report_problem</mat-icon>
+    </div>
+    <h2 class="form-title">Déclarer un Incident</h2>
+    <p class="form-subtitle">Rapportez un problème ou une anomalie détectée</p>
+  </div>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="incident-form">
+    <div class="form-section">
+      <div class="field-group">
+        <label class="field-label">
+          <mat-icon class="label-icon">title</mat-icon>
+          Titre de l'incident *
+        </label>
+        <mat-form-field appearance="outline" class="modern-field">
+          <input matInput formControlName="title" placeholder="Ex: Problème de connexion" required>
+          <mat-error *ngIf="form.get('title')?.hasError('required')">
+            <mat-icon>error</mat-icon>
+            Le titre est obligatoire
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">
+          <mat-icon class="label-icon">description</mat-icon>
+          Description détaillée *
+        </label>
+        <mat-form-field appearance="outline" class="modern-field description-field">
+          <textarea matInput formControlName="description" 
+                    placeholder="Décrivez le problème en détail..." 
+                    rows="5" required></textarea>
+          <mat-error *ngIf="form.get('description')?.hasError('required')">
+            <mat-icon>error</mat-icon>
+            La description est obligatoire
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">
+          <mat-icon class="label-icon">flag</mat-icon>
+          Priorité de l'incident *
+        </label>
+        <mat-form-field appearance="outline" class="modern-field">
+          <mat-select formControlName="status" required>
+            <mat-option *ngFor="let option of statusOptions" [value]="option.value">
+              <div class="status-option">
+                <mat-icon [class]="getStatusIcon(option.value)">{{ getStatusIcon(option.value) }}</mat-icon>
+                <span>{{ option.label }}</span>
+              </div>
+            </mat-option>
+          </mat-select>
+          <mat-error *ngIf="form.get('status')?.hasError('required')">
+            <mat-icon>error</mat-icon>
+            Le statut est obligatoire
+          </mat-error>
+        </mat-form-field>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button mat-stroked-button type="button" class="reset-btn" (click)="resetForm()">
+        <mat-icon>refresh</mat-icon>
+        Réinitialiser
+      </button>
+      
+      <button mat-raised-button color="primary" type="submit" 
+              [disabled]="form.invalid || isSubmitting" 
+              class="submit-btn">
+        <mat-icon *ngIf="!isSubmitting">send</mat-icon>
+        <mat-spinner *ngIf="isSubmitting" diameter="20"></mat-spinner>
+        {{ isSubmitting ? 'Envoi en cours...' : 'Déclarer l\'incident' }}
+      </button>
+    </div>
+  </form>
+</div> 
 <form [formGroup]="form" (ngSubmit)="onSubmit()" class="incident-form modern-incident-form">
   <mat-form-field appearance="outline" class="full-width modern-field">
     <mat-label>Titre</mat-label>

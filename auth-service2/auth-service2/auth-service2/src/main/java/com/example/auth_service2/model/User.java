@@ -37,11 +37,44 @@ public class User {
     @ElementCollection(fetch = FetchType.EAGER)
     private List<String> roles;
 
-
     private String status = "offline"; // ✅ Nouveau champ avec valeur par défaut
+
+    // Champ pour l'authentification à deux facteurs (si présent dans la base)
+    private Boolean twoFactorEnabled = false;
 
     public String getRolesAsString() {
         return roles != null ? String.join(", ", roles) : "";
     }
-}
 
+    /**
+     * Vérifie si l'utilisateur a le rôle ADMIN
+     */
+    public boolean isAdmin() {
+        return roles != null && roles.contains("ADMIN");
+    }
+
+    /**
+     * Vérifie si l'utilisateur a le rôle USER
+     */
+    public boolean isUser() {
+        return roles != null && roles.contains("USER");
+    }
+
+    /**
+     * Vérifie si l'utilisateur a un rôle spécifique
+     */
+    public boolean hasRole(String role) {
+        return roles != null && roles.contains(role);
+    }
+
+    /**
+     * Vérifie si l'utilisateur a au moins un des rôles spécifiés
+     */
+    public boolean hasAnyRole(String... roles) {
+        if (this.roles == null) return false;
+        for (String role : roles) {
+            if (this.roles.contains(role)) return true;
+        }
+        return false;
+    }
+}

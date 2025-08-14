@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.annotation.PostConstruct;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
@@ -29,6 +30,29 @@ public class AuthController {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    /**
+     * Initialise l'utilisateur admin par défaut au démarrage
+     */
+    @PostConstruct
+    public void initializeAdmin() {
+        // Vérifier si l'admin existe déjà
+        Optional<User> adminOpt = userRepository.findByEmail("admin@gmail.com");
+        if (adminOpt.isEmpty()) {
+            User admin = new User();
+            admin.setFirstname("Administrateur");
+            admin.setLastname("Principal");
+            admin.setEmail("admin@gmail.com");
+            admin.setPassword(passwordEncoder.encode("123456"));
+            admin.setRoles(Collections.singletonList("ADMIN"));
+            admin.setStatus("offline");
+            
+            userRepository.save(admin);
+            System.out.println("✅ Utilisateur admin créé avec succès: admin@gmail.com / 123456");
+        } else {
+            System.out.println("ℹ️ L'utilisateur admin existe déjà");
+        }
+    }
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody Map<String, String> request){
@@ -52,15 +76,12 @@ public class AuthController {
         newUser.setLastname(lastname);
         newUser.setEmail(email);
         newUser.setPassword(passwordEncoder.encode(password));
-        newUser.setRoles(Collections.singletonList("USER"));
+        newUser.setRoles(Collections.singletonList("USER")); // Par défaut, rôle USER
 
         userRepository.save(newUser);
 
         return ResponseEntity.ok(Map.of("message", "User registered successfully"));
-
     }
-
-
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Map<String, String> request) {
@@ -72,17 +93,27 @@ public class AuthController {
             return ResponseEntity.status(401).body("Invalid email or password");
         }
 
-
         User user = userOpt.get();
 
         // ✅ Mettre le status à online
         user.setStatus("online");
         userRepository.save(user);
 
-        String token = jwtUtil.generateToken(user.getEmail(), user.getRoles());
-        return ResponseEntity.ok(Collections.singletonMap("token", token));
-    }
+        // Créer la réponse avec plus d'informations
+        Map<String, Object> response = Map.of(
+            "token", jwtUtil.generateToken(user.getEmail(), user.getRoles()),
+            "user", Map.of(
+                "id", user.getId(),
+                "email", user.getEmail(),
+                "firstname", user.getFirstname(),
+                "lastname", user.getLastname(),
+                "roles", user.getRoles(),
+                "status", user.getStatus()
+            )
+        );
 
+        return ResponseEntity.ok(response);
+    }
 
     @PostMapping("/logout")
     public ResponseEntity<?> logout(@RequestBody Map<String, String> request) {
@@ -108,7 +139,7 @@ public class AuthController {
             return ResponseEntity.status(401).body("Missing or invalid Authorization header");
         }
         String token = authorizationHeader.substring(7);
-        String email = jwtUtil.extractUsername(token); // à adapter selon ta méthode
+        String email = jwtUtil.extractUsername(token);
         Optional<User> userOpt = userRepository.findByEmail(email);
         if (userOpt.isPresent()) {
             User user = userOpt.get();
@@ -119,4 +150,25 @@ public class AuthController {
         }
     }
 
+    /**
+     * Endpoint pour vérifier si l'utilisateur est admin
+     */
+    @GetMapping("/check-admin")
+    public ResponseEntity<?> checkAdmin(@RequestHeader("Authorization") String authorizationHeader) {
+        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+            return ResponseEntity.status(401).body("Missing or invalid Authorization header");
+        }
+        
+        String token = authorizationHeader.substring(7);
+        String email = jwtUtil.extractUsername(token);
+        Optional<User> userOpt = userRepository.findByEmail(email);
+        
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+            boolean isAdmin = user.isAdmin();
+            return ResponseEntity.ok(Map.of("isAdmin", isAdmin, "roles", user.getRoles()));
+        } else {
+            return ResponseEntity.status(404).body("User not found");
+        }
+    }
 }

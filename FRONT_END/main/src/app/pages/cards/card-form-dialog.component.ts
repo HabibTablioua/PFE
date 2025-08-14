@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject, OnInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
@@ -12,12 +12,14 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatIconModule } from '@angular/material/icon';
 import { MatRadioModule } from '@angular/material/radio';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { CardService, Card } from '../../services/card.service';
 import { OperationsMappingService, OperationMapping } from '../../services/operations-mapping.service';
 
 @Component({
   selector: 'app-card-form-dialog',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     ReactiveFormsModule,
@@ -31,7 +33,8 @@ import { OperationsMappingService, OperationMapping } from '../../services/opera
     MatCheckboxModule,
     MatSnackBarModule,
     MatIconModule,
-    MatRadioModule
+    MatRadioModule,
+    MatTooltipModule
   ],
   template: `
     <div class="dialog-container">
@@ -42,12 +45,16 @@ import { OperationsMappingService, OperationMapping } from '../../services/opera
       <form [formGroup]="cardForm" (ngSubmit)="onSubmit()">
         <mat-dialog-content>
           <div class="form-grid">
+            <!-- Champ PAN - modifiable avec génération automatique -->
             <div class="form-row">
               <mat-form-field appearance="outline" class="form-field">
                 <mat-label>PAN*</mat-label>
                 <input matInput formControlName="pan" placeholder="1234567890123456" maxlength="16">
                 <mat-error *ngIf="cardForm.get('pan')?.hasError('required')">Le PAN est requis</mat-error>
                 <mat-error *ngIf="cardForm.get('pan')?.hasError('pattern')">Le PAN doit contenir exactement 16 chiffres</mat-error>
+                <button mat-icon-button matSuffix type="button" (click)="generateNewPan()" matTooltip="Générer un nouveau PAN">
+                  <mat-icon>refresh</mat-icon>
+                </button>
               </mat-form-field>
             </div>
 
@@ -57,7 +64,50 @@ import { OperationsMappingService, OperationMapping } from '../../services/opera
                 <input matInput formControlName="holderName" placeholder="Jean Dupont" maxlength="50">
                 <mat-error *ngIf="cardForm.get('holderName')?.hasError('required')">Le nom du titulaire est requis</mat-error>
               </mat-form-field>
+            </div>
 
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="form-field">
+                <mat-label>Numéro de carte</mat-label>
+                <input matInput formControlName="cardNumber" placeholder="1234567890123456" maxlength="16">
+                <mat-hint>Optionnel - si vide, le PAN sera utilisé</mat-hint>
+                <mat-error *ngIf="cardForm.get('cardNumber')?.hasError('pattern')">Le numéro doit contenir exactement 16 chiffres</mat-error>
+              </mat-form-field>
+            </div>
+
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="form-field">
+                <mat-label>CVV</mat-label>
+                <input matInput formControlName="cvv" placeholder="123" maxlength="4" 
+                       [type]="showCvv ? 'text' : 'password'">
+                <mat-hint>3 ou 4 chiffres de sécurité</mat-hint>
+                <mat-error *ngIf="cardForm.get('cvv')?.hasError('pattern')">Le CVV doit contenir 3 ou 4 chiffres</mat-error>
+                <mat-error *ngIf="cardForm.get('cvv')?.hasError('invalidCvv')">Le CVV doit contenir exactement 3 ou 4 chiffres</mat-error>
+                <button mat-icon-button matSuffix type="button" 
+                        (click)="toggleCvvVisibility()" 
+                        [attr.aria-label]="showCvv ? 'Masquer CVV' : 'Afficher CVV'"
+                        matTooltip="{{ showCvv ? 'Masquer CVV' : 'Afficher CVV' }}">
+                  <mat-icon>{{ showCvv ? 'visibility_off' : 'visibility' }}</mat-icon>
+                </button>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="form-field">
+                <mat-label>PIN</mat-label>
+                <input matInput formControlName="pin" placeholder="0000" maxlength="6" 
+                       [type]="showPin ? 'text' : 'password'">
+                <mat-hint>4 à 6 chiffres du code secret</mat-hint>
+                <mat-error *ngIf="cardForm.get('pin')?.hasError('pattern')">Le PIN doit contenir 4 à 6 chiffres</mat-error>
+                <mat-error *ngIf="cardForm.get('pin')?.hasError('invalidPin')">Le PIN doit contenir exactement 4 à 6 chiffres</mat-error>
+                <button mat-icon-button matSuffix type="button" 
+                        (click)="togglePinVisibility()" 
+                        [attr.aria-label]="showPin ? 'Masquer PIN' : 'Afficher PIN'"
+                        matTooltip="{{ showPin ? 'Masquer PIN' : 'Afficher PIN' }}">
+                  <mat-icon>{{ showPin ? 'visibility_off' : 'visibility' }}</mat-icon>
+                </button>
+              </mat-form-field>
+            </div>
+
+            <div class="form-row">
               <mat-form-field appearance="outline" class="form-field">
                 <mat-label>Type de carte*</mat-label>
                 <mat-select formControlName="type">
@@ -67,9 +117,7 @@ import { OperationsMappingService, OperationMapping } from '../../services/opera
                 </mat-select>
                 <mat-error *ngIf="cardForm.get('type')?.hasError('required')">Le type de carte est requis</mat-error>
               </mat-form-field>
-            </div>
 
-            <div class="form-row">
               <mat-form-field appearance="outline" class="form-field">
                 <mat-label>Date d'expiration*</mat-label>
                 <input matInput [matDatepicker]="picker" formControlName="expiryDate" placeholder="MM/AAAA">
@@ -77,7 +125,9 @@ import { OperationsMappingService, OperationMapping } from '../../services/opera
                 <mat-datepicker #picker></mat-datepicker>
                 <mat-error *ngIf="cardForm.get('expiryDate')?.hasError('required')">La date d'expiration est requise</mat-error>
               </mat-form-field>
+            </div>
 
+            <div class="form-row">
               <mat-form-field appearance="outline" class="form-field">
                 <mat-label>Banque émettrice</mat-label>
                 <input matInput formControlName="issuer" placeholder="Banque Populaire" maxlength="30">
@@ -277,6 +327,63 @@ import { OperationsMappingService, OperationMapping } from '../../services/opera
 
     .form-field:focus-within .mat-mdc-form-field-focus-overlay {
       opacity: 0.2;
+    }
+
+    /* Styles pour le bouton de génération de PAN */
+    .form-field .mat-mdc-form-field-suffix button {
+      color: #3b82f6;
+      transition: all 0.3s ease;
+      border-radius: 50%;
+    }
+
+    .form-field .mat-mdc-form-field-suffix button:hover {
+      background-color: #eff6ff;
+      color: #1d4ed8;
+      transform: scale(1.1);
+    }
+
+    .form-field .mat-mdc-form-field-suffix button:active {
+      transform: scale(0.95);
+    }
+
+    /* Styles pour les champs sensibles (CVV et PIN) */
+    .form-field input[type="password"] {
+      font-family: 'Courier New', monospace;
+      letter-spacing: 2px;
+    }
+
+    .form-field input[type="password"]::placeholder {
+      font-family: 'Courier New', monospace;
+      letter-spacing: 1px;
+    }
+
+    .form-field input[type="text"] {
+      font-family: 'Courier New', monospace;
+      letter-spacing: 2px;
+    }
+
+    /* Styles pour les boutons d'affichage/masquage */
+    .form-field .mat-mdc-form-field-suffix button[matTooltip] {
+      color: #6b7280;
+      transition: all 0.3s ease;
+      border-radius: 50%;
+    }
+
+    .form-field .mat-mdc-form-field-suffix button[matTooltip]:hover {
+      background-color: #f3f4f6;
+      color: #374151;
+      transform: scale(1.1);
+    }
+
+    .form-field .mat-mdc-form-field-suffix button[matTooltip]:active {
+      transform: scale(0.95);
+    }
+
+    /* Styles pour les champs optionnels */
+    .form-field .mat-mdc-form-field-hint {
+      color: #6b7280;
+      font-size: 12px;
+      font-style: italic;
     }
 
     .full-width {
@@ -744,6 +851,52 @@ import { OperationsMappingService, OperationMapping } from '../../services/opera
     .alert-radio.mat-mdc-radio-button-checked .alert-icon {
       color: #dc2626;
     }
+
+    .pan-info-card {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding: 15px 20px;
+      background: linear-gradient(135deg, #f0f9eb 0%, #e8f5e9 100%);
+      border-radius: 12px;
+      border: 1px solid #a5d6a7;
+      box-shadow: 0 4px 15px rgba(165, 214, 167, 0.1);
+      transition: all 0.3s ease;
+    }
+
+    .pan-info-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(165, 214, 167, 0.2);
+      border-color: #66bb6a;
+    }
+
+    .info-icon {
+      color: #4caf50;
+      font-size: 28px;
+      width: 28px;
+      height: 28px;
+    }
+
+    .pan-info-content h4 {
+      margin: 0 0 8px 0;
+      color: #2e7d32;
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
+
+    .generated-pan {
+      font-family: 'Courier New', monospace;
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #2e7d32;
+      letter-spacing: 1px;
+      word-break: break-all;
+    }
+
+    .pan-info-content small {
+      color: #616161;
+      font-size: 0.8rem;
+    }
   `]
 })
 export class CardFormDialogComponent implements OnInit {
@@ -751,6 +904,10 @@ export class CardFormDialogComponent implements OnInit {
   isEditMode = false;
   isSubmitting = false;
   availableOperations: OperationMapping[] = [];
+  
+  // Propriétés pour l'affichage des champs sensibles
+  showCvv = false;
+  showPin = false;
 
   constructor(
     private fb: FormBuilder,
@@ -758,15 +915,42 @@ export class CardFormDialogComponent implements OnInit {
     private dialogRef: MatDialogRef<CardFormDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
     private snackBar: MatSnackBar,
-    private operationsMappingService: OperationsMappingService
+    private operationsMappingService: OperationsMappingService,
+    private cdr: ChangeDetectorRef
   ) {
+    this.initializeForm();
+  }
+
+  ngOnInit(): void {
+    // Utiliser setTimeout pour éviter les problèmes de rendu
+    setTimeout(() => {
+      if (this.data && this.data.pan) {
+        this.isEditMode = true;
+        this.populateForm(this.data);
+        
+        // En mode édition, afficher les champs sensibles par défaut
+        this.showCvv = true;
+        this.showPin = true;
+      }
+      this.availableOperations = this.operationsMappingService.getAllOperations();
+      this.cdr.detectChanges();
+    }, 0);
+  }
+
+  private initializeForm(): void {
+    // Générer automatiquement un PAN valide pour les nouvelles cartes
+    const generatedPan = this.generateValidPan();
+    
     this.cardForm = this.fb.group({
-      pan: ['', [Validators.required, Validators.pattern(/^\d{16}$/)]],
+      pan: [generatedPan, [Validators.required, Validators.pattern(/^\d{16}$/)]],
+      cardNumber: ['', [Validators.pattern(/^\d{16}$/)]], // Numéro de carte optionnel
       holderName: ['', Validators.required],
       type: ['DEBIT', Validators.required],
       status: ['ACTIVE', Validators.required],
       expiryDate: ['', Validators.required],
       issuer: [''],
+      cvv: ['', [Validators.pattern(/^\d{3,4}$/), this.cvvValidator]], // CVV 3 ou 4 chiffres
+      pin: ['', [Validators.pattern(/^\d{4,6}$/), this.pinValidator]], // PIN 4 à 6 chiffres
       paymentCard: [false],
       atmWithdrawal: [false],
       bankTransfer: [false],
@@ -779,30 +963,27 @@ export class CardFormDialogComponent implements OnInit {
     });
   }
 
-  ngOnInit(): void {
-    if (this.data && this.data.pan) {
-      this.isEditMode = true;
-      this.populateForm(this.data);
-    }
-    
-    this.availableOperations = this.operationsMappingService.getAllOperations();
-  }
-
   populateForm(card: any): void {
+    console.log('🔍 Données de la carte reçues:', card);
+    
+    // Utiliser patchValue pour une mise à jour plus rapide
     this.cardForm.patchValue({
       pan: card.pan,
+      cardNumber: card.cardNumber || '',
       holderName: card.holderName || '',
       type: card.type || 'DEBIT',
       status: card.status || 'ACTIVE',
       expiryDate: card.expiryDate ? new Date(card.expiryDate) : null,
       issuer: card.issuer || '',
+      cvv: card.cvv || '',
+      pin: card.pin || '',
       alertStatus: this.convertFlagsToAlertStatus(card)
     });
 
-    // Populate allowedOperations checkboxes
+    // Populate allowedOperations checkboxes de manière optimisée
     if (card.allowedOperations) {
       const operations = card.allowedOperations.split(',').map((op: string) => op.trim());
-      this.cardForm.patchValue({
+      const operationValues = {
         paymentCard: operations.includes('200000'),
         atmWithdrawal: operations.includes('310000'),
         bankTransfer: operations.includes('400000'),
@@ -811,13 +992,20 @@ export class CardFormDialogComponent implements OnInit {
         foreignPayment: operations.includes('700000'),
         premiumPayment: operations.includes('800000'),
         noRestriction: operations.includes('999999')
-      });
+      };
+      
+      this.cardForm.patchValue(operationValues);
     }
+
+    // Déclencher la détection de changements
+    this.cdr.detectChanges();
   }
 
   onSubmit(): void {
     if (this.cardForm.valid) {
       this.isSubmitting = true;
+      this.cdr.detectChanges(); // Mettre à jour l'UI immédiatement
+
       const cardData = this.cardForm.value;
 
       // Convertir les checkboxes en codes d'opérations
@@ -826,6 +1014,14 @@ export class CardFormDialogComponent implements OnInit {
 
       // Convertir le statut d'alerte en flags individuels
       this.convertAlertStatusToFlags(cardData);
+
+      // Ajouter les champs manquants
+      cardData.cardNumber = cardData.cardNumber || cardData.pan; // Si pas de cardNumber, utiliser le PAN
+      cardData.cvv = cardData.cvv || '000'; // CVV par défaut si vide
+      cardData.pin = cardData.pin || '0000'; // PIN par défaut si vide
+
+      // Log des données avant envoi
+      console.log('📤 Données de la carte à envoyer:', cardData);
 
       cardData.createdAt = new Date();
       cardData.updatedAt = new Date();
@@ -840,6 +1036,7 @@ export class CardFormDialogComponent implements OnInit {
             console.error('Erreur lors de la mise à jour:', error);
             this.snackBar.open('Erreur lors de la mise à jour de la carte', 'Fermer', { duration: 3000 });
             this.isSubmitting = false;
+            this.cdr.detectChanges();
           }
         });
       } else {
@@ -851,6 +1048,8 @@ export class CardFormDialogComponent implements OnInit {
           error: (error: any) => {
             console.error('Erreur lors de la création:', error);
             this.snackBar.open('Erreur lors de la création de la carte', 'Fermer', { duration: 3000 });
+            this.isSubmitting = false;
+            this.cdr.detectChanges();
           }
         });
       }
@@ -917,5 +1116,88 @@ export class CardFormDialogComponent implements OnInit {
     if (card.blacklisted) return 'BLACKLISTED';
     if (card.restricted) return 'RESTRICTED';
     return 'NONE';
+  }
+
+  /**
+   * Validateur personnalisé pour le CVV
+   */
+  private cvvValidator(control: any): {[key: string]: any} | null {
+    if (!control.value) return null;
+    const cvv = control.value.toString();
+    if (cvv.length < 3 || cvv.length > 4) {
+      return {'invalidCvv': {value: control.value}};
+    }
+    return null;
+  }
+
+  /**
+   * Validateur personnalisé pour le PIN
+   */
+  private pinValidator(control: any): {[key: string]: any} | null {
+    if (!control.value) return null;
+    const pin = control.value.toString();
+    if (pin.length < 4 || pin.length > 6) {
+      return {'invalidPin': {value: control.value}};
+    }
+    return null;
+  }
+
+  /**
+   * Bascule l'affichage du CVV
+   */
+  toggleCvvVisibility(): void {
+    this.showCvv = !this.showCvv;
+    this.cdr.detectChanges();
+  }
+
+  /**
+   * Bascule l'affichage du PIN
+   */
+  togglePinVisibility(): void {
+    this.showPin = !this.showPin;
+    this.cdr.detectChanges();
+  }
+
+  /**
+   * Génère un nouveau PAN et le met à jour dans le formulaire
+   */
+  generateNewPan(): void {
+    const newPan = this.generateValidPan();
+    this.cardForm.patchValue({ pan: newPan });
+    
+    // Afficher un message de confirmation
+    this.snackBar.open(`Nouveau PAN généré : ${newPan}`, 'Fermer', { duration: 3000 });
+    
+    // Déclencher la détection de changements
+    this.cdr.detectChanges();
+  }
+
+  private generateValidPan(): string {
+    // Générer 15 chiffres aléatoires
+    let pan = '';
+    for (let i = 0; i < 15; i++) {
+      pan += Math.floor(Math.random() * 10);
+    }
+    
+    // Calculer le chiffre de contrôle (Luhn)
+    let sum = 0;
+    let alternate = false;
+    
+    for (let i = pan.length - 1; i >= 0; i--) {
+      let digit = parseInt(pan.charAt(i));
+      
+      if (alternate) {
+        digit *= 2;
+        if (digit > 9) {
+          digit = (digit % 10) + 1;
+        }
+      }
+      
+      sum += digit;
+      alternate = !alternate;
+    }
+    
+    const checkDigit = (10 - (sum % 10)) % 10;
+    return pan + checkDigit;
   }
 } 

@@ -110,8 +110,8 @@ export interface AlertData {
     }
 
     .alert-item.info {
-      background: rgba(59, 130, 246, 0.05);
-      border-left-color: #3b82f6;
+      background: rgba(34, 197, 94, 0.05);
+      border-left-color: #22c55e;
     }
 
     .alert-item.warning {
@@ -140,8 +140,8 @@ export interface AlertData {
     }
 
     .alert-item.info .alert-icon {
-      background: rgba(59, 130, 246, 0.1);
-      color: #3b82f6;
+      background: rgba(34, 197, 94, 0.1);
+      color: #22c55e;
     }
 
     .alert-item.warning .alert-icon {

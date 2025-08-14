@@ -1,12 +1,28 @@
 import { Component, OnInit } from '@angular/core';
 import { UserService, User } from '../../services/user.service';
+import { AuthService } from '../../services/auth.service';
+import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [
+    CommonModule, 
+    FormsModule, 
+    MatButtonModule, 
+    MatIconModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatProgressSpinnerModule
+  ],
   templateUrl: './profile.component.html',
   styleUrls: ['./profile.component.scss']
 })
@@ -18,7 +34,12 @@ export class ProfileComponent implements OnInit {
   success = '';
   editUser: User | null = null;
 
-  constructor(private userService: UserService) {}
+  constructor(
+    private userService: UserService,
+    private authService: AuthService,
+    private router: Router,
+    private snackBar: MatSnackBar
+  ) {}
 
   ngOnInit() {
     this.loadProfile();
@@ -73,4 +94,26 @@ export class ProfileComponent implements OnInit {
       }
     });
   }
-} 
+
+  /**
+   * Déconnexion de l'utilisateur
+   */
+  logout() {
+    this.authService.logout();
+    this.router.navigate(['/authentication/login']);
+  }
+  /**
+   * Valide le format d'un email
+   */
+  isValidEmail(email: string): boolean {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  }
+
+  /**
+   * Vérifie si l'utilisateur est l'admin par défaut
+   */
+  isAdminUser(): boolean {
+    return this.user?.email === 'admin@gmail.com';
+  }
+}

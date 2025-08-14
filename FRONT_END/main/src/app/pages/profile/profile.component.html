@@ -1,3 +1,164 @@
+<div class="profile-page">
+  <!-- Header avec avatar et nom -->
+  <div class="profile-header">
+    <div class="profile-avatar-container">
+      <div class="profile-avatar">
+        <span *ngIf="user && user.firstname && user.lastname && !isAdminUser()">
+          {{ user.firstname[0] }}{{ user.lastname[0] }}
+        </span>
+        <span *ngIf="user && user.firstname && user.lastname && isAdminUser()">
+          AP
+        </span>
+        <span *ngIf="!user || !user.firstname || !user.lastname">👤</span>
+      </div>
+    </div>
+    
+    <div class="profile-header-info">
+      <h1 class="profile-name">
+        {{ user?.firstname || 'Prénom' }} {{ user?.lastname || 'Nom' }}
+      </h1>
+      <p class="profile-email">{{ user?.email || 'email@example.com' }}</p>
+      <div class="profile-roles" *ngIf="user && user.roles && user.roles.length > 0">
+        <span class="role-badge" *ngFor="let role of user.roles" [class]="role.toLowerCase()">
+          {{ role }}
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Informations du profil -->
+  <div class="profile-content">
+    <div class="profile-section">
+      <h2 class="section-title">
+        <mat-icon>person</mat-icon>
+        Informations personnelles
+      </h2>
+      
+      <div class="info-grid">
+        <div class="info-card">
+          <div class="info-icon">
+            <mat-icon>badge</mat-icon>
+          </div>
+          <div class="info-content">
+            <label>Prénom</label>
+            <span>{{ user?.firstname || 'Non défini' }}</span>
+          </div>
+        </div>
+        
+        <div class="info-card">
+          <div class="info-icon">
+            <mat-icon>person</mat-icon>
+          </div>
+          <div class="info-content">
+            <label>Nom</label>
+            <span>{{ user?.lastname || 'Non défini' }}</span>
+          </div>
+        </div>
+        
+        <div class="info-card">
+          <div class="info-icon">
+            <mat-icon>email</mat-icon>
+          </div>
+          <div class="info-content">
+            <label>Email</label>
+            <span>{{ user?.email || 'Non défini' }}</span>
+          </div>
+        </div>
+        
+        <div class="info-card">
+          <div class="info-icon">
+            <mat-icon>security</mat-icon>
+          </div>
+          <div class="info-content">
+            <label>Rôles</label>
+            <div class="role-display">
+              <span class="role-text">{{ user?.roles?.join(', ') || 'Aucun rôle' }}</span>
+              <div class="role-status-dot"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="profile-actions">
+      <button mat-raised-button color="primary" class="edit-btn" (click)="startEdit()">
+        <mat-icon>edit</mat-icon>
+        Modifier le profil
+      </button>
+      
+      <button mat-stroked-button color="warn" class="logout-btn" (click)="logout()">
+        <mat-icon>logout</mat-icon>
+        Se déconnecter
+      </button>
+    </div>
+  </div>
+
+  <!-- Formulaire d'édition (modal) -->
+  <div class="edit-modal" *ngIf="editMode">
+    <div class="edit-overlay" (click)="cancelEdit()"></div>
+    <div class="edit-content">
+      <div class="edit-header">
+        <h3>Modifier le profil</h3>
+        <button mat-icon-button (click)="cancelEdit()" class="close-btn">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+      
+      <form (ngSubmit)="saveEdit()" class="edit-form" *ngIf="editUser">
+        <mat-form-field appearance="outline">
+          <mat-label>Prénom</mat-label>
+          <input matInput [(ngModel)]="editUser.firstname" name="firstname" required minlength="2">
+          <mat-error *ngIf="editUser.firstname && editUser.firstname.length < 2">
+            Le prénom doit contenir au moins 2 caractères
+          </mat-error>
+        </mat-form-field>
+        
+        <mat-form-field appearance="outline">
+          <mat-label>Nom</mat-label>
+          <input matInput [(ngModel)]="editUser.lastname" name="lastname" required minlength="2">
+          <mat-error *ngIf="editUser.lastname && editUser.lastname.length < 2">
+            Le nom doit contenir au moins 2 caractères
+          </mat-error>
+        </mat-form-field>
+        
+        <mat-form-field appearance="outline">
+          <mat-label>Email</mat-label>
+          <input matInput [(ngModel)]="editUser.email" name="email" required type="email">
+          <mat-error *ngIf="editUser.email && !isValidEmail(editUser.email)">
+            Veuillez entrer un email valide
+          </mat-error>
+        </mat-form-field>
+        
+        <div class="edit-actions">
+          <button mat-stroked-button type="button" (click)="cancelEdit()">
+            Annuler
+          </button>
+          <button mat-raised-button color="primary" type="submit" [disabled]="loading">
+            <mat-icon>save</mat-icon>
+            Enregistrer
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Loading et messages -->
+  <div class="profile-loader" *ngIf="loading">
+    <mat-spinner diameter="40"></mat-spinner>
+    <span>Chargement du profil...</span>
+  </div>
+  
+  <div class="profile-error" *ngIf="error && !loading">
+    <mat-icon>error</mat-icon>
+    {{ error }}
+  </div>
+  
+  <div class="profile-success" *ngIf="success && !loading">
+    <mat-icon>check_circle</mat-icon>
+    {{ success }}
+  </div>
+</div> 
 <div *ngIf="loading" class="profile-loader">Chargement du profil...</div>
 <div *ngIf="error && !loading" class="profile-error">{{ error }}</div>
 <div *ngIf="success && !loading" class="profile-success">{{ success }}</div>
@@ -32,4 +193,3 @@
       <button type="button" (click)="cancelEdit()">Annuler</button>
     </div>
   </form>
-</div> 

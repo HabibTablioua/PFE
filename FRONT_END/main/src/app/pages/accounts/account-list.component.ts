@@ -9,13 +9,15 @@ import { ConfirmationDialogComponent } from '../../components/confirmation-dialo
 import { AccountDeleteDialogComponent } from '../../components/account-delete-dialog/account-delete-dialog.component';
 import { FormsModule } from '@angular/forms';
 import { AccountEditDialogComponent } from './account-edit-dialog.component';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { SelectionModel } from '@angular/cdk/collections';
 
 @Component({
   selector: 'app-account-list',
   templateUrl: './account-list.component.html',
   styleUrls: [],
   standalone: true,
-  imports: [CommonModule, RouterModule, MaterialModule, FormsModule],
+  imports: [CommonModule, RouterModule, MaterialModule, FormsModule, MatCheckboxModule],
   styles: [`
     .account-container {
       padding: 24px;
@@ -28,6 +30,36 @@ import { AccountEditDialogComponent } from './account-edit-dialog.component';
       justify-content: space-between;
       align-items: center;
       margin-bottom: 24px;
+    }
+
+    .bulk-actions {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .delete-selected-button {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      font-weight: 600;
+      border-radius: 8px;
+      border: 1px solid #ef4444;
+      color: #ef4444;
+      background: white;
+      transition: all 0.3s ease;
+    }
+
+    .delete-selected-button:hover:not(:disabled) {
+      background-color: #fef2f2;
+      border-color: #dc2626;
+      color: #dc2626;
+    }
+
+    .delete-selected-button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
     }
     
     .search-section {
@@ -713,5 +745,40 @@ export class AccountListComponent implements OnInit {
     document.body.removeChild(link);
 
     this.snackBar.open('Export CSV terminé', 'Fermer', { duration: 2000 });
+  }
+
+  // Propriétés et méthodes pour la sélection multiple
+  selection = new SelectionModel<Account>(true, []);
+
+  masterToggle(): void {
+    this.isAllSelected() ? this.selection.clear() : this.filteredAccounts.forEach(row => this.selection.select(row));
+  }
+
+  isAllSelected(): boolean {
+    const numSelected = this.selection.selected.length;
+    const numRows = this.filteredAccounts.length;
+    return numSelected === numRows;
+  }
+
+  deleteSelectedAccounts(): void {
+    if (this.selection.selected.length === 0) {
+      this.snackBar.open('Aucun compte sélectionné pour suppression.', 'Fermer', { duration: 3000 });
+      return;
+    }
+
+    const panList = this.selection.selected.map((account: any) => account.pan);
+    if (confirm(`Êtes-vous sûr de vouloir supprimer les ${panList.length} comptes sélectionnés ?\n\n⚠️ ATTENTION : Toutes les cartes associées seront également supprimées !`)) {
+      this.accountService.deleteMultipleAccounts(panList).subscribe({
+        next: (response: any) => {
+          this.loadAccounts();
+          this.selection.clear();
+          this.snackBar.open(`${response.totalAccountsDeleted} comptes supprimés avec succès. ${response.totalCardsDeleted} cartes supprimées.`, 'Fermer', { duration: 3000 });
+        },
+        error: (error: any) => {
+          console.error('Erreur lors de la suppression des comptes sélectionnés:', error);
+          this.snackBar.open('Erreur lors de la suppression des comptes sélectionnés', 'Fermer', { duration: 3000 });
+        }
+      });
+    }
   }
 } 

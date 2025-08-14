@@ -3,13 +3,18 @@ package org.example.responseisoservice.Controller;
 import lombok.RequiredArgsConstructor;
 import org.example.responseisoservice.Entity.Account;
 import org.example.responseisoservice.repository.AccountRepository;
+import org.example.responseisoservice.repository.CardRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.ArrayList;
 
 @RestController
 @RequestMapping("/accounts")
@@ -18,6 +23,9 @@ public class AccountController {
 
     @Autowired
     private AccountRepository accountRepository;
+
+    @Autowired
+    private CardRepository cardRepository;
 
     // GET - Récupérer tous les comptes
     @GetMapping
@@ -172,6 +180,7 @@ public class AccountController {
 
     // DELETE - Supprimer un compte
     @DeleteMapping("/{pan}")
+    @Transactional
     public ResponseEntity<Void> deleteAccount(@PathVariable String pan) {
         Optional<Account> account = accountRepository.findByPan(pan);
         
@@ -179,8 +188,53 @@ public class AccountController {
             return ResponseEntity.notFound().build();
         }
         
+        // Supprimer d'abord toutes les cartes associées
+        cardRepository.deleteByAccount_Pan(pan);
+        
+        // Puis supprimer le compte
         accountRepository.deleteById(pan);
         return ResponseEntity.ok().build();
+    }
+
+    // DELETE - Supprimer plusieurs comptes avec suppression en cascade
+    @DeleteMapping("/bulk")
+    @Transactional
+    public ResponseEntity<Map<String, Object>> deleteMultipleAccounts(@RequestBody List<String> pans) {
+        if (pans == null || pans.isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Liste des PANs vide"));
+        }
+        
+        List<String> deletedAccounts = new ArrayList<>();
+        List<String> notFoundAccounts = new ArrayList<>();
+        int totalCardsDeleted = 0;
+        
+        for (String pan : pans) {
+            Optional<Account> account = accountRepository.findByPan(pan);
+            if (account.isPresent()) {
+                // Compter les cartes associées avant suppression
+                long cardsCount = cardRepository.countByAccount_Pan(pan);
+                
+                // Supprimer d'abord toutes les cartes associées
+                cardRepository.deleteByAccount_Pan(pan);
+                
+                // Puis supprimer le compte
+                accountRepository.deleteById(pan);
+                
+                deletedAccounts.add(pan);
+                totalCardsDeleted += cardsCount;
+            } else {
+                notFoundAccounts.add(pan);
+            }
+        }
+        
+        Map<String, Object> response = new HashMap<>();
+        response.put("deletedAccounts", deletedAccounts);
+        response.put("notFoundAccounts", notFoundAccounts);
+        response.put("totalAccountsDeleted", deletedAccounts.size());
+        response.put("totalCardsDeleted", totalCardsDeleted);
+        response.put("totalNotFound", notFoundAccounts.size());
+        
+        return ResponseEntity.ok(response);
     }
 
     // GET - Rechercher des comptes par statut
@@ -227,4 +281,4 @@ public class AccountController {
         
         return (sum % 10) == 0;
     }
-} 
+}

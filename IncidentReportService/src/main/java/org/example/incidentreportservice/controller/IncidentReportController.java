@@ -68,6 +68,12 @@ public class IncidentReportController {
         return incidentReportService.countByStatus(status);
     }
 
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<IncidentReport>> getIncidentsByUserId(@PathVariable Long userId) {
+        List<IncidentReport> incidents = incidentReportService.getIncidentsByUserId(userId);
+        return ResponseEntity.ok(incidents);
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<String> updateIncidentStatus(@PathVariable Long id, @RequestBody Map<String, String> request) {
         incidentReportService.updateIncidentStatus(id, request.get("status"));
@@ -95,4 +101,3 @@ public class IncidentReportController {
         return ResponseEntity.noContent().build();
     }
 }
-

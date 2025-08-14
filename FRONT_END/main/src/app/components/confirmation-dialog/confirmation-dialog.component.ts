@@ -65,7 +65,7 @@ export interface ConfirmationDialogData {
     }
     
     .dialog-header {
-      background: linear-gradient(135deg, #B71C1C 0%, #F57C00 100%);
+      background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
       color: white;
       padding: 24px 24px 16px 24px;
       

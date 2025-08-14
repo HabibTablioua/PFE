@@ -79,6 +79,19 @@
       <th mat-header-cell *matHeaderCellDef>Date</th>
       <td mat-cell *matCellDef="let incident">{{incident.dateTime | date:'short'}}</td>
     </ng-container>
+    
+    <!-- Colonne utilisateur -->
+    <ng-container matColumnDef="user">
+      <th mat-header-cell *matHeaderCellDef>Utilisateur</th>
+      <td mat-cell *matCellDef="let incident">
+        <div class="user-info">
+          <span *ngIf="incident.username" class="username">{{ incident.username }}</span>
+          <span *ngIf="!incident.username && incident.userId" class="user-id">ID: {{ incident.userId }}</span>
+          <span *ngIf="!incident.username && !incident.userId" class="unknown-user">Utilisateur inconnu</span>
+        </div>
+      </td>
+    </ng-container>
+    
     <ng-container matColumnDef="actions">
       <th mat-header-cell *matHeaderCellDef>Actions</th>
       <td mat-cell *matCellDef="let incident">
@@ -94,4 +107,3 @@
     <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
   </table>
   <mat-paginator [pageSize]="5" [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
-</div> 

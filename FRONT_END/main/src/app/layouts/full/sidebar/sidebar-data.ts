@@ -4,85 +4,88 @@ console.log('Chargement des navItems...');
 
 export const navItems: NavItem[] = [
   {
-    navCap: 'Home',
+    navCap: 'Dashboard',
+    roles: ['ADMIN']
   },
   {
     displayName: 'Dashboard',
     iconName: 'layout-grid-add',
     route: '/dashboard',
+    roles: ['ADMIN']
   },
   {
-    navCap: 'Gestion Transactions',
+    navCap: 'Génération ISO'
+  },
+  {
+    displayName: 'Génération de Messages',
+    iconName: 'message-circle',
+    route: '/message-form'
+  },
+  {
+    displayName: 'Réponse ISO',
+    iconName: 'send',
+    route: '/iso-response'
+  },
+  {
+    navCap: 'Gestion Financière'
   },
   {
     displayName: 'Historique des Transactions',
     iconName: 'history',
-    route: '/transaction-history',
+    route: '/transaction-history'
   },
   {
     displayName: 'Depack Message',
     iconName: 'box',
-    route: '/iso-depacker',
+    route: '/iso-depacker'
   },
   {
-    displayName: 'Message',
-    iconName: 'message-circle',
-    route: '/message-form',
+    navCap: 'Monitoring & Incidents'
   },
   {
-    displayName: 'Logs',
+    displayName: 'Logs & Monitoring',
     iconName: 'file-text',
-    route: '/dashboard/logs-monitoring',
+    route: '/logs'
   },
   {
-    navCap: 'Gestion Utilisateurs',
+    displayName: 'Gestion Incidents',
+    iconName: 'tool',
+    route: '/incidents'
   },
   {
-    displayName: 'Users',
+    navCap: 'Administration',
+    roles: ['ADMIN']
+  },
+  {
+    displayName: 'Gestion Utilisateurs',
     iconName: 'users',
     route: '/users',
-  },
-  {
-    navCap: 'Gestion des Comptes',
+    roles: ['ADMIN']
   },
   {
     displayName: 'Gestion des Comptes',
     iconName: 'credit-card',
     route: '/accounts',
+    roles: ['ADMIN']
   },
   {
     displayName: 'Gestion des Cartes',
     iconName: 'credit-card',
     route: '/cards',
-  },
-
-  {
-    navCap: 'Gestion Incidents',
+    roles: ['ADMIN']
   },
   {
-    displayName: 'Gestion Incidents',
-    iconName: 'tool',
-    route: '/dashboard/incidents',
+    navCap: 'Profil Utilisateur'
   },
   {
-    navCap: 'ISO',
+    displayName: 'Mon Profil',
+    iconName: 'user',
+    route: '/profile'
   },
   {
-    displayName: 'Réponse',
-    iconName: 'send',
-    route: '/dashboard/iso-response',
-  },
-  {
-    navCap: 'Auth',
-  },
-  {
-    displayName: 'Login',
-    iconName: 'login',
-    route: '/authentication/login',
-  },
-  {
-    displayName: 'Register',
-    iconName: 'user-plus',
-    route: '/authentication/register',
-  },
+    displayName: 'Déconnexion',
+    iconName: 'log-out',
+    action: 'logout'
+  }
 ];
+

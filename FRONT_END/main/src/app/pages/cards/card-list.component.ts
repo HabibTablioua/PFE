@@ -15,6 +15,12 @@ import { CardFormDialogComponent } from './card-form-dialog.component';
 import { CardNavigationComponent } from './card-navigation.component';
 import { CardService, Card, CardStats } from '../../services/card.service';
 import { CardDetailsDialogComponent } from './card-details-dialog.component';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { FormsModule } from '@angular/forms';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { SelectionModel } from '@angular/cdk/collections';
 
 @Component({
   selector: 'app-card-list',
@@ -32,7 +38,12 @@ import { CardDetailsDialogComponent } from './card-details-dialog.component';
     MatTooltipModule,
     MatTabsModule,
     CardFormDialogComponent,
-    CardNavigationComponent
+    CardNavigationComponent,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    FormsModule,
+    MatCheckboxModule
   ],
   template: `
     <div class="container">
@@ -64,14 +75,80 @@ import { CardDetailsDialogComponent } from './card-details-dialog.component';
       </div>
 
       <div class="filters-section">
-        <button mat-stroked-button color="primary" class="filter-button">
-          <mat-icon>filter_list</mat-icon>
-          Afficher les filtres
+        <button mat-raised-button color="primary" class="add-card-button" (click)="openCardForm()">
+          <mat-icon>add</mat-icon>
+          Ajouter une carte
         </button>
+        
+        <button mat-stroked-button color="primary" class="filter-button" (click)="toggleFilters()">
+          <mat-icon>{{ showFilters ? 'visibility_off' : 'filter_list' }}</mat-icon>
+          {{ showFilters ? 'Masquer les filtres' : 'Afficher les filtres' }}
+        </button>
+        
+        <button mat-stroked-button color="warn" class="delete-selected-button" 
+                [disabled]="selection.selected.length === 0" 
+                (click)="deleteSelectedCards()">
+          <mat-icon>delete_sweep</mat-icon>
+          Supprimer la sélection ({{ selection.selected.length }})
+        </button>
+      </div>
+
+      <div class="filters-interface" *ngIf="showFilters">
+        <div class="filters-row">
+          <mat-form-field appearance="outline" class="search-field">
+            <mat-label>Rechercher une carte</mat-label>
+            <input matInput placeholder="Rechercher une carte" [(ngModel)]="searchTerm" (ngModelChange)="applyFilters()">
+            <mat-icon matSuffix>search</mat-icon>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="status-field">
+            <mat-label>Statut</mat-label>
+            <mat-select [(ngModel)]="selectedStatus" (ngModelChange)="applyFilters()">
+              <mat-option value="">Tous les statuts</mat-option>
+              <mat-option value="ACTIVE">Active</mat-option>
+              <mat-option value="BLOCKED">Bloquée</mat-option>
+              <mat-option value="EXPIRED">Expirée</mat-option>
+              <mat-option value="SUSPENDED">Suspendue</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="sort-field">
+            <mat-label>Trier par</mat-label>
+            <mat-select [(ngModel)]="selectedSort" (ngModelChange)="applyFilters()">
+              <mat-option value="recent">Plus récents d'abord</mat-option>
+              <mat-option value="oldest">Plus anciens d'abord</mat-option>
+              <mat-option value="name">Nom du titulaire</mat-option>
+              <mat-option value="type">Type de carte</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <button mat-stroked-button color="primary" class="refresh-button" (click)="refreshCards()">
+            <mat-icon>refresh</mat-icon>
+            Actualiser
+          </button>
+        </div>
       </div>
 
       <div class="table-container">
         <table mat-table [dataSource]="dataSource" class="cards-table">
+
+          <!-- Checkbox Column -->
+          <ng-container matColumnDef="select">
+            <th mat-header-cell *matHeaderCellDef>
+              <mat-checkbox (change)="$event ? masterToggle() : null"
+                            [checked]="selection.hasValue() && isAllSelected()"
+                            [indeterminate]="selection.hasValue() && !isAllSelected()">
+              </mat-checkbox>
+            </th>
+            <td mat-cell *matCellDef="let row">
+              <mat-checkbox (click)="$event.stopPropagation()"
+                            (change)="$event ? selection.toggle(row) : null"
+                            [checked]="selection.isSelected(row)">
+              </mat-checkbox>
+            </td>
+          </ng-container>
+
+          <!-- PAN Column -->
           <ng-container matColumnDef="pan">
             <th mat-header-cell *matHeaderCellDef>PAN</th>
             <td mat-cell *matCellDef="let card">
@@ -268,8 +345,29 @@ import { CardDetailsDialogComponent } from './card-details-dialog.component';
 
     .filters-section {
       display: flex;
-      justify-content: flex-end;
+      justify-content: space-between;
+      align-items: center;
       margin-bottom: 32px;
+    }
+
+    .add-card-button {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 24px;
+      font-weight: 600;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+      color: white;
+      border: none;
+      box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+      transition: all 0.3s ease;
+    }
+
+    .add-card-button:hover {
+      background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
     }
 
     .filter-button {
@@ -285,6 +383,71 @@ import { CardDetailsDialogComponent } from './card-details-dialog.component';
     }
 
     .filter-button:hover {
+      background-color: #eff6ff;
+      border-color: #1d4ed8;
+      color: #1d4ed8;
+    }
+
+    .delete-selected-button {
+      margin-left: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 24px;
+      font-weight: 600;
+      border-radius: 12px;
+      border: 1px solid #ef4444;
+      color: #ef4444;
+      transition: all 0.3s ease;
+    }
+
+    .delete-selected-button:hover:not(:disabled) {
+      background-color: #fef2f2;
+      border-color: #dc2626;
+      color: #dc2626;
+    }
+
+    .delete-selected-button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .filters-interface {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      overflow: hidden;
+      border: 1px solid #f1f5f9;
+      padding: 24px;
+      margin-bottom: 32px;
+    }
+
+    .filters-row {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .search-field, .status-field, .sort-field {
+      flex: 1;
+      min-width: 200px;
+    }
+
+    .refresh-button {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 24px;
+      font-weight: 600;
+      border-radius: 12px;
+      border: 1px solid #3b82f6;
+      color: #3b82f6;
+      transition: all 0.3s ease;
+    }
+
+    .refresh-button:hover {
       background-color: #eff6ff;
       border-color: #1d4ed8;
       color: #1d4ed8;
@@ -478,13 +641,21 @@ import { CardDetailsDialogComponent } from './card-details-dialog.component';
   `]
 })
 export class CardListComponent implements OnInit {
-  displayedColumns: string[] = ['pan', 'holderName', 'status', 'type', 'expiryDate', 'alertStatus', 'actions'];
+  displayedColumns: string[] = ['select', 'pan', 'holderName', 'status', 'type', 'expiryDate', 'alertStatus', 'actions'];
   dataSource = new MatTableDataSource<any>([]);
   
   totalCards = 0;
   activeCards = 0;
   blockedCards = 0;
   expiredCards = 0;
+
+  showFilters = false;
+  searchTerm: string = '';
+  selectedStatus: string = '';
+  selectedSort: string = 'recent';
+  allCards: Card[] = [];
+
+  selection = new SelectionModel<any>(true, []);
 
   constructor(
     private cardService: CardService,
@@ -503,6 +674,66 @@ export class CardListComponent implements OnInit {
         this.openCardForm();
       }
     });
+
+    // Écouter les changements des filtres
+    this.setupFilterListeners();
+  }
+
+  setupFilterListeners(): void {
+    // Écouter les changements de recherche
+    this.searchTerm = '';
+    this.selectedStatus = '';
+    this.selectedSort = 'recent';
+  }
+
+  applyFilters(): void {
+    let filteredCards = [...this.allCards];
+
+    // Filtrage par recherche
+    if (this.searchTerm.trim()) {
+      const searchLower = this.searchTerm.toLowerCase();
+      filteredCards = filteredCards.filter(card => 
+        card.pan.toLowerCase().includes(searchLower) ||
+        card.holderName.toLowerCase().includes(searchLower) ||
+        card.type.toLowerCase().includes(searchLower) ||
+        card.issuer?.toLowerCase().includes(searchLower)
+      );
+    }
+
+    // Filtrage par statut
+    if (this.selectedStatus) {
+      filteredCards = filteredCards.filter(card => 
+        this.getDetailedStatus(card) === this.selectedStatus
+      );
+    }
+
+    // Tri
+    switch (this.selectedSort) {
+      case 'recent':
+        filteredCards.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        break;
+      case 'oldest':
+        filteredCards.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+        break;
+      case 'name':
+        filteredCards.sort((a, b) => a.holderName.localeCompare(b.holderName));
+        break;
+      case 'type':
+        filteredCards.sort((a, b) => a.type.localeCompare(b.type));
+        break;
+    }
+
+    this.dataSource.data = filteredCards;
+  }
+
+  toggleFilters(): void {
+    this.showFilters = !this.showFilters;
+  }
+
+  refreshCards(): void {
+    this.loadCards();
+    this.loadStats();
+    this.snackBar.open('Cartes actualisées', 'Fermer', { duration: 2000 });
   }
 
   loadCards(): void {
@@ -510,6 +741,7 @@ export class CardListComponent implements OnInit {
     this.cardService.getAllCards().subscribe({
       next: (cards: Card[]) => {
         console.log('✅ Cartes chargées:', cards);
+        this.allCards = cards;
         this.dataSource.data = cards;
       },
       error: (error: any) => {
@@ -604,6 +836,39 @@ export class CardListComponent implements OnInit {
         }
       });
     }
+  }
+
+  deleteSelectedCards(): void {
+    if (this.selection.selected.length === 0) return;
+
+    const confirmMessage = `Êtes-vous sûr de vouloir supprimer ${this.selection.selected.length} carte(s) ?`;
+    if (confirm(confirmMessage)) {
+      const deletePromises = this.selection.selected.map(card => 
+        this.cardService.deleteCard(card.pan).toPromise()
+      );
+
+      Promise.all(deletePromises).then(() => {
+        this.selection.clear();
+        this.loadCards();
+        this.loadStats();
+        this.snackBar.open(`${this.selection.selected.length} carte(s) supprimée(s) avec succès`, 'Fermer', { duration: 3000 });
+      }).catch(error => {
+        console.error('Erreur lors de la suppression en masse:', error);
+        this.snackBar.open('Erreur lors de la suppression en masse', 'Fermer', { duration: 3000 });
+      });
+    }
+  }
+
+  isAllSelected() {
+    const numSelected = this.selection.selected.length;
+    const numRows = this.dataSource.data.length;
+    return numSelected === numRows;
+  }
+
+  masterToggle() {
+    this.isAllSelected() ?
+      this.selection.clear() :
+      this.dataSource.data.forEach(row => this.selection.select(row));
   }
 
   getCardTypeIcon(type: string): string {

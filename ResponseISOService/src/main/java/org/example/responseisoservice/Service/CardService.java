@@ -6,6 +6,7 @@ import org.example.responseisoservice.repository.CardRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -50,6 +51,15 @@ public class CardService {
         return cardRepository.countByStatus(status);
     }
 
+    public long countExpiredCards() {
+        List<Card> allCards = cardRepository.findAll();
+        LocalDate today = LocalDate.now();
+
+        return allCards.stream()
+                .filter(card -> card.getExpiryDate() != null && card.getExpiryDate().isBefore(today))
+                .count();
+    }
+
     private CardResponseDto convertToDto(Card card) {
         return new CardResponseDto(
                 card.getPan(),
@@ -69,4 +79,4 @@ public class CardService {
                 card.getAccount() != null ? card.getAccount().getPan() : null
         );
     }
-} 
+}

@@ -1,9 +1,10 @@
 package org.example.responseisoservice.Entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 public class Account {
@@ -23,6 +24,11 @@ public class Account {
     private boolean blacklisted;
     private boolean restricted;
     private String allowedOperations; // Ex: "200000,310000"
+
+    // Relation inverse avec Card
+    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonBackReference
+    private List<Card> cards;
 
     public String getPan() { return pan; }
     public void setPan(String pan) { this.pan = pan; }
@@ -54,4 +60,7 @@ public class Account {
     public void setRestricted(boolean restricted) { this.restricted = restricted; }
     public String getAllowedOperations() { return allowedOperations; }
     public void setAllowedOperations(String allowedOperations) { this.allowedOperations = allowedOperations; }
-} 
+
+    public List<Card> getCards() { return cards; }
+    public void setCards(List<Card> cards) { this.cards = cards; }
+}
