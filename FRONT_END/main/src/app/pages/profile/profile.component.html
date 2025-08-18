@@ -158,38 +158,4 @@
     <mat-icon>check_circle</mat-icon>
     {{ success }}
   </div>
-</div> 
-<div *ngIf="loading" class="profile-loader">Chargement du profil...</div>
-<div *ngIf="error && !loading" class="profile-error">{{ error }}</div>
-<div *ngIf="success && !loading" class="profile-success">{{ success }}</div>
-<div *ngIf="!loading && !error && user" class="profile-container">
-  <div class="profile-avatar">
-    <span *ngIf="user.firstname && user.lastname">{{ user.firstname[0] }}{{ user.lastname[0] }}</span>
-    <span *ngIf="!user.firstname || !user.lastname">?</span>
-  </div>
-  <h2 class="profile-title">Mon Profil</h2>
-  <div *ngIf="!editMode" class="profile-info">
-    <div class="profile-row"><span class="profile-label">Nom</span><span class="profile-value">{{ user.firstname }} {{ user.lastname }}</span></div>
-    <div class="profile-row"><span class="profile-label">Email</span><span class="profile-value">{{ user.email }}</span></div>
-    <div class="profile-row" *ngIf="user.roles"><span class="profile-label">Rôles</span><span class="profile-value">{{ user.roles.join(', ') }}</span></div>
-    <div class="profile-row" *ngIf="user.status"><span class="profile-label">Status</span><span class="profile-value">{{ user.status }}</span></div>
-    <button (click)="startEdit()" class="profile-edit-btn">Modifier</button>
-  </div>
-  <form *ngIf="editMode && editUser" (ngSubmit)="saveEdit()" class="profile-edit-form">
-    <div>
-      <label>Prénom :</label>
-      <input [(ngModel)]="editUser.firstname" name="firstname" required minlength="2" />
-    </div>
-    <div>
-      <label>Nom :</label>
-      <input [(ngModel)]="editUser.lastname" name="lastname" required minlength="2" />
-    </div>
-    <div>
-      <label>Email :</label>
-      <input [(ngModel)]="editUser.email" name="email" required type="email" />
-    </div>
-    <div class="profile-edit-actions">
-      <button type="submit" [disabled]="loading">Enregistrer</button>
-      <button type="button" (click)="cancelEdit()">Annuler</button>
-    </div>
-  </form>
+</div>

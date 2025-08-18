@@ -1,70 +1,159 @@
 <div class="depacker-container">
+  <!-- Section du bouton principal -->
   <div class="depack-button-section" *ngIf="!showDepackerArea">
-    <button mat-raised-button color="primary" (click)="toggleDepackerArea()">
-      <mat-icon>cloud_download</mat-icon> Dépaqueter un message ISO
-    </button>
+    <div class="welcome-card">
+      <div class="welcome-icon">
+        <mat-icon>cloud_download</mat-icon>
+      </div>
+      <h2 class="welcome-title">Dépaqueter un message ISO</h2>
+      <p class="welcome-description">
+        Analysez et décomposez vos messages ISO8583 pour une meilleure compréhension
+      </p>
+      <button mat-raised-button color="primary" (click)="toggleDepackerArea()" class="main-action-btn">
+        <mat-icon>play_arrow</mat-icon>
+        Commencer l'analyse
+      </button>
+    </div>
   </div>
 
+  <!-- Zone de formulaire principale -->
   <div *ngIf="showDepackerArea" class="depack-form-area" @fadeIn>
-    <div class="iso-textarea-wrapper">
-      <span class="iso-textarea-icon">📥</span>
-      <textarea matInput
-                rows="8"
-                placeholder="Collez votre message ISO ici..."
-                [(ngModel)]="isoMessage"
-                class="depack-textarea"></textarea>
+    <!-- En-tête de la section -->
+    <div class="form-header">
+      <div class="header-content">
+        <div class="header-icon">
+          <mat-icon>analytics</mat-icon>
+        </div>
+        <div class="header-text">
+          <h2>Analyse de message ISO8583</h2>
+          <p>Collez votre message ISO et analysez sa structure</p>
+        </div>
+      </div>
     </div>
 
-    <div *ngIf="fields.length > 0" class="depack-table-container" @fadeIn>
-      <table mat-table [dataSource]="fields" class="mat-elevation-z2" style="width:100%; border-radius: 1.2rem; overflow: hidden;">
-        <ng-container matColumnDef="id">
-          <th mat-header-cell *matHeaderCellDef style="background:#f0f7ff; color:#2196f3; font-weight:600;">Champ</th>
-          <td mat-cell *matCellDef="let field" style="font-weight:500;">{{ field.id }}</td>
-        </ng-container>
-        <ng-container matColumnDef="name">
-          <th mat-header-cell *matHeaderCellDef style="background:#f0f7ff; color:#2196f3; font-weight:600;">Nom du champ</th>
-          <td mat-cell *matCellDef="let field">{{ getFieldName(field.id) }}</td>
-        </ng-container>
-        <ng-container matColumnDef="length">
-          <th mat-header-cell *matHeaderCellDef style="background:#f0f7ff; color:#2196f3; font-weight:600;">Longueur</th>
-          <td mat-cell *matCellDef="let field">{{ getValueLength(field.value) }}</td>
-        </ng-container>
-        <ng-container matColumnDef="value">
-          <th mat-header-cell *matHeaderCellDef style="background:#f0f7ff; color:#2196f3; font-weight:600;">Valeur</th>
-          <td mat-cell *matCellDef="let field">{{ field.value }}</td>
-        </ng-container>
-        <ng-container matColumnDef="actions">
-          <th mat-header-cell *matHeaderCellDef style="background:#f0f7ff; color:#2196f3; font-weight:600;">Actions</th>
-          <td mat-cell *matCellDef="let field">
-            <button mat-icon-button color="primary" (click)="copyFieldValue(field.value)" matTooltip="Copier la valeur">
-              <mat-icon>content_copy</mat-icon>
-            </button>
-          </td>
-        </ng-container>
-        <tr mat-header-row *matHeaderRowDef="['id', 'name', 'length', 'value', 'actions']"></tr>
-        <tr mat-row *matRowDef="let row; columns: ['id', 'name', 'length', 'value', 'actions'];"></tr>
-      </table>
+    <!-- Zone de saisie du message -->
+    <div class="input-section">
+      <div class="iso-textarea-wrapper">
+        <div class="textarea-header">
+          <div class="textarea-icon">
+            <mat-icon>description</mat-icon>
+          </div>
+          <div class="textarea-info">
+            <h4>Message ISO à analyser</h4>
+            <p>Format accepté : ASCII ou HEX</p>
+          </div>
+        </div>
+        <textarea matInput
+                  rows="8"
+                  placeholder="Collez votre message ISO ici..."
+                  [(ngModel)]="isoMessage"
+                  class="depack-textarea"></textarea>
+        <div class="textarea-footer">
+          <span class="char-count">{{ isoMessage.length }} caractères</span>
+          <div class="format-indicator">
+            <mat-icon>info</mat-icon>
+            <span>Format détecté automatiquement</span>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <div class="action-buttons justify-content-center">
+    <!-- Boutons d'action -->
+    <div class="action-buttons">
       <button mat-raised-button color="primary" (click)="analyzeMessage()" class="analyze-btn">
-        <mat-icon>search</mat-icon> Analyser
+        <mat-icon>search</mat-icon>
+        Analyser
       </button>
       <button mat-stroked-button color="primary" (click)="resetDepacker()" class="reset-btn">
-        <mat-icon>refresh</mat-icon> Réinitialiser
+        <mat-icon>refresh</mat-icon>
+        Réinitialiser
       </button>
       <button mat-stroked-button color="warn" (click)="toggleDepackerArea()" class="cancel-btn">
-        <mat-icon>cancel</mat-icon> Annuler
+        <mat-icon>close</mat-icon>
+        Annuler
       </button>
     </div>
 
-    <div *ngIf="depackedResult" class="result-area" @fadeIn>
-      <h3>Résultat de l'analyse :</h3>
-      <pre class="generated-message">{{ depackedResult }}</pre>
-      <div class="action-buttons justify-content-end mt-3">
-        <button mat-button color="accent" (click)="copyResult()">
-          <mat-icon>content_copy</mat-icon> Copier le résultat
+    <!-- Résultats de l'analyse -->
+    <div *ngIf="depackedResult" class="results-section" @fadeIn>
+      <div class="results-header">
+        <div class="results-icon">
+          <mat-icon>check_circle</mat-icon>
+        </div>
+        <div class="results-title">
+          <h3>Résultat de l'analyse</h3>
+          <p>Message décomposé avec succès</p>
+        </div>
+      </div>
+      
+      <div class="result-content">
+        <pre class="generated-message">{{ depackedResult }}</pre>
+      </div>
+
+      <div class="results-actions">
+        <button mat-button color="accent" (click)="copyResult()" class="copy-btn">
+          <mat-icon>content_copy</mat-icon>
+          Copier le résultat
         </button>
+        <button mat-stroked-button color="primary" class="download-btn">
+          <mat-icon>download</mat-icon>
+          Télécharger
+        </button>
+      </div>
+    </div>
+
+    <!-- Tableau des champs détaillés -->
+    <div *ngIf="fields.length > 0" class="fields-table-section" @fadeIn>
+      <div class="table-header">
+        <h3>Détail des champs ISO8583</h3>
+        <p>{{ fields.length }} champs détectés</p>
+      </div>
+      
+      <div class="table-container">
+        <table mat-table [dataSource]="fields" class="fields-table">
+          <ng-container matColumnDef="id">
+            <th mat-header-cell *matHeaderCellDef>ID</th>
+            <td mat-cell *matCellDef="let field">
+              <span class="field-id">{{ field.id }}</span>
+            </td>
+          </ng-container>
+          
+          <ng-container matColumnDef="name">
+            <th mat-header-cell *matHeaderCellDef>Nom du champ</th>
+            <td mat-cell *matCellDef="let field">
+              <span class="field-name">{{ getFieldName(field.id) }}</span>
+            </td>
+          </ng-container>
+          
+          <ng-container matColumnDef="length">
+            <th mat-header-cell *matHeaderCellDef>Longueur</th>
+            <td mat-cell *matCellDef="let field">
+              <span class="field-length">{{ getValueLength(field.value) }}</span>
+            </td>
+          </ng-container>
+          
+          <ng-container matColumnDef="value">
+            <th mat-header-cell *matHeaderCellDef>Valeur</th>
+            <td mat-cell *matCellDef="let field">
+              <span class="field-value">{{ field.value }}</span>
+            </td>
+          </ng-container>
+          
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>Actions</th>
+            <td mat-cell *matCellDef="let field">
+              <button mat-icon-button color="primary" 
+                      (click)="copyFieldValue(field.value)" 
+                      matTooltip="Copier la valeur"
+                      class="action-btn">
+                <mat-icon>content_copy</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+          
+          <tr mat-header-row *matHeaderRowDef="['id', 'name', 'length', 'value', 'actions']"></tr>
+          <tr mat-row *matRowDef="let row; columns: ['id', 'name', 'length', 'value', 'actions'];"></tr>
+        </table>
       </div>
     </div>
   </div>

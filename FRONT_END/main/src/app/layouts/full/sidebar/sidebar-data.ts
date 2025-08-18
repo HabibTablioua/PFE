@@ -53,6 +53,11 @@ export const navItems: NavItem[] = [
     route: '/incidents'
   },
   {
+    displayName: 'Carte des Transactions',
+    iconName: 'map',
+    route: '/transaction-map'
+  },
+  {
     navCap: 'Administration',
     roles: ['ADMIN']
   },
@@ -84,7 +89,7 @@ export const navItems: NavItem[] = [
   },
   {
     displayName: 'Déconnexion',
-    iconName: 'log-out',
+    iconName: 'logout',
     action: 'logout'
   }
 ];

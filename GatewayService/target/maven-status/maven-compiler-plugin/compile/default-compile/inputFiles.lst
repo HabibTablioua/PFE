@@ -1,0 +1,6 @@
+D:\PFE\GatewayService\src\main\java\com\pfe\gateway\filter\JwtAuthenticationGatewayFilterFactory.java
+D:\PFE\GatewayService\src\main\java\com\pfe\gateway\config\SecurityConfig.java
+D:\PFE\GatewayService\src\main\java\com\pfe\gateway\util\JwtUtil.java
+D:\PFE\GatewayService\src\main\java\com\pfe\gateway\GatewayServiceApplication.java
+D:\PFE\GatewayService\src\main\java\com\pfe\gateway\config\CorsConfig.java
+D:\PFE\GatewayService\src\main\java\com\pfe\gateway\config\JwtConfig.java

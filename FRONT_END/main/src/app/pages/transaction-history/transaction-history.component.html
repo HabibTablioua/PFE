@@ -78,9 +78,9 @@
     </div>
 
     <div class="delete-all-button-container" *ngIf="transactions.length > 0">
-      <button mat-raised-button color="warn" type="button" (click)="deleteSelectedTransactions()">
+      <button mat-raised-button class="delete-all-btn" (click)="deleteSelectedTransactions()">
         <mat-icon>delete</mat-icon>
-        Supprimer tout
+        Supprimer tous
       </button>
     </div>
 
@@ -150,7 +150,7 @@
 
         <!-- Detail Column -->
         <ng-container matColumnDef="detail">
-          <th mat-header-cell *matHeaderCellDef> Détail </th>
+          <th mat-header-cell *matHeaderCellDef></th>
           <td mat-cell *matCellDef="let element">
             <button mat-icon-button (click)="showTransactionDetail(element)">
               <mat-icon>{{expandedElement === element ? 'expand_less' : 'expand_more'}}</mat-icon>
@@ -162,7 +162,17 @@
         <ng-container matColumnDef="actions">
           <th mat-header-cell *matHeaderCellDef> Actions </th>
           <td mat-cell *matCellDef="let element">
-            <button mat-icon-button color="warn" (click)="deleteTransaction(element.id); $event.stopPropagation();">
+            <button mat-icon-button color="primary" 
+                    (click)="showFieldDetails(element); $event.stopPropagation();" 
+                    [disabled]="!element.fields || element.fields.length === 0"
+                    matTooltip="Voir les détails des champs"
+                    class="action-button">
+              <mat-icon>visibility</mat-icon>
+            </button>
+            <button mat-icon-button color="warn" 
+                    (click)="deleteTransaction(element.id); $event.stopPropagation();"
+                    matTooltip="Supprimer la transaction"
+                    class="action-button">
               <mat-icon style="color: red;">delete</mat-icon>
             </button>
           </td>

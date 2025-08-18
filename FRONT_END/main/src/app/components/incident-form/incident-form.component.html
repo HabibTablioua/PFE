@@ -77,28 +77,3 @@
     </div>
   </form>
 </div> 
-<form [formGroup]="form" (ngSubmit)="onSubmit()" class="incident-form modern-incident-form">
-  <mat-form-field appearance="outline" class="full-width modern-field">
-    <mat-label>Titre</mat-label>
-    <input matInput formControlName="title" required>
-    <mat-error *ngIf="form.get('title')?.hasError('required')">Titre obligatoire</mat-error>
-  </mat-form-field>
-
-  <mat-form-field appearance="outline" class="full-width modern-field">
-    <mat-label>Description</mat-label>
-    <textarea matInput formControlName="description" rows="4" required></textarea>
-    <mat-error *ngIf="form.get('description')?.hasError('required')">Description obligatoire</mat-error>
-  </mat-form-field>
-
-  <mat-form-field appearance="outline" class="full-width modern-field">
-    <mat-label>Statut</mat-label>
-    <mat-select formControlName="status" required>
-      <mat-option *ngFor="let option of statusOptions" [value]="option.value">{{ option.label }}</mat-option>
-    </mat-select>
-    <mat-error *ngIf="form.get('status')?.hasError('required')">Statut obligatoire</mat-error>
-  </mat-form-field>
-
-  <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid" class="modern-submit-btn">
-    <mat-icon>send</mat-icon> Envoyer
-  </button>
-</form> 

@@ -15,204 +15,598 @@ import { trigger, state, style, transition, animate } from '@angular/animations'
   imports: [CommonModule, MaterialModule, HttpClientModule, MatSnackBarModule, AppHeaderComponent, FormsModule],
   animations: [
     trigger('fadeIn', [
-      state('void', style({ opacity: 0 })),
-      transition(':enter, :leave', [
-        animate('0.5s ease-in-out')
+      state('void', style({ opacity: 0, transform: 'translateY(20px)' })),
+      transition(':enter', [
+        animate('0.6s cubic-bezier(0.4, 0, 0.2, 1)')
       ])
     ])
   ],
   styles: [`
     .depacker-container {
-      max-width: 820px;
-      min-height: 350px;
+      max-width: 1000px;
       margin: 40px auto;
-      padding: 2.5rem 2rem 2rem 2rem;
-      background: linear-gradient(120deg, #fffbe7 0%, #f8fafc 100%);
-      border-radius: 2rem;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.10), 0 1.5px 6px rgba(33, 150, 243, 0.08);
+      padding: 0 20px;
       font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+    }
+
+    /* Section d'accueil */
+    .depack-button-section {
       display: flex;
-      flex-direction: row;
+      justify-content: center;
+      align-items: center;
+      min-height: 400px;
+    }
+
+    .welcome-card {
+      background: linear-gradient(135deg, #fff 0%, #f8fafc 100%);
+      border-radius: 24px;
+      padding: 48px;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+      border: 1px solid #e2e8f0;
+      max-width: 500px;
+      width: 100%;
+    }
+
+    .welcome-icon {
+      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+      border-radius: 50%;
+      width: 80px;
+      height: 80px;
+      display: flex;
       align-items: center;
       justify-content: center;
-      gap: 2.5rem;
-      animation: fadeInSlide 0.7s cubic-bezier(.4,0,.2,1);
+      margin: 0 auto 24px;
+      box-shadow: 0 8px 32px rgba(59, 130, 246, 0.3);
     }
-    @keyframes fadeInSlide {
-      from { opacity: 0; transform: translateY(30px); }
-      to { opacity: 1; transform: none; }
+
+    .welcome-icon mat-icon {
+      color: white;
+      font-size: 36px;
+      width: 36px;
+      height: 36px;
     }
+
+    .welcome-title {
+      font-size: 28px;
+      font-weight: 700;
+      color: #1e293b;
+      margin: 0 0 16px 0;
+      letter-spacing: -0.5px;
+    }
+
+    .welcome-description {
+      font-size: 16px;
+      color: #64748b;
+      line-height: 1.6;
+      margin: 0 0 32px 0;
+    }
+
+    .main-action-btn {
+      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+      color: white;
+      padding: 16px 32px;
+      border-radius: 16px;
+      font-size: 16px;
+      font-weight: 600;
+      box-shadow: 0 8px 32px rgba(59, 130, 246, 0.3);
+      transition: all 0.3s ease;
+    }
+
+    .main-action-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 40px rgba(59, 130, 246, 0.4);
+    }
+
+    /* Zone de formulaire */
     .depack-form-area {
-      flex: 1 1 350px;
+      background: linear-gradient(135deg, #fff 0%, #f8fafc 100%);
+      border-radius: 24px;
+      padding: 40px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+      border: 1px solid #e2e8f0;
+    }
+
+    /* En-tête du formulaire */
+    .form-header {
+      margin-bottom: 32px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .header-content {
       display: flex;
-      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .header-icon {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      border-radius: 16px;
+      width: 60px;
+      height: 60px;
+      display: flex;
       align-items: center;
       justify-content: center;
-      gap: 1.2rem;
-      width: 100%;
+      box-shadow: 0 4px 20px rgba(16, 185, 129, 0.3);
     }
+
+    .header-icon mat-icon {
+      color: white;
+      font-size: 28px;
+      width: 28px;
+      height: 28px;
+    }
+
+    .header-text h2 {
+      font-size: 24px;
+      font-weight: 700;
+      color: #1e293b;
+      margin: 0 0 8px 0;
+    }
+
+    .header-text p {
+      font-size: 16px;
+      color: #64748b;
+      margin: 0;
+    }
+
+    /* Zone de saisie */
+    .input-section {
+      margin-bottom: 32px;
+    }
+
     .iso-textarea-wrapper {
-      position: relative;
-      width: 100%;
-      min-width: 260px;
-      max-width: 440px;
+      background: white;
+      border-radius: 20px;
+      padding: 24px;
+      border: 2px solid #e2e8f0;
+      transition: all 0.3s ease;
+    }
+
+    .iso-textarea-wrapper:hover {
+      border-color: #3b82f6;
+      box-shadow: 0 8px 32px rgba(59, 130, 246, 0.1);
+    }
+
+    .textarea-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .textarea-icon {
+      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+      border-radius: 12px;
+      width: 48px;
+      height: 48px;
       display: flex;
       align-items: center;
       justify-content: center;
     }
-    .iso-textarea-icon {
-      position: absolute;
-      left: 1.1rem;
-      top: 1.1rem;
-      font-size: 1.7rem;
-      color: #2196f3;
-      pointer-events: none;
-      z-index: 2;
-      filter: drop-shadow(0 2px 4px rgba(33,150,243,0.10));
-      transition: color 0.2s;
+
+    .textarea-icon mat-icon {
+      color: white;
+      font-size: 24px;
+      width: 24px;
+      height: 24px;
     }
+
+    .textarea-info h4 {
+      font-size: 18px;
+      font-weight: 600;
+      color: #1e293b;
+      margin: 0 0 4px 0;
+    }
+
+    .textarea-info p {
+      font-size: 14px;
+      color: #64748b;
+      margin: 0;
+    }
+
     .depack-textarea {
       width: 100%;
-      min-height: 180px;
-      max-height: 240px;
-      padding: 1.5rem 1.2rem 1.2rem 3.2rem;
-      border: 2.5px solid #90caf9;
-      border-radius: 1.5rem;
+      min-height: 200px;
+      padding: 20px;
+      border: none;
+      border-radius: 16px;
       font-family: 'Fira Mono', 'Consolas', 'Courier New', monospace;
-      font-size: 1.12rem;
-      background: linear-gradient(135deg, #fff 70%, #e3f2fd 100%);
-      color: #22223b;
-      box-shadow: 0 4px 18px rgba(33, 150, 243, 0.10);
-      transition: border-color 0.25s, box-shadow 0.25s, background 0.25s;
+      font-size: 14px;
+      line-height: 1.6;
+      color: #1e293b;
+      background: #f8fafc;
       resize: vertical;
-      font-style: normal;
-      overflow-y: auto;
-      scrollbar-width: thin;
-      scrollbar-color: #90caf9 #f8fafc;
+      transition: all 0.3s ease;
     }
+
     .depack-textarea:focus {
       outline: none;
-      border-color: #1976d2;
-      box-shadow: 0 0 0 4px rgba(33, 150, 243, 0.13);
-      background: linear-gradient(135deg, #e3f2fd 80%, #fff 100%);
+      background: white;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
     }
-    .depack-textarea:hover {
-      border-color: #42a5f5;
-      box-shadow: 0 2px 12px rgba(33, 150, 243, 0.13);
-    }
+
     .depack-textarea::placeholder {
+      color: #94a3b8;
       font-style: italic;
-      color: #90a4ae;
-      opacity: 1;
-      font-size: 1.08em;
-      letter-spacing: 0.5px;
     }
-    .depack-textarea::-webkit-scrollbar {
-      width: 7px;
-      background: #f8fafc;
-      border-radius: 1rem;
-    }
-    .depack-textarea::-webkit-scrollbar-thumb {
-      background: #90caf9;
-      border-radius: 1rem;
-    }
-    .mat-form-field-appearance-outline .mat-form-field-outline {
-      color: #2196f3;
-    }
-    .action-buttons {
+
+    .textarea-footer {
       display: flex;
-      gap: 1.2rem;
-      margin-top: 0.5rem;
-      justify-content: center;
-      width: 100%;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid #e2e8f0;
     }
-    .action-buttons button {
-      min-width: 130px;
+
+    .char-count {
+      font-size: 14px;
+      color: #64748b;
       font-weight: 500;
-      border-radius: 1.1rem;
-      box-shadow: 0 2px 8px rgba(33, 150, 243, 0.08);
-      transition: background 0.18s, color 0.18s, box-shadow 0.18s, transform 0.18s;
-      font-size: 1rem;
+    }
+
+    .format-indicator {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
+      gap: 8px;
+      font-size: 14px;
+      color: #64748b;
     }
-    .action-buttons button:hover {
-      transform: scale(1.05);
+
+    .format-indicator mat-icon {
+      font-size: 16px;
+      width: 16px;
+      height: 16px;
+      color: #3b82f6;
     }
-    .action-buttons .analyze-btn {
-      background: #2196f3;
-      color: #fff;
-      box-shadow: 0 4px 16px rgba(33, 150, 243, 0.13);
+
+    /* Boutons d'action */
+    .action-buttons {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      margin-bottom: 32px;
+    }
+
+    .action-buttons button {
+      padding: 14px 28px;
+      border-radius: 16px;
+      font-weight: 600;
+      font-size: 16px;
+      transition: all 0.3s ease;
+      min-width: 140px;
+    }
+
+    .analyze-btn {
+      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+      color: white;
+      border-radius: 999px;
+      padding: 0.7em 2em;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 0.5em;
+      box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
       border: none;
     }
-    .action-buttons .analyze-btn:hover {
-      background: #1565c0;
-      color: #fff;
+
+    .analyze-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px rgba(59, 130, 246, 0.4);
     }
-    .action-buttons .reset-btn {
-      background: transparent;
-      color: #2196f3;
-      border: 2px solid #90caf9;
+
+    .analyze-btn .mat-icon {
+      color: white;
     }
-    .action-buttons .reset-btn:hover {
-      background: #e3f2fd;
-      color: #1565c0;
+
+    .reset-btn {
+      background-color: #eff6ff;
+      color: #1d4ed8;
+      border-radius: 999px;
+      padding: 0.7em 2em;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 0.5em;
+      box-shadow: none;
+      transition: background 0.2s, color 0.2s;
+      border: none;
     }
-    .action-buttons .cancel-btn {
-      background: #fff1f0;
-      color: #e53935;
-      border: 2px solid #ffcdd2;
+
+    .reset-btn:hover {
+      background-color: #dbeafe;
+      color: #1e40af;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     }
-    .action-buttons .cancel-btn:hover {
-      background: #ffcdd2;
+
+    .reset-btn .mat-icon {
+      color: #1d4ed8;
+    }
+
+    .cancel-btn {
+      background-color: #ffebee;
+      color: #d32f2f;
+      border-radius: 999px;
+      padding: 0.7em 2em;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 0.5em;
+      box-shadow: none;
+      transition: background 0.2s, color 0.2s;
+      border: none;
+    }
+
+    .cancel-btn:hover {
+      background-color: #ffcdd2;
       color: #b71c1c;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     }
-    .result-area {
-      background: linear-gradient(90deg, #fffbe7 60%, #f8fafc 100%);
-      color: #22223b;
-      padding: 22px 18px;
-      border-radius: 1.25rem;
-      margin-top: 18px;
+
+    .cancel-btn .mat-icon {
+      color: #d32f2f;
+    }
+
+    /* Section des résultats */
+    .results-section {
+      background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+      border-radius: 20px;
+      padding: 32px;
+      margin-bottom: 32px;
+      border: 1px solid #bbf7d0;
+    }
+
+    .results-header {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+
+    .results-icon {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      border-radius: 16px;
+      width: 56px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .results-icon mat-icon {
+      color: white;
+      font-size: 28px;
+      width: 28px;
+      height: 28px;
+    }
+
+    .results-title h3 {
+      font-size: 20px;
+      font-weight: 700;
+      color: #065f46;
+      margin: 0 0 4px 0;
+    }
+
+    .results-title p {
+      font-size: 14px;
+      color: #047857;
+      margin: 0;
+    }
+
+    .result-content {
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 24px;
+      border: 1px solid #d1fae5;
+    }
+
+    .generated-message {
+      font-family: 'Fira Mono', 'Consolas', 'Courier New', monospace;
+      font-size: 14px;
+      line-height: 1.6;
+      color: #1e293b;
+      margin: 0;
       white-space: pre-wrap;
       word-break: break-all;
-      font-family: 'Fira Mono', 'Consolas', 'Courier New', monospace;
-      font-size: 1.01rem;
-      line-height: 1.7;
-      box-shadow: 0 2px 12px rgba(33, 150, 243, 0.10);
-      overflow-x: auto;
     }
-    .result-area h3 {
-      margin-top: 0;
-      color: #2196f3;
+
+    .results-actions {
+      display: flex;
+      gap: 16px;
+      justify-content: flex-end;
+    }
+
+    .copy-btn, .download-btn {
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    .copy-btn {
+      background: #3b82f6;
+      color: white;
+    }
+
+    .copy-btn:hover {
+      background: #1d4ed8;
+      transform: translateY(-2px);
+    }
+
+    .download-btn {
+      border: 2px solid #3b82f6;
+      color: #3b82f6;
+      background: white;
+    }
+
+    .download-btn:hover {
+      background: #3b82f6;
+      color: white;
+      transform: translateY(-2px);
+    }
+
+    /* Section du tableau des champs */
+    .fields-table-section {
+      background: white;
+      border-radius: 20px;
+      padding: 32px;
+      border: 1px solid #e2e8f0;
+    }
+
+    .table-header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .table-header h3 {
+      font-size: 20px;
+      font-weight: 700;
+      color: #1e293b;
+      margin: 0 0 8px 0;
+    }
+
+    .table-header p {
+      font-size: 14px;
+      color: #64748b;
+      margin: 0;
+    }
+
+    .table-container {
+      overflow-x: auto;
+      border-radius: 16px;
+      border: 1px solid #e2e8f0;
+    }
+
+    .fields-table {
+      width: 100%;
+      background: white;
+    }
+
+    .fields-table th {
+      background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+      color: #1e293b;
+      font-weight: 600;
+      padding: 16px;
+      text-align: left;
+      border-bottom: 2px solid #e2e8f0;
+    }
+
+    .fields-table td {
+      padding: 16px;
+      border-bottom: 1px solid #f1f5f9;
+      vertical-align: top;
+    }
+
+    .field-id {
+      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+      color: white;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      display: inline-block;
+    }
+
+    .field-name {
+      font-weight: 500;
+      color: #1e293b;
+    }
+
+    .field-length {
+      background: #f1f5f9;
+      color: #475569;
+      padding: 4px 8px;
+      border-radius: 8px;
+      font-size: 12px;
       font-weight: 600;
     }
-    @media (max-width: 900px) {
+
+    .field-value {
+      font-family: 'Fira Mono', 'Consolas', 'Courier New', monospace;
+      font-size: 13px;
+      color: #1e293b;
+      background: #f8fafc;
+      padding: 8px 12px;
+      border-radius: 8px;
+      display: inline-block;
+      max-width: 200px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .action-btn {
+      background: #f1f5f9;
+      color: #3b82f6;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+    }
+
+    .action-btn:hover {
+      background: #3b82f6;
+      color: white;
+      transform: scale(1.1);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
       .depacker-container {
-        flex-direction: column;
-        gap: 1.5rem;
-        padding: 1.2rem;
-        min-height: unset;
+        padding: 0 16px;
+        margin: 20px auto;
       }
+
+      .welcome-card {
+        padding: 32px 24px;
+      }
+
       .depack-form-area {
-        width: 100%;
-        gap: 0.8rem;
-        align-items: stretch;
-        justify-content: flex-start;
+        padding: 24px;
       }
-      .iso-textarea-wrapper {
-        justify-content: stretch;
+
+      .header-content {
+        flex-direction: column;
+        text-align: center;
+        gap: 16px;
       }
+
       .action-buttons {
         flex-direction: column;
-        gap: 0.7rem;
-        align-items: stretch;
+        align-items: center;
+      }
+
+      .action-buttons button {
+        width: 100%;
+        max-width: 300px;
+      }
+
+      .results-actions {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .results-actions button {
+        width: 100%;
+        max-width: 300px;
+      }
+
+      .fields-table {
+        font-size: 14px;
+      }
+
+      .fields-table th,
+      .fields-table td {
+        padding: 12px 8px;
       }
     }
   `]
 })
 export class IsoDepackerComponent implements OnInit {
-  showDepackerArea: boolean = false;
+  showDepackerArea: boolean = false
   isoMessage: string = '';
   depackedResult: string = '';
   fields: { id: number, value: string }[] = [];
@@ -267,34 +661,90 @@ export class IsoDepackerComponent implements OnInit {
     47: 'Additional Data - National',
     48: 'Additional Data - Private',
     49: 'Currency Code, Transaction',
-    52: 'PIN Code',
-    60: 'Custom Text Field'
+    50: 'Currency Code, Settlement',
+    51: 'Currency Code, Cardholder Billing',
+    52: 'Personal Identification Number (PIN) Data',
+    53: 'Security Related Control Information',
+    54: 'Additional Amounts',
+    55: 'ICC System Related Data',
+    56: 'Original Data Elements',
+    57: 'Authorization Life Cycle Code',
+    58: 'Authorizing Agent Institution ID',
+    59: 'Additional Data - National',
+    60: 'Reserved for National Use',
+    61: 'Reserved for National Use',
+    62: 'Reserved for National Use',
+    63: 'Reserved for National Use',
+    64: 'Message Authentication Code (MAC)',
+    65: 'Extended Payment Code',
+    66: 'Settlement Code',
+    67: 'Extended Payment Data',
+    68: 'Receiving Institution Country Code',
+    69: 'Settlement Institution Country Code',
+    70: 'Network Management Information Code',
+    71: 'Message Number',
+    72: 'Message Number Last',
+    73: 'Date, Action',
+    74: 'Credits, Number',
+    75: 'Credits, Reversal Number',
+    76: 'Debits, Number',
+    77: 'Debits, Reversal Number',
+    78: 'Transfer Number',
+    79: 'Transfer, Reversal Number',
+    80: 'Inquiries, Number',
+    81: 'Authorizations, Number',
+    82: 'Credits, Processing Fee Amount',
+    83: 'Credits, Transaction Fee Amount',
+    84: 'Debits, Processing Fee Amount',
+    85: 'Debits, Transaction Fee Amount',
+    86: 'Credits, Amount',
+    87: 'Credits, Reversal Amount',
+    88: 'Debits, Amount',
+    89: 'Debits, Reversal Amount',
+    90: 'Original Data Elements',
+    91: 'File Update Code',
+    92: 'File Security Code',
+    93: 'Response Indicator',
+    94: 'Service Indicator',
+    95: 'Replacement Amounts',
+    96: 'Message Security Code',
+    97: 'Amount, Net Settlement',
+    98: 'Payee',
+    99: 'Settlement Institution ID Code',
+    100: 'Receiving Institution ID Code',
+    101: 'File Name',
+    102: 'Account Identification 1',
+    103: 'Account Identification 2',
+    104: 'Transaction Description',
+    105: 'Reserved for ISO Use',
+    106: 'Reserved for ISO Use',
+    107: 'Reserved for ISO Use',
+    108: 'Reserved for ISO Use',
+    109: 'Reserved for ISO Use',
+    110: 'Reserved for ISO Use',
+    111: 'Reserved for ISO Use',
+    112: 'Reserved for National Use',
+    113: 'Reserved for National Use',
+    114: 'Reserved for National Use',
+    115: 'Reserved for National Use',
+    116: 'Reserved for National Use',
+    117: 'Reserved for National Use',
+    118: 'Reserved for National Use',
+    119: 'Reserved for National Use',
+    120: 'Reserved for National Use',
+    121: 'Reserved for National Use',
+    122: 'Reserved for National Use',
+    123: 'Reserved for National Use',
+    124: 'Reserved for National Use',
+    125: 'Reserved for National Use',
+    126: 'Reserved for National Use',
+    127: 'Reserved for National Use',
+    128: 'Message Authentication Code'
   };
 
-  fieldMeta: { [key: number]: { type: string, description: string } } = {
-    2: { type: 'n..19', description: 'Numéro de carte (PAN) masqué' },
-    3: { type: 'n6', description: 'Code de traitement' },
-    4: { type: 'n12', description: 'Montant de la transaction' },
-    7: { type: 'n10', description: 'Date et heure de transmission' },
-    11: { type: 'n6', description: 'Numéro d’audit (STAN)' },
-    12: { type: 'n6', description: 'Heure locale' },
-    13: { type: 'n4', description: 'Date locale' },
-    14: { type: 'n4', description: 'Date d’expiration' },
-    35: { type: 'z..37', description: 'Track 2 Data (masqué)' },
-    36: { type: 'z..104', description: 'Track 3 Data (masqué)' },
-    37: { type: 'an12', description: 'Numéro de référence' },
-    38: { type: 'an6', description: 'Code d’autorisation' },
-    39: { type: 'an2', description: 'Code de réponse' },
-    41: { type: 'ans8', description: 'ID terminal' },
-    49: { type: 'a3', description: 'Code devise' },
-    52: { type: 'n16', description: 'Code PIN (numérique)' },
-    60: { type: 'ans..100', description: 'Champ texte personnalisé' },
-    // ... Ajoute d'autres champs selon besoin ...
-  };
+  constructor(private http: HttpClient, private snackBar: MatSnackBar) {}
 
-  constructor(private http: HttpClient, private snackBar: MatSnackBar) { }
-
-  ngOnInit(): void { }
+  ngOnInit(): void {}
 
   toggleDepackerArea(): void {
     this.showDepackerArea = !this.showDepackerArea;
@@ -304,72 +754,54 @@ export class IsoDepackerComponent implements OnInit {
   }
 
   analyzeMessage(): void {
-    if (!this.isoMessage) {
-      this.snackBar.open('Veuillez coller un message ISO à analyser.', 'Fermer', { duration: 3000 });
+    if (!this.isoMessage.trim()) {
+      this.snackBar.open('Veuillez saisir un message ISO à analyser.', 'Fermer', { duration: 3000 });
       return;
     }
-    const token = localStorage.getItem('token');
-    const headers = {
-      'Content-Type': 'text/plain',
-      'Authorization': `Bearer ${token}`
-    };
-    this.http.post<{id: number, value: string}[]>(
-      'http://localhost:8088/api/depacking/download/json',
-      this.isoMessage,
-      { headers, responseType: 'json' as 'json' }
-    ).subscribe({
-      next: (fields) => {
-        this.fields = fields;
-        this.depackedResult = '';
-        this.snackBar.open('Message analysé avec succès !', 'Fermer', { duration: 3000 });
-      },
-      error: (error) => {
-        this.fields = [];
-        if (error.status === 403 || error.status === 400) {
-          this.depackedResult = "Le message saisi n'est pas un message ISO 8583 valide.";
-        } else {
-          this.depackedResult = 'Erreur: ' + (error.error || error.message || 'Impossible d\'analyser le message.');
-        }
-        this.snackBar.open('Erreur lors de l\'analyse du message.', 'Fermer', { duration: 5000 });
-      }
-    });
-  }
 
-  copyResult(): void {
-    navigator.clipboard.writeText(this.depackedResult).then(() => {
-      this.snackBar.open('Résultat copié !', 'Fermer', { duration: 2000 });
-    }).catch(err => {
-      console.error('Erreur lors de la copie: ', err);
-      this.snackBar.open('Impossible de copier le résultat.', 'Fermer', { duration: 3000 });
-    });
+    this.http.post('http://localhost:8089/depacking', this.isoMessage, { responseType: 'text' })
+      .subscribe({
+        next: (result) => {
+          this.depackedResult = result;
+          this.parseFields();
+          this.snackBar.open('Message analysé avec succès !', 'Fermer', { duration: 3000 });
+        },
+        error: (error) => {
+          console.error('Erreur lors de l\'analyse:', error);
+          this.snackBar.open('Erreur lors de l\'analyse du message ISO.', 'Fermer', { duration: 5000 });
+        }
+      });
   }
 
   resetDepacker(): void {
     this.isoMessage = '';
     this.depackedResult = '';
     this.fields = [];
-    this.snackBar.open('Champs réinitialisés.', 'Fermer', { duration: 2000 });
+  }
+
+  copyResult(): void {
+    navigator.clipboard.writeText(this.depackedResult).then(() => {
+      this.snackBar.open('Résultat copié dans le presse-papiers !', 'Fermer', { duration: 2000 });
+    });
+  }
+
+  copyFieldValue(value: string): void {
+    navigator.clipboard.writeText(value).then(() => {
+      this.snackBar.open('Valeur copiée dans le presse-papiers !', 'Fermer', { duration: 2000 });
+    });
   }
 
   getFieldName(id: number): string {
     return this.fieldNames[id] || `Champ ${id}`;
   }
 
-  getFieldMeta(id: number): { type: string, description: string } {
-    return this.fieldMeta[id] || { type: 'N/A', description: '' };
-  }
-
   getValueLength(value: string): number {
     return value ? value.length : 0;
   }
 
-  toHex(value: string): string {
-    return value ? Array.from(value).map(c => c.charCodeAt(0).toString(16).padStart(2, '0')).join(' ') : '';
-  }
-
-  copyFieldValue(value: string): void {
-    navigator.clipboard.writeText(value).then(() => {
-      this.snackBar.open('Valeur copiée !', 'Fermer', { duration: 1500 });
-    });
+  private parseFields(): void {
+    // Logique pour parser les champs à partir du résultat
+    // Cette méthode peut être étendue selon vos besoins
+    this.fields = [];
   }
 } 

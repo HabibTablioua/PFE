@@ -10,6 +10,9 @@ import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { trigger, state, style, transition, animate } from '@angular/animations';
 import { SelectionModel } from '@angular/cdk/collections';
+import { MatDialog } from '@angular/material/dialog';
+import { FieldDetailDialogComponent } from './field-detail-dialog.component';
+import { ConfirmationDialogComponent, ConfirmationDialogData } from './confirmation-dialog.component';
 
 interface FieldDetail {
   fieldNumber: string;
@@ -180,6 +183,29 @@ interface Transaction {
       padding: 0 15px; /* Add some horizontal padding to align with table */
     }
 
+    .delete-all-btn {
+      background-color: #ffebee;
+      color: #d32f2f;
+      border-radius: 999px;
+      padding: 0.7em 2em;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 0.5em;
+      box-shadow: none;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .delete-all-btn .mat-icon {
+      color: #d32f2f;
+    }
+
+    .delete-all-btn:hover,
+    .delete-all-btn:active {
+      background-color: #ffcdd2;
+      color: #b71c1c;
+    }
+
     .transaction-table-container {
       overflow-x: auto;
       margin-top: 20px;
@@ -209,7 +235,19 @@ interface Transaction {
     }
 
     .mat-column-detail {
-      width: 80px;
+      width: 60px;
+      text-align: center;
+      padding: 0;
+    }
+
+    .mat-column-detail th {
+      padding: 12px 8px;
+      border: none;
+      background: transparent;
+    }
+
+    .mat-column-detail td {
+      padding: 8px;
       text-align: center;
     }
 
@@ -321,6 +359,20 @@ interface Transaction {
       transform: translateY(-2px); /* Slight lift on hover */
       box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15); /* Slightly stronger shadow on hover */
     }
+
+    .action-button {
+      margin: 0 2px;
+      transition: all 0.2s ease;
+    }
+
+    .action-button:hover {
+      transform: scale(1.1);
+    }
+
+    .action-button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
   `]
 })
 export class TransactionHistoryComponent implements OnInit {
@@ -364,7 +416,7 @@ export class TransactionHistoryComponent implements OnInit {
 
   displayedColumns: string[] = ['select', 'id', 'mti', 'format', 'rrn', 'date', 'status', 'detail', 'actions'];
 
-  constructor(private fb: FormBuilder, private http: HttpClient, private snackBar: MatSnackBar) {
+  constructor(private fb: FormBuilder, private http: HttpClient, private snackBar: MatSnackBar, private dialog: MatDialog) {
     this.filterForm = this.fb.group({
       mti: [''],
       format: [''],
@@ -487,6 +539,30 @@ export class TransactionHistoryComponent implements OnInit {
     });
   }
 
+  showFieldDetails(transaction: Transaction): void {
+    if (!transaction.fields || transaction.fields.length === 0) {
+      this.snackBar.open('Aucun détail de champ disponible pour cette transaction.', 'Fermer', { duration: 3000 });
+      return;
+    }
+
+    const dialogRef = this.dialog.open(FieldDetailDialogComponent, {
+      data: {
+        transactionId: transaction.id,
+        mti: transaction.mti,
+        format: transaction.format,
+        fields: transaction.fields
+      },
+      width: '90vw',
+      maxWidth: '1200px',
+      height: '80vh',
+      maxHeight: '800px'
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      console.log('Dialogue fermé');
+    });
+  }
+
   getStatusClass(status: string): string {
     return status.toUpperCase() === 'SUCCESS' ? 'status-success' : 'status-failed';
   }
@@ -508,29 +584,45 @@ export class TransactionHistoryComponent implements OnInit {
   }
 
   deleteTransaction(id: string): void {
-    if (confirm('Êtes-vous sûr de vouloir supprimer cette transaction ?')) {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        this.snackBar.open('Authentification requise pour supprimer la transaction.', 'Fermer', { duration: 3000 });
-        return;
-      }
+    const dialogData: ConfirmationDialogData = {
+      title: 'Confirmation de suppression',
+      message: 'Êtes-vous sûr de vouloir supprimer cette transaction ?',
+      confirmText: 'Supprimer',
+      cancelText: 'Annuler',
+      type: 'danger'
+    };
 
-      const headers = new HttpHeaders({
-        'Authorization': `Bearer ${token}`
-      });
+    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+      data: dialogData,
+      width: '400px',
+      disableClose: true
+    });
 
-      this.http.delete(`http://localhost:8088/api/history/${id}`, { headers: headers })
-        .subscribe({
-          next: () => {
-            this.snackBar.open('Transaction supprimée avec succès !', 'Fermer', { duration: 3000 });
-            this.fetchTransactions(); // Refresh the table
-          },
-          error: (error) => {
-            console.error('Erreur lors de la suppression de la transaction:', error);
-            this.snackBar.open('Erreur lors de la suppression de la transaction.', 'Fermer', { duration: 5000 });
-          }
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          this.snackBar.open('Authentification requise pour supprimer la transaction.', 'Fermer', { duration: 3000 });
+          return;
+        }
+
+        const headers = new HttpHeaders({
+          'Authorization': `Bearer ${token}`
         });
-    }
+
+        this.http.delete(`http://localhost:8088/api/history/${id}`, { headers: headers })
+          .subscribe({
+            next: () => {
+              this.snackBar.open('Transaction supprimée avec succès !', 'Fermer', { duration: 3000 });
+              this.fetchTransactions(); // Refresh the table
+            },
+            error: (error) => {
+              console.error('Erreur lors de la suppression de la transaction:', error);
+              this.snackBar.open('Erreur lors de la suppression de la transaction.', 'Fermer', { duration: 5000 });
+            }
+          });
+      }
+    });
   }
 
   deleteSelectedTransactions(): void {
@@ -539,34 +631,50 @@ export class TransactionHistoryComponent implements OnInit {
       return;
     }
 
-    if (confirm('Êtes-vous sûr de vouloir supprimer les transactions sélectionnées ?')) {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        this.snackBar.open('Authentification requise pour supprimer les transactions.', 'Fermer', { duration: 3000 });
-        return;
-      }
+    const dialogData: ConfirmationDialogData = {
+      title: 'Confirmation de suppression multiple',
+      message: `Êtes-vous sûr de vouloir supprimer ${this.selection.selected.length} transaction(s) sélectionnée(s) ?`,
+      confirmText: 'Supprimer',
+      cancelText: 'Annuler',
+      type: 'danger'
+    };
 
-      const selectedIds = this.selection.selected.map(tx => tx.id);
+    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+      data: dialogData,
+      width: '450px',
+      disableClose: true
+    });
 
-      const headers = new HttpHeaders({
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      });
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          this.snackBar.open('Authentification requise pour supprimer les transactions.', 'Fermer', { duration: 3000 });
+          return;
+        }
 
-      // Make a POST request to a new batch delete endpoint with selected IDs
-      this.http.post('http://localhost:8088/api/history/delete-batch', selectedIds, { headers: headers })
-        .subscribe({
-          next: () => {
-            this.snackBar.open('Transactions sélectionnées supprimées avec succès !', 'Fermer', { duration: 3000 });
-            this.fetchTransactions(); // Refresh the table
-            this.selection.clear(); // Clear selection
-          },
-          error: (error) => {
-            console.error('Erreur lors de la suppression des transactions sélectionnées:', error);
-            this.snackBar.open('Erreur lors de la suppression des transactions sélectionnées.', 'Fermer', { duration: 5000 });
-          }
+        const selectedIds = this.selection.selected.map(tx => tx.id);
+
+        const headers = new HttpHeaders({
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
         });
-    }
+
+        // Make a POST request to a new batch delete endpoint with selected IDs
+        this.http.post('http://localhost:8088/api/history/delete-batch', selectedIds, { headers: headers })
+          .subscribe({
+            next: () => {
+              this.snackBar.open('Transactions sélectionnées supprimées avec succès !', 'Fermer', { duration: 3000 });
+              this.fetchTransactions(); // Refresh the table
+              this.selection.clear(); // Clear selection
+            },
+            error: (error) => {
+              console.error('Erreur lors de la suppression des transactions sélectionnées:', error);
+              this.snackBar.open('Erreur lors de la suppression des transactions sélectionnées.', 'Fermer', { duration: 5000 });
+            }
+          });
+      }
+    });
   }
 
   downloadPdfReport(): void {

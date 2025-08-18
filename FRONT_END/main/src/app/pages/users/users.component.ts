@@ -71,12 +71,18 @@ export class UsersComponent implements OnInit {
     { value: 'MANAGER', label: 'Manager' }
   ];
 
-  filterMode = 'all'; // 'all', 'firstname', 'lastname', 'email'
+  filterMode = 'all';
   showFilterPanel = false;
   filterRole = '';
   filterStatus = '';
 
   hidePassword = true;
+
+  // Propriétés pour les statistiques
+  totalUsers = 0;
+  onlineUsers = 0;
+  offlineUsers = 0;
+  adminUsers = 0;
 
   constructor(
     private userService: UserService,
@@ -95,13 +101,22 @@ export class UsersComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // Debug: Vérifier l'état d'authentification
     console.log('UsersComponent: Vérification de l\'authentification...');
     console.log('Token présent:', !!localStorage.getItem('token'));
     console.log('Utilisateur connecté:', this.authService.getCurrentUserValue());
     console.log('Est authentifié:', this.authService.isAuthenticated());
     
     this.loadUsers();
+    
+    this.authService.currentUser$.subscribe(user => {
+      if (user) {
+        console.log('🔄 Utilisateur connecté, mise à jour du statut...');
+        this.updateUserStatus(user.email, 'online');
+      } else {
+        console.log('🔄 Utilisateur déconnecté, mise à jour du statut...');
+        this.setAllUsersOffline();
+      }
+    });
   }
 
   ngAfterViewInit() {
@@ -113,63 +128,100 @@ export class UsersComponent implements OnInit {
     this.isLoading = true;
     this.userService.getUsers().subscribe({
       next: (users) => {
-        // Trier par ID croissant (plus petit en haut)
-        users.sort((a, b) => (a.id ?? 0) - (b.id ?? 0));
         this.dataSource.data = users;
+        this.checkCurrentUserStatus();
         this.isLoading = false;
       },
       error: (error) => {
         console.error('Erreur lors du chargement des utilisateurs:', error);
-        this.showNotification('Erreur lors du chargement des utilisateurs', 'error');
+        this.snackBar.open('Erreur lors du chargement des utilisateurs', 'Fermer', { duration: 3000 });
         this.isLoading = false;
       }
     });
   }
 
-  toggleFilterPanel() {
+  calculateStats(): void {
+    const users = this.dataSource.data;
+    this.totalUsers = users.length;
+    this.onlineUsers = users.filter(user => user.status === 'online').length;
+    this.offlineUsers = users.filter(user => user.status === 'offline').length;
+    this.adminUsers = users.filter(user => user.roles && user.roles.includes('ADMIN')).length;
+  }
+
+  refreshUsers(): void {
+    this.loadUsers();
+  }
+
+  getStatusColor(status: string): string {
+    return status === 'online' ? 'primary' : 'warn';
+  }
+
+  getRoleColor(role: string): string {
+    switch (role) {
+      case 'ADMIN':
+        return 'warn';
+      case 'MANAGER':
+        return 'accent';
+      default:
+        return 'primary';
+    }
+  }
+
+  getRoleLabel(role: string): string {
+    const roleObj = this.roles.find(r => r.value === role);
+    return roleObj ? roleObj.label : role;
+  }
+
+  viewUserDetails(user: User): void {
+    console.log('Détails de l\'utilisateur:', user);
+    this.snackBar.open(`Détails de ${user.firstname} ${user.lastname}`, 'Fermer', { duration: 3000 });
+  }
+
+  toggleFilterPanel(): void {
     this.showFilterPanel = !this.showFilterPanel;
   }
 
-  resetFilters() {
-    this.filterRole = '';
-    this.filterMode = 'all';
-    this.searchTerm = '';
-    this.filterStatus = '';
-    this.applyFilter();
+  applyFilter(): void {
+    let filteredData = this.dataSource.data;
+
+    if (this.searchTerm) {
+      const searchLower = this.searchTerm.toLowerCase();
+      filteredData = filteredData.filter(user => {
+        switch (this.filterMode) {
+          case 'firstname':
+            return user.firstname?.toLowerCase().includes(searchLower);
+          case 'lastname':
+            return user.lastname?.toLowerCase().includes(searchLower);
+          case 'email':
+            return user.email?.toLowerCase().includes(searchLower);
+          default:
+            return user.firstname?.toLowerCase().includes(searchLower) ||
+                   user.lastname?.toLowerCase().includes(searchLower) ||
+                   user.email?.toLowerCase().includes(searchLower);
+        }
+      });
+    }
+
+    if (this.filterStatus) {
+      filteredData = filteredData.filter(user => user.status === this.filterStatus);
+    }
+
+    if (this.filterRole) {
+      filteredData = filteredData.filter(user => 
+        user.roles && user.roles.includes(this.filterRole)
+      );
+    }
+
+    this.dataSource.data = filteredData;
+    this.calculateStats();
   }
 
-  applyFilter(event?: Event): void {
-    let filterValue = this.searchTerm.trim().toLowerCase();
-    const selectedRole = this.filterRole;
-    const selectedStatus = this.filterStatus;
-
-    this.dataSource.filterPredicate = (data: User, filter: string) => {
-      // Filtrage par rôle (tableau)
-      if (selectedRole && (!data.roles || !data.roles.includes(selectedRole))) {
-        return false;
-      }
-      // Filtrage par statut
-      if (selectedStatus && data.status !== selectedStatus) {
-        return false;
-      }
-      // Filtrage par mode
-      switch (this.filterMode) {
-        case 'firstname':
-          return data.firstname.toLowerCase().includes(filter);
-        case 'lastname':
-          return data.lastname.toLowerCase().includes(filter);
-        case 'email':
-          return data.email.toLowerCase().includes(filter);
-        default: // 'all'
-          return (
-            data.firstname.toLowerCase().includes(filter) ||
-            data.lastname.toLowerCase().includes(filter) ||
-            data.email.toLowerCase().includes(filter)
-          );
-      }
-    };
-
-    this.dataSource.filter = filterValue;
+  resetFilters(): void {
+    this.searchTerm = '';
+    this.filterStatus = '';
+    this.filterRole = '';
+    this.filterMode = 'all';
+    this.loadUsers();
   }
 
   applyRoleFilter(): void {
@@ -246,14 +298,12 @@ export class UsersComponent implements OnInit {
   saveUser(): void {
     if (this.userForm.valid) {
       const userData = this.userForm.value;
-      // Validation côté client
       const validation = this.userService.validateUser(userData);
       if (!validation.isValid) {
         this.showNotification(validation.errors.join(', '), 'error');
         return;
       }
       if (this.isEditMode && this.editingUserId) {
-        // Mode édition - on n'envoie plus le mot de passe
         this.userService.updateUser(this.editingUserId, userData).subscribe({
           next: () => {
             this.showNotification('Utilisateur modifié avec succès', 'success');
@@ -266,7 +316,6 @@ export class UsersComponent implements OnInit {
           }
         });
       } else {
-        // Mode création
         this.userService.createUser(userData).subscribe({
           next: () => {
             this.showNotification('Utilisateur créé avec succès', 'success');
@@ -350,22 +399,6 @@ export class UsersComponent implements OnInit {
     });
   }
 
-  getRoleLabel(role: string): string {
-    const roleObj = this.roles.find(r => r.value === role);
-    return roleObj ? roleObj.label : role;
-  }
-
-  getRoleColor(role: string): string {
-    switch (role) {
-      case 'ADMIN':
-        return 'warn';
-      case 'MANAGER':
-        return 'accent';
-      default:
-        return 'primary';
-    }
-  }
-
   showNotification(message: string, type: 'success' | 'error' | 'warning' = 'success'): void {
     this.snackBar.open(message, 'Fermer', {
       duration: 3000,
@@ -380,10 +413,10 @@ export class UsersComponent implements OnInit {
       password += charset.charAt(Math.floor(Math.random() * charset.length));
     }
     this.userForm.get('password')?.setValue(password);
-    this.hidePassword = false; // Affiche le mot de passe généré
+    this.hidePassword = false;
   }
 
-  downloadUsersPdf() {
+  downloadUsersPdf(): void {
     this.userService.exportUsersPdf().subscribe((blob: any) => {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -394,7 +427,8 @@ export class UsersComponent implements OnInit {
       this.snackBar.open('PDF téléchargé avec succès !', 'Fermer', { duration: 3000 });
     });
   }
-  downloadUsersExcel() {
+
+  downloadUsersExcel(): void {
     this.userService.exportUsersExcel().subscribe((blob: any) => {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -405,7 +439,8 @@ export class UsersComponent implements OnInit {
       this.snackBar.open('Excel téléchargé avec succès !', 'Fermer', { duration: 3000 });
     });
   }
-  downloadUsersCsv() {
+
+  downloadUsersCsv(): void {
     this.userService.exportUsersCsv().subscribe((blob: any) => {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -415,5 +450,45 @@ export class UsersComponent implements OnInit {
       window.URL.revokeObjectURL(url);
       this.snackBar.open('CSV téléchargé avec succès !', 'Fermer', { duration: 3000 });
     });
+  }
+
+  private updateUserStatus(email: string, status: 'online' | 'offline'): void {
+    const users = this.dataSource.data;
+    const userIndex = users.findIndex(u => u.email === email);
+    
+    if (userIndex !== -1) {
+      users[userIndex].status = status;
+      this.dataSource.data = [...users];
+      this.calculateStats();
+      console.log(`✅ Statut de ${email} mis à jour: ${status}`);
+    }
+  }
+
+  private setAllUsersOffline(): void {
+    const users = this.dataSource.data;
+    users.forEach(user => {
+      user.status = 'offline';
+    });
+    this.dataSource.data = [...users];
+    this.calculateStats();
+    console.log('✅ Tous les utilisateurs sont maintenant hors ligne');
+  }
+
+  private checkCurrentUserStatus(): void {
+    const currentUser = this.authService.getCurrentUserValue();
+    if (currentUser) {
+      this.updateUserStatus(currentUser.email, 'online');
+      
+      const users = this.dataSource.data;
+      users.forEach(user => {
+        if (user.email !== currentUser.email) {
+          user.status = 'offline';
+        }
+      });
+      this.dataSource.data = [...users];
+      this.calculateStats();
+    } else {
+      this.setAllUsersOffline();
+    }
   }
 } 

@@ -9,6 +9,7 @@ import {
 import { NavItem } from './nav-item';
 import { Router } from '@angular/router';
 import { NavService } from '../../../../services/nav.service';
+import { AuthService } from '../../../../services/auth.service';
 
 import { TranslateModule } from '@ngx-translate/core';
 import { TablerIconsModule } from 'angular-tabler-icons';
@@ -31,7 +32,11 @@ export class AppNavItemComponent implements OnChanges {
   @HostBinding('attr.aria-expanded') ariaExpanded = this.expanded;
   @Input() depth: any;
 
-  constructor(public navService: NavService, public router: Router) {}
+  constructor(
+    public navService: NavService, 
+    public router: Router,
+    private authService: AuthService
+  ) {}
 
   ngOnChanges() {
     const url = this.navService.currentUrl();
@@ -42,12 +47,22 @@ export class AppNavItemComponent implements OnChanges {
   }
 
   onItemSelected(item: NavItem) {
+    // Gérer les actions spéciales
+    if (item.action === 'logout') {
+      this.handleLogout();
+      return;
+    }
+
+    // Gérer la navigation normale
     if (!item.children || !item.children.length) {
-      this.router.navigate([item.route]);
+      if (item.route) {
+        this.router.navigate([item.route]);
+      }
     }
     if (item.children && item.children.length) {
       this.expanded = !this.expanded;
     }
+    
     //scroll
     window.scroll({
       top: 0,
@@ -58,6 +73,20 @@ export class AppNavItemComponent implements OnChanges {
       if (window.innerWidth < 1024) {
         this.notify.emit();
       }
+    }
+  }
+
+  /**
+   * Gère la déconnexion de l'utilisateur
+   */
+  private handleLogout(): void {
+    console.log('🔄 Déconnexion en cours...');
+    this.authService.logout();
+    this.router.navigate(['/authentication/login']);
+    
+    // Fermer le sidebar mobile si nécessaire
+    if (window.innerWidth < 1024) {
+      this.notify.emit();
     }
   }
 

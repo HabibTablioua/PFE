@@ -48,6 +48,13 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'transaction-map',
+        loadComponent: () =>
+          import('./components/transaction-map/transaction-map.component').then(
+            (m) => m.TransactionMapComponent
+          ),
+      },
+      {
         path: 'logs',
         loadComponent: () =>
           import('./pages/logs-monitoring/logs-monitoring.component').then(

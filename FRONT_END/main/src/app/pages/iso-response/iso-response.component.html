@@ -95,7 +95,7 @@
       </td>
     </ng-container>
     <ng-container matColumnDef="id">
-      <th mat-header-cell *matHeaderCellDef>id</th>
+      <th mat-header-cell *matHeaderCellDef>DE</th>
       <td mat-cell *matCellDef="let element">{{ element.id }}</td>
     </ng-container>
     <ng-container matColumnDef="mti">
@@ -151,9 +151,4 @@
     <tr mat-row *matRowDef="let row; columns: allColumns"></tr>
   </table>
   <div *ngIf="dataSource.data.length === 0" style="text-align: center; color: #888; margin: 24px 0;">Aucune réponse enregistrée.</div>
-  <!-- Bouton de suppression groupée -->
-  <button mat-raised-button color="warn" (click)="deleteSelectedResponses()" style="margin: 16px 0;">
-    <mat-icon>delete</mat-icon>
-    Supprimer la sélection
-  </button>
 </div> 
