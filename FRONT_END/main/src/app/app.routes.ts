@@ -47,13 +47,7 @@ export const routes: Routes = [
             (m) => m.TransactionHistoryComponent
           ),
       },
-      {
-        path: 'transaction-map',
-        loadComponent: () =>
-          import('./components/transaction-map/transaction-map.component').then(
-            (m) => m.TransactionMapComponent
-          ),
-      },
+
       {
         path: 'logs',
         loadComponent: () =>

@@ -2,48 +2,107 @@
   <mat-card>
     <mat-card-content>
 
-      <div style="margin-bottom: 16px;">
-        <button mat-stroked-button color="primary" (click)="fileInput.click()">
-          <mat-icon>upload</mat-icon> Importer un fichier
-        </button>
-        <input #fileInput type="file" accept=".txt,.json" style="display:none" (change)="onFileSelected($event)">
+      <!-- Header avec bouton d'import -->
+      <div class="form-header">
+        <div class="header-content">
+          <div class="header-icon">
+            <mat-icon>iso</mat-icon>
+          </div>
+          <div class="header-text">
+            <h2>Génération de Message ISO 8583</h2>
+            <p>Remplissez les champs organisés par catégories pour générer votre message ISO</p>
+          </div>
+        </div>
+        <div class="header-actions">
+          <button mat-stroked-button color="primary" (click)="fileInput.click()" class="import-btn">
+            <mat-icon>upload</mat-icon> Importer un fichier
+          </button>
+          <input #fileInput type="file" accept=".txt,.json" style="display:none" (change)="onFileSelected($event)">
+        </div>
       </div>
 
       <div *ngIf="showForm">
         <form [formGroup]="messageForm" (ngSubmit)="generateMessage()">
-          <div class="row">
-            <!-- MTI Combobox -->
-            <div class="col-md-6 col-lg-4">
-              <mat-form-field appearance="outline" class="w-100">
-                <mat-label>Sélectionnez un type de message (MTI)</mat-label>
-                <mat-icon matPrefix>credit_card</mat-icon>
-                <mat-select formControlName="mti" required>
-                  <mat-option *ngFor="let option of mtiOptions" [value]="option.value">
-                    {{ option.viewValue }}
-                  </mat-option>
-                </mat-select>
-                <mat-error *ngIf="messageForm.get('mti')?.hasError('required') && messageForm.get('mti')?.touched">
-                  MTI est requis.
-                </mat-error>
-              </mat-form-field>
+          
+          <!-- Section MTI -->
+          <div class="category-section mti-section">
+            <div class="category-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+              <div class="category-icon">
+                <mat-icon>credit_card</mat-icon>
+              </div>
+              <div class="category-title">
+                <h3>🎯 Type de Message (MTI)</h3>
+                <p>Sélectionnez le type de message ISO 8583</p>
+              </div>
             </div>
-
-            <!-- Other fields -->
-            @for (key of orderedFieldKeys; track key) {
-            <div class="col-md-6 col-lg-4">
-              <mat-form-field appearance="outline" class="w-100">
-                <mat-label>{{ key }} - {{ getFieldName(key) }}</mat-label>
-                <input matInput [formControlName]="key" placeholder="Saisir {{ getFieldName(key) }}">
-              </mat-form-field>
+            <div class="category-content">
+              <div class="row">
+                <div class="col-md-6 col-lg-4">
+                  <mat-form-field appearance="outline" class="w-100">
+                    <mat-label>Sélectionnez un type de message (MTI)</mat-label>
+                    <mat-icon matPrefix>credit_card</mat-icon>
+                    <mat-select formControlName="mti" required>
+                      <mat-option *ngFor="let option of mtiOptions" [value]="option.value">
+                        {{ option.viewValue }}
+                      </mat-option>
+                    </mat-select>
+                    <mat-error *ngIf="messageForm.get('mti')?.hasError('required') && messageForm.get('mti')?.touched">
+                      MTI est requis.
+                    </mat-error>
+                  </mat-form-field>
+                </div>
+              </div>
             </div>
-            }
           </div>
-          <button mat-raised-button color="primary" type="button" (click)="generateMessage()">Générer le Message (ASCII)</button>
-          <button mat-raised-button color="accent" type="button" (click)="generateHexMessage()" class="ml-2">Générer le Message (HEX)</button>
-          <button mat-raised-button color="warn" type="button" (click)="clearForm()" class="ml-2">Vider les champs</button>
+
+          <!-- Champs organisés par catégories -->
+          @for (category of fieldCategories; track category.title) {
+          <div class="category-section">
+            <div class="category-header" [style.background]="'linear-gradient(135deg, ' + category.color + ' 0%, ' + category.color + 'dd 100%)'">
+              <div class="category-icon">
+                <mat-icon>{{ category.icon }}</mat-icon>
+              </div>
+              <div class="category-title">
+                <h3>{{ category.title }}</h3>
+                <p>{{ category.fields.length }} champs</p>
+              </div>
+            </div>
+            <div class="category-content">
+              <div class="row">
+                @for (field of getFieldsByCategory(category); track field.key) {
+                <div class="col-md-6 col-lg-4">
+                  <mat-form-field appearance="outline" class="w-100">
+                    <mat-label>{{ field.key }} - {{ field.name }}</mat-label>
+                    <input matInput [formControlName]="field.key" [placeholder]="'Saisir ' + field.name">
+                  </mat-form-field>
+                </div>
+                }
+              </div>
+            </div>
+          </div>
+          }
+
+          <!-- Boutons d'action -->
+          <div class="action-buttons-section">
+            <div class="action-buttons-container">
+              <button mat-raised-button color="primary" type="button" (click)="generateMessage()" class="action-btn primary">
+                <mat-icon>send</mat-icon>
+                Générer le Message (ASCII)
+              </button>
+              <button mat-raised-button color="accent" type="button" (click)="generateHexMessage()" class="action-btn accent">
+                <mat-icon>code</mat-icon>
+                Générer le Message (HEX)
+              </button>
+              <button mat-raised-button color="warn" type="button" (click)="clearForm()" class="action-btn warn">
+                <mat-icon>clear</mat-icon>
+                Vider les champs
+              </button>
+            </div>
+          </div>
         </form>
       </div>
 
+      <!-- Section des résultats -->
       <div *ngIf="!showForm" class="result-container" [@fadeIn]>
         <h3>Message ISO Généré :</h3>
         <div class="message-output-box">

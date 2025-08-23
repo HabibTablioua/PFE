@@ -447,13 +447,15 @@ public class TransactionHistoryService {
                     switch (entryMode) {
                         case "010": source = "ATM"; break;
                         case "021":
-                        case "022": source = "Mobile"; break;
+                        case "022": source = "Mobile Banking"; break;
                         case "051":
                         case "052": source = "POS"; break;
                         case "071": source = "E-commerce"; break;
-                        case "081": source = "Web"; break;
+                        case "081": source = "Web Banking"; break;
                         case "091": source = "Call Center"; break;
                         case "111": source = "Kiosk"; break;
+                        case "121": source = "Virement"; break;
+                        case "131": source = "Prélèvement"; break;
                         default: source = "Autre";
                     }
                 }

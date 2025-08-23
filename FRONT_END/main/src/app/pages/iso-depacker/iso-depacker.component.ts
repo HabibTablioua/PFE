@@ -1,18 +1,34 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MaterialModule } from 'src/app/material.module';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { HttpClient, HttpClientModule, HttpHeaders } from '@angular/common/http';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
+import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatInputModule } from '@angular/material/input';
 import { AppHeaderComponent } from '../../components/app-header/app-header.component';
 import { FormsModule } from '@angular/forms';
 import { trigger, state, style, transition, animate } from '@angular/animations';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-iso-depacker',
   templateUrl: './iso-depacker.component.html',
   styleUrls: [],
   standalone: true,
-  imports: [CommonModule, MaterialModule, HttpClientModule, MatSnackBarModule, AppHeaderComponent, FormsModule],
+  imports: [
+    CommonModule, 
+    MaterialModule, 
+    HttpClientModule, 
+    MatSnackBarModule, 
+    MatFormFieldModule,
+    MatSelectModule,
+    MatPaginatorModule,
+    MatInputModule,
+    AppHeaderComponent, 
+    FormsModule
+  ],
   animations: [
     trigger('fadeIn', [
       state('void', style({ opacity: 0, transform: 'translateY(20px)' })),
@@ -23,7 +39,7 @@ import { trigger, state, style, transition, animate } from '@angular/animations'
   ],
   styles: [`
     .depacker-container {
-      max-width: 1000px;
+      max-width: 1200px;
       margin: 40px auto;
       padding: 0 20px;
       font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
@@ -100,18 +116,17 @@ import { trigger, state, style, transition, animate } from '@angular/animations'
 
     /* Zone de formulaire */
     .depack-form-area {
-      background: linear-gradient(135deg, #fff 0%, #f8fafc 100%);
-      border-radius: 24px;
-      padding: 40px;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
-      border: 1px solid #e2e8f0;
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      margin-bottom: 40px;
     }
 
-    /* En-tête du formulaire */
     .form-header {
-      margin-bottom: 32px;
-      padding-bottom: 24px;
-      border-bottom: 1px solid #e2e8f0;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 32px;
     }
 
     .header-content {
@@ -121,52 +136,44 @@ import { trigger, state, style, transition, animate } from '@angular/animations'
     }
 
     .header-icon {
-      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 50%;
       width: 60px;
       height: 60px;
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 4px 20px rgba(16, 185, 129, 0.3);
     }
 
     .header-icon mat-icon {
-      color: white;
       font-size: 28px;
       width: 28px;
       height: 28px;
     }
 
     .header-text h2 {
-      font-size: 24px;
-      font-weight: 700;
-      color: #1e293b;
       margin: 0 0 8px 0;
+      font-size: 24px;
+      font-weight: 600;
     }
 
     .header-text p {
-      font-size: 16px;
-      color: #64748b;
       margin: 0;
+      opacity: 0.9;
+      font-size: 16px;
     }
 
     /* Zone de saisie */
     .input-section {
-      margin-bottom: 32px;
+      padding: 32px;
+      background: #f8fafc;
     }
 
     .iso-textarea-wrapper {
       background: white;
-      border-radius: 20px;
+      border-radius: 16px;
       padding: 24px;
-      border: 2px solid #e2e8f0;
-      transition: all 0.3s ease;
-    }
-
-    .iso-textarea-wrapper:hover {
-      border-color: #3b82f6;
-      box-shadow: 0 8px 32px rgba(59, 130, 246, 0.1);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
     }
 
     .textarea-header {
@@ -177,59 +184,45 @@ import { trigger, state, style, transition, animate } from '@angular/animations'
     }
 
     .textarea-icon {
-      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-      border-radius: 12px;
-      width: 48px;
-      height: 48px;
+      background: #e0e7ff;
+      color: #3730a3;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
       display: flex;
       align-items: center;
       justify-content: center;
     }
 
-    .textarea-icon mat-icon {
-      color: white;
-      font-size: 24px;
-      width: 24px;
-      height: 24px;
-    }
-
     .textarea-info h4 {
+      margin: 0 0 4px 0;
+      color: #1e293b;
       font-size: 18px;
       font-weight: 600;
-      color: #1e293b;
-      margin: 0 0 4px 0;
     }
 
     .textarea-info p {
-      font-size: 14px;
-      color: #64748b;
       margin: 0;
+      color: #64748b;
+      font-size: 14px;
     }
 
     .depack-textarea {
       width: 100%;
-      min-height: 200px;
-      padding: 20px;
-      border: none;
-      border-radius: 16px;
-      font-family: 'Fira Mono', 'Consolas', 'Courier New', monospace;
+      border: 2px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 16px;
+      font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
       font-size: 14px;
-      line-height: 1.6;
-      color: #1e293b;
-      background: #f8fafc;
+      line-height: 1.5;
       resize: vertical;
-      transition: all 0.3s ease;
+      transition: border-color 0.3s ease;
     }
 
     .depack-textarea:focus {
       outline: none;
-      background: white;
+      border-color: #3b82f6;
       box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-    }
-
-    .depack-textarea::placeholder {
-      color: #94a3b8;
-      font-style: italic;
     }
 
     .textarea-footer {
@@ -242,8 +235,8 @@ import { trigger, state, style, transition, animate } from '@angular/animations'
     }
 
     .char-count {
-      font-size: 14px;
       color: #64748b;
+      font-size: 14px;
       font-weight: 500;
     }
 
@@ -251,306 +244,557 @@ import { trigger, state, style, transition, animate } from '@angular/animations'
       display: flex;
       align-items: center;
       gap: 8px;
+      color: #059669;
       font-size: 14px;
-      color: #64748b;
+      font-weight: 500;
     }
 
-    .format-indicator mat-icon {
-      font-size: 16px;
-      width: 16px;
-      height: 16px;
-      color: #3b82f6;
-    }
-
-    /* Boutons d'action */
-    .action-buttons {
+    /* Boutons d'action - Design moderne et centré */
+    .action-buttons-modern {
+      padding: 32px;
+      background: white;
+      border-top: 1px solid #e2e8f0;
       display: flex;
-      gap: 16px;
       justify-content: center;
-      margin-bottom: 32px;
+      align-items: center;
     }
 
-    .action-buttons button {
-      padding: 14px 28px;
-      border-radius: 16px;
-      font-weight: 600;
-      font-size: 16px;
-      transition: all 0.3s ease;
-      min-width: 140px;
+    .buttons-container {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
     }
 
-    .analyze-btn {
+    /* Bouton Analyser - Principal */
+    .analyze-btn-modern {
       background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
       color: white;
-      border-radius: 999px;
-      padding: 0.7em 2em;
-      font-weight: 500;
-      display: flex;
-      align-items: center;
-      gap: 0.5em;
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 14px;
+      min-width: 120px;
+      height: 44px;
       box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       border: none;
+      position: relative;
+      overflow: hidden;
     }
 
-    .analyze-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 32px rgba(59, 130, 246, 0.4);
+    .analyze-btn-modern::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: left 0.5s;
     }
 
-    .analyze-btn .mat-icon {
+    .analyze-btn-modern:hover::before {
+      left: 100%;
+    }
+
+    .analyze-btn-modern:hover {
+      transform: translateY(-4px) scale(1.02);
+      box-shadow: 0 12px 40px rgba(59, 130, 246, 0.4);
+    }
+
+    .analyze-btn-modern:active {
+      transform: translateY(-2px) scale(0.98);
+    }
+
+    .analyze-btn-modern mat-icon {
+      margin-right: 8px;
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
+
+    /* Bouton Réinitialiser - Secondaire */
+    .reset-btn-modern {
+      background: white;
+      color: #3b82f6;
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 14px;
+      min-width: 120px;
+      height: 44px;
+      border: 2px solid #3b82f6;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .reset-btn-modern::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 0;
+      height: 100%;
+      background: #3b82f6;
+      transition: width 0.3s ease;
+      z-index: -1;
+    }
+
+    .reset-btn-modern:hover::before {
+      width: 100%;
+    }
+
+    .reset-btn-modern:hover {
       color: white;
+      transform: translateY(-4px) scale(1.02);
+      box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
     }
 
-    .reset-btn {
-      background-color: #eff6ff;
-      color: #1d4ed8;
-      border-radius: 999px;
-      padding: 0.7em 2em;
-      font-weight: 500;
-      display: flex;
-      align-items: center;
-      gap: 0.5em;
-      box-shadow: none;
-      transition: background 0.2s, color 0.2s;
-      border: none;
+    .reset-btn-modern:active {
+      transform: translateY(-2px) scale(0.98);
     }
 
-    .reset-btn:hover {
-      background-color: #dbeafe;
-      color: #1e40af;
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    .reset-btn-modern mat-icon {
+      margin-right: 8px;
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
     }
 
-    .reset-btn .mat-icon {
-      color: #1d4ed8;
+    /* Bouton Annuler - Danger */
+    .cancel-btn-modern {
+      background: white;
+      color: #ef4444;
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 14px;
+      min-width: 120px;
+      height: 44px;
+      border: 2px solid #ef4444;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
     }
 
-    .cancel-btn {
-      background-color: #ffebee;
-      color: #d32f2f;
-      border-radius: 999px;
-      padding: 0.7em 2em;
-      font-weight: 500;
-      display: flex;
-      align-items: center;
-      gap: 0.5em;
-      box-shadow: none;
-      transition: background 0.2s, color 0.2s;
-      border: none;
+    .cancel-btn-modern::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 0;
+      height: 100%;
+      background: #ef4444;
+      transition: width 0.3s ease;
+      z-index: -1;
     }
 
-    .cancel-btn:hover {
-      background-color: #ffcdd2;
-      color: #b71c1c;
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    .cancel-btn-modern:hover::before {
+      width: 100%;
     }
 
-    .cancel-btn .mat-icon {
-      color: #d32f2f;
+    .cancel-btn-modern:hover {
+      color: white;
+      transform: translateY(-4px) scale(1.02);
+      box-shadow: 0 8px 25px rgba(239, 68, 68, 0.3);
     }
 
-    /* Section des résultats */
+    .cancel-btn-modern:active {
+      transform: translateY(-2px) scale(0.98);
+    }
+
+    .cancel-btn-modern mat-icon {
+      margin-right: 8px;
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
+
+    /* Animation d'apparition des boutons */
+    .buttons-container button {
+      animation: buttonSlideIn 0.6s ease forwards;
+      opacity: 0;
+      transform: translateY(20px);
+    }
+
+    .buttons-container button:nth-child(1) { animation-delay: 0.1s; }
+    .buttons-container button:nth-child(2) { animation-delay: 0.2s; }
+    .buttons-container button:nth-child(3) { animation-delay: 0.3s; }
+
+    @keyframes buttonSlideIn {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Section des résultats - Design moderne */
     .results-section {
-      background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+      background: white;
       border-radius: 20px;
-      padding: 32px;
-      margin-bottom: 32px;
-      border: 1px solid #bbf7d0;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      margin-bottom: 40px;
     }
 
-    .results-header {
+    .results-header-modern {
+      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+      color: white;
+      padding: 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+
+    .results-main-info {
       display: flex;
       align-items: center;
       gap: 20px;
-      margin-bottom: 24px;
     }
 
-    .results-icon {
-      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-      border-radius: 16px;
-      width: 56px;
-      height: 56px;
+    .success-icon {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
       display: flex;
       align-items: center;
       justify-content: center;
     }
 
-    .results-icon mat-icon {
-      color: white;
+    .success-icon mat-icon {
       font-size: 28px;
       width: 28px;
       height: 28px;
     }
 
-    .results-title h3 {
-      font-size: 20px;
-      font-weight: 700;
-      color: #065f46;
-      margin: 0 0 4px 0;
-    }
-
-    .results-title p {
-      font-size: 14px;
-      color: #047857;
-      margin: 0;
-    }
-
-    .result-content {
-      background: white;
-      border-radius: 16px;
-      padding: 24px;
-      margin-bottom: 24px;
-      border: 1px solid #d1fae5;
-    }
-
-    .generated-message {
-      font-family: 'Fira Mono', 'Consolas', 'Courier New', monospace;
-      font-size: 14px;
-      line-height: 1.6;
-      color: #1e293b;
-      margin: 0;
-      white-space: pre-wrap;
-      word-break: break-all;
-    }
-
-    .results-actions {
-      display: flex;
-      gap: 16px;
-      justify-content: flex-end;
-    }
-
-    .copy-btn, .download-btn {
-      padding: 12px 24px;
-      border-radius: 12px;
+    .results-title-modern h3 {
+      margin: 0 0 8px 0;
+      font-size: 24px;
       font-weight: 600;
-      transition: all 0.3s ease;
     }
 
-    .copy-btn {
-      background: #3b82f6;
-      color: white;
+    .success-subtitle {
+      margin: 0;
+      opacity: 0.9;
+      font-size: 16px;
     }
 
-    .copy-btn:hover {
-      background: #1d4ed8;
-      transform: translateY(-2px);
+    /* Carte du résultat brut */
+    .raw-result-card {
+      margin: 24px;
+      background: #f8fafc;
+      border-radius: 16px;
+      overflow: hidden;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 24px;
+      background: white;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .card-header h4 {
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: #1e293b;
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .raw-content {
+      padding: 24px;
+    }
+
+    .generated-message-modern {
+      background: #1e293b;
+      color: #e2e8f0;
+      padding: 20px;
+      border-radius: 12px;
+      font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+      font-size: 13px;
+      line-height: 1.6;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    /* Actions de téléchargement */
+    .download-actions {
+      padding: 24px;
+      background: white;
+      border-top: 1px solid #e2e8f0;
+    }
+
+    .download-actions h4 {
+      margin: 0 0 16px 0;
+      color: #1e293b;
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .download-buttons {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
     }
 
     .download-btn {
+      border-radius: 10px;
+      font-weight: 500;
+      padding: 10px 20px;
+      min-width: 80px;
+      height: 40px;
       border: 2px solid #3b82f6;
       color: #3b82f6;
       background: white;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .download-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 0;
+      height: 100%;
+      background: #3b82f6;
+      transition: width 0.3s ease;
+      z-index: -1;
+    }
+
+    .download-btn:hover::before {
+      width: 100%;
     }
 
     .download-btn:hover {
-      background: #3b82f6;
       color: white;
-      transform: translateY(-2px);
+      transform: translateY(-3px) scale(1.02);
+      box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
     }
 
-    /* Section du tableau des champs */
-    .fields-table-section {
+    .download-btn:active {
+      transform: translateY(-1px) scale(0.98);
+    }
+
+    .download-btn mat-icon {
+      margin-right: 6px;
+      font-size: 16px;
+      width: 16px;
+      height: 16px;
+    }
+
+    /* Section des champs - Design moderne */
+    .fields-section-modern {
       background: white;
       border-radius: 20px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      margin-bottom: 40px;
+    }
+
+    .section-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
       padding: 32px;
-      border: 1px solid #e2e8f0;
-    }
-
-    .table-header {
       text-align: center;
-      margin-bottom: 24px;
     }
 
-    .table-header h3 {
-      font-size: 20px;
-      font-weight: 700;
-      color: #1e293b;
-      margin: 0 0 8px 0;
-    }
-
-    .table-header p {
-      font-size: 14px;
-      color: #64748b;
-      margin: 0;
-    }
-
-    .table-container {
-      overflow-x: auto;
-      border-radius: 16px;
-      border: 1px solid #e2e8f0;
-    }
-
-    .fields-table {
-      width: 100%;
-      background: white;
-    }
-
-    .fields-table th {
-      background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-      color: #1e293b;
+    .section-header h3 {
+      margin: 0 0 12px 0;
+      font-size: 24px;
       font-weight: 600;
-      padding: 16px;
-      text-align: left;
-      border-bottom: 2px solid #e2e8f0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
     }
 
-    .fields-table td {
-      padding: 16px;
-      border-bottom: 1px solid #f1f5f9;
-      vertical-align: top;
+    .section-header p {
+      margin: 0;
+      opacity: 0.9;
+      font-size: 16px;
     }
 
-    .field-id {
+    /* Filtres et recherche */
+    .filters-section {
+      padding: 24px 32px;
+      background: #f8fafc;
+      display: flex;
+      gap: 20px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .search-field, .filter-field {
+      min-width: 250px;
+    }
+
+    /* Grille des champs */
+    .fields-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      gap: 20px;
+      padding: 32px;
+    }
+
+    .field-card {
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+      border: 2px solid transparent;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .field-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .field-card.highlighted {
+      border-color: #3b82f6;
+      background: #eff6ff;
+    }
+
+    .field-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .field-id-badge {
       background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
       color: white;
-      padding: 6px 12px;
       border-radius: 20px;
-      font-size: 12px;
-      font-weight: 600;
-      display: inline-block;
+      padding: 8px 16px;
+      font-weight: 700;
+      font-size: 16px;
+      min-width: 40px;
+      text-align: center;
+    }
+
+    .field-actions {
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .field-card:hover .field-actions {
+      opacity: 1;
+    }
+
+    .field-content {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .field-name-section {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
     }
 
     .field-name {
-      font-weight: 500;
+      margin: 0;
       color: #1e293b;
-    }
-
-    .field-length {
-      background: #f1f5f9;
-      color: #475569;
-      padding: 4px 8px;
-      border-radius: 8px;
-      font-size: 12px;
+      font-size: 16px;
       font-weight: 600;
+      line-height: 1.4;
+      flex: 1;
     }
 
-    .field-value {
-      font-family: 'Fira Mono', 'Consolas', 'Courier New', monospace;
-      font-size: 13px;
-      color: #1e293b;
-      background: #f8fafc;
-      padding: 8px 12px;
-      border-radius: 8px;
-      display: inline-block;
-      max-width: 200px;
-      overflow: hidden;
-      text-overflow: ellipsis;
+    .field-type-badge {
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
       white-space: nowrap;
     }
 
-    .action-btn {
-      background: #f1f5f9;
-      color: #3b82f6;
-      border-radius: 8px;
-      transition: all 0.3s ease;
+    .type-badge.type-date {
+      background: #fef3c7;
+      color: #92400e;
     }
 
-    .action-btn:hover {
-      background: #3b82f6;
-      color: white;
-      transform: scale(1.1);
+    .type-badge.type-amount {
+      background: #dbeafe;
+      color: #1e40af;
+    }
+
+    .type-badge.type-card {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .type-badge.type-other {
+      background: #f3e8ff;
+      color: #7c3aed;
+    }
+
+    .field-value-section {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .value-display {
+      background: #f8fafc;
+      border-radius: 8px;
+      padding: 12px;
+      border: 1px solid #e2e8f0;
+    }
+
+    .field-value {
+      font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+      font-size: 14px;
+      color: #1e293b;
+      word-break: break-all;
+      line-height: 1.4;
+    }
+
+    .field-meta {
+      display: flex;
+      gap: 16px;
+      font-size: 12px;
+      color: #64748b;
+    }
+
+    .field-meta span {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .field-meta mat-icon {
+      font-size: 16px;
+      width: 16px;
+      height: 16px;
+    }
+
+    /* Pagination */
+    .pagination-section {
+      padding: 24px 32px;
+      background: #f8fafc;
+      border-top: 1px solid #e2e8f0;
+      display: flex;
+      justify-content: center;
     }
 
     /* Responsive */
@@ -560,56 +804,81 @@ import { trigger, state, style, transition, animate } from '@angular/animations'
         margin: 20px auto;
       }
 
-      .welcome-card {
-        padding: 32px 24px;
-      }
-
-      .depack-form-area {
-        padding: 24px;
-      }
-
-      .header-content {
+      .results-header-modern {
         flex-direction: column;
+        gap: 24px;
         text-align: center;
-        gap: 16px;
+      }
+
+      .filters-section {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .search-field, .filter-field {
+        min-width: auto;
+      }
+
+      .fields-grid {
+        grid-template-columns: 1fr;
+        padding: 20px;
       }
 
       .action-buttons {
         flex-direction: column;
-        align-items: center;
       }
 
-      .action-buttons button {
-        width: 100%;
-        max-width: 300px;
-      }
-
-      .results-actions {
+      /* Styles responsive pour les nouveaux boutons */
+      .buttons-container {
         flex-direction: column;
-        align-items: center;
+        gap: 16px;
       }
 
-      .results-actions button {
+      .analyze-btn-modern,
+      .reset-btn-modern,
+      .cancel-btn-modern {
+        min-width: 160px;
         width: 100%;
-        max-width: 300px;
-      }
-
-      .fields-table {
-        font-size: 14px;
-      }
-
-      .fields-table th,
-      .fields-table td {
-        padding: 12px 8px;
+        max-width: 250px;
       }
     }
+
+    /* Animations */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .field-card {
+      animation: fadeInUp 0.6s ease forwards;
+    }
+
+    .field-card:nth-child(1) { animation-delay: 0.1s; }
+    .field-card:nth-child(2) { animation-delay: 0.2s; }
+    .field-card:nth-child(3) { animation-delay: 0.3s; }
+    .field-card:nth-child(4) { animation-delay: 0.4s; }
+    .field-card:nth-child(5) { animation-delay: 0.5s; }
+    .field-card:nth-child(6) { animation-delay: 0.6s; }
   `]
 })
 export class IsoDepackerComponent implements OnInit {
-  showDepackerArea: boolean = false
-  isoMessage: string = '';
-  depackedResult: string = '';
-  fields: { id: number, value: string }[] = [];
+  showDepackerArea = false;
+  isoMessage = '';
+  depackedResult = '';
+  fields: any[] = [];
+  
+  // Nouvelles propriétés pour le design moderne
+  searchTerm = '';
+  selectedFieldType = '';
+  processingStartTime = 0;
+  processingEndTime = 0;
+
   fieldNames: { [key: number]: string } = {
     0: 'Message Type Indicator (MTI)',
     1: 'Bitmap',
@@ -742,9 +1011,51 @@ export class IsoDepackerComponent implements OnInit {
     128: 'Message Authentication Code'
   };
 
-  constructor(private http: HttpClient, private snackBar: MatSnackBar) {}
+  constructor(
+    private http: HttpClient, 
+    private snackBar: MatSnackBar,
+    private authService: AuthService
+  ) {}
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    // Vérifier l'état de l'authentification au démarrage
+    this.checkAuthStatus();
+  }
+
+  checkAuthStatus(): void {
+    const isAuth = this.authService.isAuthenticated();
+    const token = localStorage.getItem('token');
+    console.log('État de l\'authentification:', isAuth);
+    console.log('Token présent:', !!token);
+    if (token) {
+      console.log('Token (premiers caractères):', token.substring(0, 20) + '...');
+      
+      // Test de connexion au gateway
+      this.testGatewayConnection();
+    }
+  }
+
+  testGatewayConnection(): void {
+    const token = localStorage.getItem('token');
+    let headers = new HttpHeaders();
+    if (token) {
+      headers = headers.set('Authorization', `Bearer ${token}`);
+    }
+
+    // Test simple de connexion au gateway
+    this.http.get('http://localhost:8088/api/incidents/count', { headers })
+      .subscribe({
+        next: (result) => {
+          console.log('✅ Connexion au gateway réussie:', result);
+        },
+        error: (error) => {
+          console.error('❌ Erreur de connexion au gateway:', error);
+          if (error.status === 401) {
+            console.error('Erreur 401: Token invalide ou expiré');
+          }
+        }
+      });
+  }
 
   toggleDepackerArea(): void {
     this.showDepackerArea = !this.showDepackerArea;
@@ -759,18 +1070,49 @@ export class IsoDepackerComponent implements OnInit {
       return;
     }
 
-    this.http.post('http://localhost:8089/depacking', this.isoMessage, { responseType: 'text' })
+    // Vérifier si l'utilisateur est authentifié
+    if (!this.authService.isAuthenticated()) {
+      this.snackBar.open('Vous devez être connecté pour analyser un message ISO.', 'Fermer', { duration: 5000 });
+      return;
+    }
+
+    // Démarrer le chronomètre
+    this.startProcessingTimer();
+
+    // Récupérer le token JWT et créer les en-têtes (comme dans incident.service.ts)
+    const token = localStorage.getItem('token');
+    let headers = new HttpHeaders();
+    if (token) {
+      headers = headers.set('Authorization', `Bearer ${token}`);
+      headers = headers.set('Content-Type', 'text/plain');
+    }
+
+    // Utiliser l'URL absolue comme dans incident.service.ts
+    this.http.post('http://localhost:8088/api/depacking', this.isoMessage, { 
+      responseType: 'text',
+      headers: headers
+    })
       .subscribe({
         next: (result) => {
+          // Arrêter le chronomètre
+          this.stopProcessingTimer();
+          
           this.depackedResult = result;
           this.parseFields();
-          this.snackBar.open('Message analysé avec succès !', 'Fermer', { duration: 3000 });
-        },
-        error: (error) => {
+        this.snackBar.open('Message analysé avec succès !', 'Fermer', { duration: 3000 });
+      },
+      error: (error) => {
+          // Arrêter le chronomètre même en cas d'erreur
+          this.stopProcessingTimer();
+          
           console.error('Erreur lors de l\'analyse:', error);
+          if (error.status === 401) {
+            this.snackBar.open('Erreur d\'authentification. Veuillez vous reconnecter.', 'Fermer', { duration: 5000 });
+        } else {
           this.snackBar.open('Erreur lors de l\'analyse du message ISO.', 'Fermer', { duration: 5000 });
+          }
         }
-      });
+    });
   }
 
   resetDepacker(): void {
@@ -803,5 +1145,133 @@ export class IsoDepackerComponent implements OnInit {
     // Logique pour parser les champs à partir du résultat
     // Cette méthode peut être étendue selon vos besoins
     this.fields = [];
+  }
+
+  // Nouvelles méthodes pour le design moderne
+  getFilteredFields(): any[] {
+    let filtered = this.fields;
+    
+    // Filtrage par recherche
+    if (this.searchTerm) {
+      filtered = filtered.filter(field => 
+        field.id.toString().includes(this.searchTerm) ||
+        this.getFieldName(field.id).toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+        field.value.toLowerCase().includes(this.searchTerm.toLowerCase())
+      );
+    }
+    
+    // Filtrage par type
+    if (this.selectedFieldType) {
+      filtered = filtered.filter(field => this.getFieldType(field.id) === this.selectedFieldType);
+    }
+    
+    return filtered;
+  }
+
+  isFieldHighlighted(field: any): boolean {
+    return this.searchTerm && (
+      field.id.toString().includes(this.searchTerm) ||
+      this.getFieldName(field.id).toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+      field.value.toLowerCase().includes(this.searchTerm.toLowerCase())
+    );
+  }
+
+  getFieldType(fieldId: number): string {
+    // Logique pour déterminer le type de champ
+    if ([2, 14, 15, 16, 17].includes(fieldId)) return 'date';
+    if ([3, 4, 5, 6, 8, 9, 10].includes(fieldId)) return 'amount';
+    if ([2, 35, 45, 52, 53, 55].includes(fieldId)) return 'card';
+    return 'other';
+  }
+
+  getFieldTypeClass(fieldId: number): string {
+    const type = this.getFieldType(fieldId);
+    return `type-badge type-${type}`;
+  }
+
+  getFieldFormat(value: string): string {
+    // Détection automatique du format
+    if (/^\d{6}$/.test(value)) return 'MMDDYY';
+    if (/^\d{4}$/.test(value)) return 'MMDD';
+    if (/^\d{6}$/.test(value) && parseInt(value) > 240000) return 'HHMMSS';
+    if (/^\d{12}$/.test(value)) return 'Amount';
+    if (/^\d{16}$/.test(value)) return 'Card';
+    return 'Text';
+  }
+
+  // Méthode pour démarrer le chronomètre
+  startProcessingTimer(): void {
+    this.processingStartTime = Date.now();
+  }
+
+  // Méthode pour arrêter le chronomètre
+  stopProcessingTimer(): void {
+    this.processingEndTime = Date.now();
+  }
+
+  // Méthodes de téléchargement
+  downloadJson(): void {
+    this.downloadFile('json', 'application/json', 'depacked.json');
+  }
+
+  downloadXml(): void {
+    this.downloadFile('xml', 'application/xml', 'depacked.xml');
+  }
+
+  downloadCsv(): void {
+    this.downloadFile('csv', 'text/csv', 'depacked.csv');
+  }
+
+  downloadTxt(): void {
+    this.downloadFile('txt', 'text/plain', 'depacked.txt');
+  }
+
+  private downloadFile(format: string, contentType: string, filename: string): void {
+    if (!this.isoMessage.trim()) {
+      this.snackBar.open('Aucun message ISO à télécharger.', 'Fermer', { duration: 3000 });
+      return;
+    }
+
+    if (!this.authService.isAuthenticated()) {
+      this.snackBar.open('Vous devez être connecté pour télécharger.', 'Fermer', { duration: 5000 });
+      return;
+    }
+
+    const token = localStorage.getItem('token');
+    let headers = new HttpHeaders();
+    if (token) {
+      headers = headers.set('Authorization', `Bearer ${token}`);
+      headers = headers.set('Content-Type', 'text/plain');
+    }
+
+    // Afficher un message de chargement
+    this.snackBar.open(`Téléchargement du fichier ${format.toUpperCase()} en cours...`, 'Fermer', { duration: 2000 });
+
+    this.http.post(`http://localhost:8088/api/depacking/download/${format}`, this.isoMessage, {
+      responseType: 'blob',
+      headers: headers
+    }).subscribe({
+      next: (blob: Blob) => {
+        // Créer le lien de téléchargement
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+        
+        this.snackBar.open(`Fichier ${format.toUpperCase()} téléchargé avec succès !`, 'Fermer', { duration: 3000 });
+      },
+      error: (error) => {
+        console.error(`Erreur lors du téléchargement ${format}:`, error);
+        if (error.status === 401) {
+          this.snackBar.open('Erreur d\'authentification lors du téléchargement.', 'Fermer', { duration: 5000 });
+        } else {
+          this.snackBar.open(`Erreur lors du téléchargement du fichier ${format.toUpperCase()}.`, 'Fermer', { duration: 5000 });
+        }
+      }
+    });
   }
 } 

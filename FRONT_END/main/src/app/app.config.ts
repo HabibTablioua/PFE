@@ -7,6 +7,7 @@ import {
   HttpClient,
   provideHttpClient,
   withInterceptorsFromDi,
+  withInterceptors,
 } from '@angular/common/http';
 import { routes } from './app.routes';
 import {
@@ -31,6 +32,9 @@ import { NgScrollbarModule } from 'ngx-scrollbar';
 import { MaterialModule } from './material.module';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
+// Intercepteur d'authentification
+import { AuthInterceptor } from './services/auth.interceptor';
+
 export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection({ eventCoalescing: true }),
@@ -42,7 +46,10 @@ export const appConfig: ApplicationConfig = {
       }),
       withComponentInputBinding()
     ),
-    provideHttpClient(withInterceptorsFromDi()),
+    provideHttpClient(
+      withInterceptorsFromDi(),
+      withInterceptors([AuthInterceptor])
+    ),
     provideClientHydration(),
     provideAnimationsAsync(),
     provideNativeDateAdapter(),

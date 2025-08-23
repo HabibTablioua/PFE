@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Proxy</title>
+</head>
+<body>
+    <h1>Test du Proxy Angular</h1>
+    <button onclick="testProxy()">Tester le Proxy</button>
+    <div id="result"></div>
+
+    <script>
+        async function testProxy() {
+            try {
+                const response = await fetch('/api/depacking', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'text/plain'
+                    },
+                    body: 'TEST123'
+                });
+                
+                if (response.ok) {
+                    const result = await response.text();
+                    document.getElementById('result').innerHTML = '<p style="color: green;">✅ Proxy fonctionne! Réponse: ' + result + '</p>';
+                } else {
+                    document.getElementById('result').innerHTML = '<p style="color: red;">❌ Erreur: ' + response.status + ' ' + response.statusText + '</p>';
+                }
+            } catch (error) {
+                document.getElementById('result').innerHTML = '<p style="color: red;">❌ Erreur: ' + error.message + '</p>';
+            }
+        }
+    </script>
+</body>
+</html>

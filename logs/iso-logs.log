@@ -271,3 +271,5 @@ java.lang.IllegalArgumentException: Length 100 too long for org.jpos.iso.IFA_LLC
 2025-08-01T14:58:54.457437100 SUCCESS - Packing ASCII réussi pour MTI : 0200
 2025-08-01T14:59:15.781159300 SUCCESS - Message enregistré dans historique pour MTI : 0200
 2025-08-01T14:59:15.832675200 SUCCESS - Packing ASCII réussi pour MTI : 0200
+2025-08-20T12:16:43.358696400 SUCCESS - Message enregistré dans historique pour MTI : 0200
+2025-08-20T12:16:43.421749300 SUCCESS - Packing ASCII réussi pour MTI : 0200

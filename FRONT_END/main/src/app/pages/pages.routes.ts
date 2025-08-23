@@ -50,11 +50,7 @@ export const routes: Routes = [
     loadComponent: () => import('./transaction-history/transaction-history.component').then(m => m.TransactionHistoryComponent),
     canActivate: [AuthGuard]
   },
-  {
-    path: 'transaction-map',
-    loadComponent: () => import('../components/transaction-map/transaction-map.component').then(m => m.TransactionMapComponent),
-    canActivate: [AuthGuard]
-  },
+
   {
     path: 'message-form',
     loadComponent: () => import('./message-form/message-form.component').then(m => m.MessageFormComponent),

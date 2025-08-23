@@ -119,7 +119,7 @@ public class ResponseISOService {
             String pan = isoMsg.hasField(2) ? isoMsg.getString(2) : null;
             if (pan == null || !isValidLuhn(pan)) {
                 isoMsg.set(39, "14"); // PAN invalide
-                response.setStatus("FAILED");
+                response.setStatus("NON APPROUVÉE");
                 response.setMessage("Numéro de carte invalide.");
                 Map<String, Object> details = new HashMap<>();
                 details.put("isoCode", "14");
@@ -139,7 +139,7 @@ public class ResponseISOService {
             Optional<Card> cardOpt = cardRepository.findByPan(pan);
             if (cardOpt.isEmpty()) {
                 isoMsg.set(39, "15"); // Carte inexistante
-                response.setStatus("FAILED");
+                response.setStatus("NON APPROUVÉE");
                 response.setMessage("Carte inexistante.");
                 Map<String, Object> details = new HashMap<>();
                 details.put("isoCode", "15");
@@ -168,7 +168,7 @@ public class ResponseISOService {
             Card card = cardOpt.get();
             if (card.isStolen()) {
                 isoMsg.set(39, "43");
-                response.setStatus("FAILED");
+                response.setStatus("NON APPROUVÉE");
                 response.setMessage("Carte volée.");
                 Map<String, Object> details = new HashMap<>();
                 details.put("isoCode", "43");
@@ -343,7 +343,7 @@ public class ResponseISOService {
 
             String responseCode = isoMsg.getString(39);
             String reason = getReasonByResponseCode(responseCode);
-            response.setStatus(responseCode.equals("00") ? "SUCCESS" : "FAILED");
+            response.setStatus(responseCode.equals("00") ? "APPROUVÉE" : "NON APPROUVÉE");
             response.setMessage(responseCode.equals("00")
                     ? "Transaction approuvée."
                     : "Transaction échouée : " + reason);
@@ -792,14 +792,14 @@ public class ResponseISOService {
 
         } catch (ISOException e) {
             log.error("❌ Erreur de traitement ISO: {}", e.getMessage());
-            response.setStatus("FAILED");
+            response.setStatus("NON APPROUVÉE");
             response.setMessage("Erreur de traitement ISO : " + e.getMessage());
             cause = e.getMessage();
-            saveToHistory("0210", new HashMap<>(), "", "RAW", "FAILED", cause);
+            saveToHistory("0210", new HashMap<>(), "", "RAW", "NON APPROUVÉE", cause);
         } catch (Exception ex) {
             log.error("❌ Autre erreur : {}", ex.getMessage());
             // Ajout : gestion acquéreur indisponible
-            response.setStatus("FAILED");
+            response.setStatus("NON APPROUVÉE");
             if (ex.getMessage() != null && ex.getMessage().toLowerCase().contains("acquéreur") || ex.getMessage().toLowerCase().contains("acquirer") || ex.getMessage().toLowerCase().contains("switch")) {
                 response.setMessage("Acquéreur indisponible.");
                 // Si possible, set le code ISO 91 dans le message ISO
@@ -808,7 +808,7 @@ public class ResponseISOService {
                 response.setMessage("Erreur lors de l'envoi de la réponse ISO : " + ex.getMessage());
             }
             cause = ex.getMessage();
-            saveToHistory("0210", new HashMap<>(), "", "RAW", "FAILED", cause);
+            saveToHistory("0210", new HashMap<>(), "", "RAW", "NON APPROUVÉE", cause);
         }
 
         return response;
@@ -1033,11 +1033,11 @@ public class ResponseISOService {
     }
 
     public long countSuccessResponses() {
-        return historyRepository.countByStatus("SUCCESS");
+        return historyRepository.countByStatus("APPROUVÉE");
     }
 
     public long countFailedResponses() {
-        return historyRepository.countByStatus("FAILED");
+        return historyRepository.countByStatus("NON APPROUVÉE");
     }
     
     // Méthode isPinRequired supprimée
