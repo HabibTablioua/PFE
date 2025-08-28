@@ -1,37 +1,15 @@
 <div class="users-container">
-  <!-- Header avec titre et sous-titre améliorés -->
+  <!-- Header style carte moderne -->
   <div class="page-header">
-    <div class="header-content">
-      <div class="title-section">
+    <div class="header-card">
+      <div class="icon-container">
+        <i-tabler name="users-group" class="title-icon"></i-tabler>
+      </div>
+      <div class="text-content">
         <h1 class="page-title">
-          <i-tabler name="users-group" class="title-icon"></i-tabler>
-          Gestion des Utilisateurs
+          <span class="title-part-1">Gestion des </span><span class="title-part-2">Utilisateurs</span>
         </h1>
         <p class="page-subtitle">Gérez les comptes utilisateurs de votre application.</p>
-      </div>
-      <div class="action-buttons">
-        <button 
-          mat-flat-button 
-          class="add-user-btn"
-          (click)="openAddUserDialog()"
-          [disabled]="isLoading"
-          aria-label="Ajouter un nouvel utilisateur">
-          <i-tabler name="user-plus" class="btn-icon"></i-tabler>
-          Ajouter un utilisateur
-        </button>
-        <button 
-          mat-stroked-button 
-          class="delete-selected-btn"
-          (click)="deleteSelectedUsers()"
-          [disabled]="selectedUsers.length === 0 || isLoading"
-          [class.disabled]="selectedUsers.length === 0"
-          aria-label="Supprimer les utilisateurs sélectionnés">
-          <i-tabler name="trash" class="btn-icon"></i-tabler>
-          Supprimer sélectionnés
-          @if (selectedUsers.length > 0) {
-            <span class="selection-count">({{ selectedUsers.length }})</span>
-          }
-        </button>
       </div>
     </div>
   </div>
@@ -58,13 +36,23 @@
 
   <!-- Section des filtres modernisée -->
   <div class="filters-section">
-    <button mat-stroked-button color="primary" class="filter-button" (click)="toggleFilterPanel()">
+    <button mat-flat-button color="primary" class="filter-button" (click)="toggleFilterPanel()">
       <mat-icon>{{ showFilterPanel ? 'visibility_off' : 'filter_list' }}</mat-icon>
       {{ showFilterPanel ? 'Masquer les filtres' : 'Afficher les filtres' }}
     </button>
     
+    <button 
+      mat-stroked-button 
+      color="primary"
+      class="add-user-btn"
+      (click)="openAddUserDialog()"
+      [disabled]="isLoading"
+      aria-label="Ajouter un nouvel utilisateur">
+      <mat-icon>person_add</mat-icon>
+      Ajouter un utilisateur
+    </button>
+    
     <button mat-stroked-button color="warn" class="delete-selected-button" 
-            [disabled]="selectedUsers.length === 0" 
             (click)="deleteSelectedUsers()">
       <mat-icon>delete_sweep</mat-icon>
       Supprimer la sélection ({{ selectedUsers.length }})

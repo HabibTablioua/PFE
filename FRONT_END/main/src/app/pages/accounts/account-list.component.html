@@ -1,8 +1,21 @@
 <div class="account-container">
+  <!-- Titre stylé pour la gestion des comptes -->
+  <div class="account-title-section" @titleSlideIn>
+    <div class="title-content">
+      <div class="title-icon-container">
+        <mat-icon class="title-icon">account_balance</mat-icon>
+      </div>
+      <div class="title-text">
+        <h1 class="account-title">Gestion des Comptes bancaires</h1>
+        <p class="account-subtitle">Gérez et surveillez tous vos comptes bancaires en temps réel</p>
+      </div>
+    </div>
+  </div>
+
   <!-- Header avec actions -->
   <div class="header-actions">
-    <h1>Gestion des Comptes</h1>
-    <button mat-raised-button color="primary" 
+    <button mat-raised-button 
+            class="add-account-btn"
             (click)="createNewAccount()"
             style="cursor: pointer;">
       <mat-icon>add</mat-icon>
@@ -69,12 +82,12 @@
 
   <!-- Actions globales -->
   <div style="margin-bottom: 16px; display: flex; gap: 8px;">
-    <button mat-raised-button color="warn" (click)="deleteAllAccounts()" 
+    <button mat-raised-button class="delete-all-btn" (click)="deleteAllAccounts()" 
             [disabled]="filteredAccounts.length === 0 || loading">
       <mat-icon>delete_sweep</mat-icon>
       Supprimer tous
     </button>
-    <button mat-raised-button color="accent" (click)="exportToCSV()" 
+    <button mat-raised-button class="export-csv-btn" (click)="exportToCSV()" 
             [disabled]="filteredAccounts.length === 0">
       <mat-icon>download</mat-icon>
       Exporter CSV

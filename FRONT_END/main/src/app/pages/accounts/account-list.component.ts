@@ -11,6 +11,7 @@ import { FormsModule } from '@angular/forms';
 import { AccountEditDialogComponent } from './account-edit-dialog.component';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { SelectionModel } from '@angular/cdk/collections';
+import { trigger, state, style, transition, animate } from '@angular/animations';
 
 @Component({
   selector: 'app-account-list',
@@ -18,18 +19,202 @@ import { SelectionModel } from '@angular/cdk/collections';
   styleUrls: [],
   standalone: true,
   imports: [CommonModule, RouterModule, MaterialModule, FormsModule, MatCheckboxModule],
+  animations: [
+    trigger('titleSlideIn', [
+      state('void', style({ 
+        opacity: 0, 
+        transform: 'translateY(-30px)' 
+      })),
+      transition(':enter', [
+        animate('0.8s ease-out', style({ 
+          opacity: 1, 
+          transform: 'translateY(0)' 
+        }))
+      ])
+    ])
+  ],
   styles: [`
     .account-container {
       padding: 24px;
       max-width: 1200px;
       margin: 0 auto;
     }
+
+    /* Styles pour le titre de la gestion des comptes */
+    .account-title-section {
+      background: linear-gradient(135deg, #e8f5e8 0%, #d4edda 100%);
+      border: none;
+      border-radius: 20px;
+      padding: 24px 32px;
+      margin-bottom: 28px;
+      box-shadow: 0 6px 24px rgba(34, 197, 94, 0.12);
+      position: relative;
+      overflow: hidden;
+      transition: all 0.4s ease;
+    }
+
+    .account-title-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.08) 50%, transparent 70%);
+      transform: translateX(-100%);
+      transition: transform 0.6s ease;
+    }
+
+    .account-title-section:hover::before {
+      transform: translateX(100%);
+    }
+
+    .account-title-section:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 36px rgba(34, 197, 94, 0.2);
+    }
+
+    .title-content {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .title-icon-container {
+      background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+      border-radius: 50%;
+      padding: 14px;
+      box-shadow: 0 6px 20px rgba(34, 197, 94, 0.25);
+      transition: all 0.3s ease;
+    }
+
+    .title-icon-container:hover {
+      transform: scale(1.08) rotate(5deg);
+      box-shadow: 0 10px 28px rgba(34, 197, 94, 0.35);
+    }
+
+    .title-icon {
+      font-size: 2rem;
+      width: 2rem;
+      height: 2rem;
+      color: white;
+      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+    }
+
+    .title-text {
+      flex: 1;
+    }
+
+    .account-title {
+      color: #166534;
+      font-size: 2rem;
+      font-weight: 700;
+      margin: 0 0 6px 0;
+      letter-spacing: 0.4px;
+      line-height: 1.2;
+      text-shadow: 0 1px 3px rgba(22, 101, 52, 0.08);
+    }
+
+    .account-subtitle {
+      color: #16a34a;
+      font-size: 1rem;
+      margin: 0;
+      font-weight: 500;
+      line-height: 1.4;
+      letter-spacing: 0.2px;
+    }
+
+    /* Responsive pour le titre */
+    @media (max-width: 768px) {
+      .account-title-section {
+        padding: 20px 16px;
+        margin-bottom: 24px;
+      }
+      
+      .title-content {
+        flex-direction: column;
+        text-align: center;
+        gap: 14px;
+      }
+      
+      .title-icon-container {
+        padding: 12px;
+      }
+      
+      .title-icon {
+        font-size: 1.8rem;
+        width: 1.8rem;
+        height: 1.8rem;
+      }
+      
+      .account-title {
+        font-size: 1.6rem;
+      }
+      
+      .account-subtitle {
+        font-size: 0.95rem;
+      }
+    }
     
     .header-actions {
       display: flex;
-      justify-content: space-between;
+      justify-content: flex-end;
       align-items: center;
       margin-bottom: 24px;
+    }
+
+    /* Styles pour les boutons personnalisés */
+    .add-account-btn {
+      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%) !important;
+      color: white !important;
+      border: none !important;
+      padding: 12px 24px !important;
+      font-weight: 600 !important;
+      border-radius: 12px !important;
+      box-shadow: 0 4px 16px rgba(59, 130, 246, 0.3) !important;
+      transition: all 0.3s ease !important;
+    }
+
+    .add-account-btn:hover {
+      transform: translateY(-2px) !important;
+      box-shadow: 0 8px 24px rgba(59, 130, 246, 0.4) !important;
+      background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%) !important;
+    }
+
+    .delete-all-btn {
+      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+      color: white !important;
+      border: none !important;
+      padding: 10px 20px !important;
+      font-weight: 600 !important;
+      border-radius: 10px !important;
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3) !important;
+      transition: all 0.3s ease !important;
+    }
+
+    .delete-all-btn:hover:not(:disabled) {
+      transform: translateY(-2px) !important;
+      box-shadow: 0 6px 18px rgba(239, 68, 68, 0.4) !important;
+      background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%) !important;
+    }
+
+    .export-csv-btn {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+      color: white !important;
+      border: none !important;
+      padding: 10px 20px !important;
+      font-weight: 600 !important;
+      border-radius: 10px !important;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3) !important;
+      transition: all 0.3s ease !important;
+    }
+
+    .export-csv-btn:hover:not(:disabled) {
+      transform: translateY(-2px) !important;
+      box-shadow: 0 6px 18px rgba(16, 185, 129, 0.4) !important;
+      background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
     }
 
     .bulk-actions {
@@ -432,9 +617,6 @@ export class AccountListComponent implements OnInit {
     console.log('Navigation vers le formulaire de création de compte');
     console.log('URL actuelle:', window.location.href);
     console.log('Router configuré:', this.router);
-    
-    // Test temporaire avec alerte
-    alert('Bouton cliqué ! Navigation vers /accounts/new');
     
     this.router.navigate(['/accounts/new']).then(result => {
       console.log('Navigation réussie:', result);

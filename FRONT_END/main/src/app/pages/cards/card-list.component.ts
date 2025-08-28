@@ -21,6 +21,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { FormsModule } from '@angular/forms';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { SelectionModel } from '@angular/cdk/collections';
+import { trigger, state, style, transition, animate } from '@angular/animations';
 
 @Component({
   selector: 'app-card-list',
@@ -45,13 +46,34 @@ import { SelectionModel } from '@angular/cdk/collections';
     FormsModule,
     MatCheckboxModule
   ],
+  animations: [
+    trigger('titleSlideIn', [
+      state('void', style({ 
+        opacity: 0, 
+        transform: 'translateY(-30px)' 
+      })),
+      transition(':enter', [
+        animate('0.8s ease-out', style({ 
+          opacity: 1, 
+          transform: 'translateY(0)' 
+        }))
+      ])
+    ])
+  ],
   template: `
     <div class="container">
       <app-card-navigation></app-card-navigation>
 
-      <div class="header-section">
-        <div class="title-section">
-          <h2>Toutes les Cartes</h2>
+      <!-- Titre stylé pour la gestion des cartes -->
+      <div class="card-title-section" @titleSlideIn>
+        <div class="title-content">
+          <div class="title-icon-container">
+            <mat-icon class="title-icon">credit_card</mat-icon>
+          </div>
+          <div class="title-text">
+            <h1 class="card-title">Gestion des Cartes</h1>
+            <p class="card-subtitle">Gérez et surveillez toutes vos cartes bancaires en temps réel</p>
+          </div>
         </div>
       </div>
 
@@ -239,6 +261,124 @@ import { SelectionModel } from '@angular/cdk/collections';
       max-width: 1400px;
       margin: 0 auto;
       padding: 24px;
+    }
+
+    /* Styles pour le titre de la gestion des cartes */
+    .card-title-section {
+      background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
+      border: none;
+      border-radius: 20px;
+      padding: 24px 32px;
+      margin-bottom: 28px;
+      box-shadow: 0 6px 24px rgba(139, 92, 246, 0.12);
+      position: relative;
+      overflow: hidden;
+      transition: all 0.4s ease;
+    }
+
+    .card-title-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.08) 50%, transparent 70%);
+      transform: translateX(-100%);
+      transition: transform 0.6s ease;
+    }
+
+    .card-title-section:hover::before {
+      transform: translateX(100%);
+    }
+
+    .card-title-section:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 36px rgba(139, 92, 246, 0.2);
+    }
+
+    .title-content {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .title-icon-container {
+      background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%);
+      border-radius: 50%;
+      padding: 14px;
+      box-shadow: 0 6px 20px rgba(139, 92, 246, 0.25);
+      transition: all 0.3s ease;
+    }
+
+    .title-icon-container:hover {
+      transform: scale(1.08) rotate(5deg);
+      box-shadow: 0 10px 28px rgba(139, 92, 246, 0.35);
+    }
+
+    .title-icon {
+      font-size: 2rem;
+      width: 2rem;
+      height: 2rem;
+      color: white;
+      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+    }
+
+    .title-text {
+      flex: 1;
+    }
+
+    .card-title {
+      color: #3730a3;
+      font-size: 2rem;
+      font-weight: 700;
+      margin: 0 0 6px 0;
+      letter-spacing: 0.4px;
+      line-height: 1.2;
+      text-shadow: 0 1px 3px rgba(55, 48, 163, 0.08);
+    }
+
+    .card-subtitle {
+      color: #6366f1;
+      font-size: 1rem;
+      margin: 0;
+      font-weight: 500;
+      line-height: 1.4;
+      letter-spacing: 0.2px;
+    }
+
+    /* Responsive pour le titre */
+    @media (max-width: 768px) {
+      .card-title-section {
+        padding: 20px 16px;
+        margin-bottom: 24px;
+      }
+      
+      .title-content {
+        flex-direction: column;
+        text-align: center;
+        gap: 14px;
+      }
+      
+      .title-icon-container {
+        padding: 12px;
+      }
+      
+      .title-icon {
+        font-size: 1.8rem;
+        width: 1.8rem;
+        height: 1.8rem;
+      }
+      
+      .card-title {
+        font-size: 1.6rem;
+      }
+      
+      .card-subtitle {
+        font-size: 0.95rem;
+      }
     }
 
     .header-section {

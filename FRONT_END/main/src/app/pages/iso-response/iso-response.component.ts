@@ -249,4 +249,13 @@ export class IsoResponseComponent implements OnInit {
       });
     }
   }
+
+  // Méthodes pour le comptage des statistiques
+  getSuccessCount(): number {
+    return this.dataSource.data.filter(item => item.status === 'SUCCESS').length;
+  }
+
+  getFailedCount(): number {
+    return this.dataSource.data.filter(item => item.status === 'FAILED').length;
+  }
 } 

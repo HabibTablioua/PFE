@@ -25,6 +25,9 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                        .requestMatchers("/response/process").permitAll() // Permettre l'accès sans authentification
+                        .requestMatchers("/response/health").permitAll() // Endpoint de santé
+                        .requestMatchers("/response/test").permitAll() // Endpoint de test
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session

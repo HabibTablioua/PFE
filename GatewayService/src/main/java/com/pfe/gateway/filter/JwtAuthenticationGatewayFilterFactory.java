@@ -23,7 +23,7 @@ import java.util.List;
 @Component
 public class JwtAuthenticationGatewayFilterFactory extends AbstractGatewayFilterFactory<JwtAuthenticationGatewayFilterFactory.Config> {
 
-    @Value("${jwt.secret}")
+    @Value("${jwt.secret:super-ultra-mega-long-secret-key-123456}")
     private String secret;
 
     public JwtAuthenticationGatewayFilterFactory() {

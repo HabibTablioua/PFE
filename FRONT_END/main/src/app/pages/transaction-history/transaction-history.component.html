@@ -1,11 +1,18 @@
 <div class="history-container">
-  <div class="history-button-section" *ngIf="!showHistoryArea">
-    <button mat-raised-button color="primary" (click)="toggleHistoryArea()">
-      <mat-icon>history</mat-icon> Historique des Transactions
-    </button>
-  </div>
-
-  <div *ngIf="showHistoryArea" @fadeIn>
+  <div @fadeIn>
+    <!-- Titre stylé pour l'historique des transactions -->
+    <div class="history-title-section" @titleSlideIn>
+      <div class="title-content">
+        <div class="title-icon-container">
+          <mat-icon class="title-icon">refresh</mat-icon>
+        </div>
+        <div class="title-text">
+          <h1 class="history-title">Historique des Transactions</h1>
+          <p class="history-subtitle">Gérez et consultez toutes les réponses de vos messages ISO</p>
+        </div>
+      </div>
+    </div>
+    
     <div class="history-button-section" *ngIf="!showFilterForm">
       <button mat-raised-button color="primary" (click)="showFilter()">
         <mat-icon>filter_alt</mat-icon> Filtrage
@@ -66,7 +73,6 @@
         <button mat-raised-button color="primary" type="submit" (click)="applyFilter()"><mat-icon>search</mat-icon> Rechercher</button>
         <button mat-raised-button color="warn" type="button" (click)="resetFilter()"><mat-icon>clear_all</mat-icon> Réinitialiser</button>
         <button mat-raised-button color="accent" type="button" (click)="showFilterForm = false;"><mat-icon>visibility_off</mat-icon> Masquer le filtre</button>
-        <button mat-raised-button color="accent" type="button" (click)="toggleHistoryArea()"><mat-icon>arrow_back</mat-icon> Masquer</button>
       </div>
 
     </div>

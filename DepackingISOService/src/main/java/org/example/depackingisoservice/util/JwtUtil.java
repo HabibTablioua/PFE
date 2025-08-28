@@ -13,7 +13,7 @@ import java.security.Key;
 @Component
 public class JwtUtil {
 
-    @Value("${jwt.secret}")
+    @Value("${jwt.secret:super-ultra-mega-long-secret-key-123456}")
     private String secret;
 
     private Key getSigningKey() {

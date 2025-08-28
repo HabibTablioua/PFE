@@ -1,0 +1,307 @@
+/* Styles pour le dialogue de détail de réponse ISO */
+.dialog-container {
+  padding: 28px 16px 16px 16px;
+  min-width: 340px;
+  max-width: 800px;
+  background: #f9fafb;
+  border-radius: 14px;
+}
+
+.dialog-title {
+  margin-bottom: 24px;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #1e40af;
+  letter-spacing: 1px;
+  text-align: center;
+  padding: 20px 24px;
+  background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
+  border-radius: 16px;
+  border: none;
+  box-shadow: 0 10px 40px rgba(59, 130, 246, 0.12), 0 4px 16px rgba(59, 130, 246, 0.08);
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  text-shadow: 0 2px 4px rgba(30, 64, 175, 0.1);
+}
+
+.dialog-title::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transition: left 0.6s ease;
+}
+
+.dialog-title:hover::before {
+  left: 100%;
+}
+
+.dialog-title:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 15px 50px rgba(59, 130, 246, 0.18), 0 6px 20px rgba(59, 130, 246, 0.12);
+}
+
+.dialog-title::after {
+  content: '📋';
+  position: absolute;
+  right: 24px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.3rem;
+  opacity: 0.8;
+  transition: all 0.3s ease;
+}
+
+.dialog-title:hover::after {
+  transform: translateY(-50%) scale(1.1);
+  opacity: 1;
+}
+
+/* Alertes stylisées */
+.alert-success {
+  color: #43a047;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  background: #e8f5e9;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border-left: 4px solid #43a047;
+  margin-bottom: 10px;
+}
+
+.alert-error {
+  color: #e53935;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  background: #ffebee;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border-left: 4px solid #e53935;
+  margin-bottom: 10px;
+}
+
+.alert-icon {
+  vertical-align: middle;
+  margin-right: 6px;
+}
+
+/* Titres de sections */
+.section-title {
+  margin: 20px 0 12px 0;
+  color: #1e40af;
+  display: flex;
+  align-items: center;
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.section-icon {
+  margin-right: 8px;
+  color: #3b82f6;
+  font-size: 1.2rem;
+}
+
+/* Section Solution proposée */
+.solution-section {
+  margin-bottom: 20px;
+}
+
+.solution-card {
+  background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+  border: 1px solid #10b981;
+  border-radius: 12px;
+  padding: 16px 20px;
+  color: #065f46;
+  font-size: 1rem;
+  line-height: 1.5;
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.1);
+}
+
+/* Section Détails techniques */
+.technical-details-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.detail-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+}
+
+.detail-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  border-color: #3b82f6;
+}
+
+.detail-key {
+  display: flex;
+  align-items: center;
+  color: #374151;
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.detail-icon {
+  margin-right: 8px;
+  color: #6b7280;
+  font-size: 1rem;
+}
+
+.detail-value {
+  color: #111827;
+  font-size: 1rem;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+/* Section Message ISO */
+.message-iso-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.message-iso-card pre {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #334155;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  font-family: 'Courier New', monospace;
+  line-height: 1.4;
+}
+
+/* Table des champs ISO */
+.iso-fields-table {
+  background: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.table-header {
+  background: #f8f9fa;
+  color: #495057;
+  font-weight: 600;
+  padding: 12px 16px;
+  border-bottom: 2px solid #dee2e6;
+}
+
+.table-cell {
+  padding: 12px 16px;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.field-number {
+  font-weight: 600;
+  color: #2563eb;
+}
+
+.field-name {
+  color: #6c757d;
+}
+
+.field-value {
+  font-family: 'Courier New', monospace;
+  background: #f8f9fa;
+  color: #212529;
+}
+
+/* Bouton de fermeture */
+.close-button {
+  background: #ef4444;
+  color: #fff;
+  border-radius: 8px;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.95rem;
+  box-shadow: 0 2px 8px #ef444422;
+  padding: 7px 18px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.close-button:hover {
+  background: #dc2626;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px #ef444444;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .dialog-container {
+    padding: 20px 12px 12px 12px;
+    min-width: 300px;
+  }
+  
+  .dialog-title {
+    font-size: 1.4rem;
+    padding: 18px 20px;
+    margin-bottom: 20px;
+    letter-spacing: 0.8px;
+  }
+  
+  .alert-success,
+  .alert-error {
+    padding: 6px 10px;
+    font-size: 0.9rem;
+  }
+
+  .dialog-title::after {
+    font-size: 1.1rem;
+    right: 20px;
+  }
+  
+  /* Responsive pour les nouvelles sections */
+  .section-title {
+    font-size: 1rem;
+    margin: 16px 0 10px 0;
+  }
+  
+  .section-icon {
+    font-size: 1.1rem;
+  }
+  
+  .technical-details-container {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  .detail-card {
+    padding: 14px;
+  }
+  
+  .solution-card {
+    padding: 14px 16px;
+    font-size: 0.95rem;
+  }
+  
+  .message-iso-card {
+    padding: 14px;
+  }
+  
+  .message-iso-card pre {
+    font-size: 0.85rem;
+  }
+}

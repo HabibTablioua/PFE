@@ -211,7 +211,8 @@ public class PackingISOService {
 
     private void sendToResponseISOService(String isoMessage, String transactionId, String format, Map<String, Object> meta) {
         try {
-            String url = "http://localhost:8089/response/process"; // Passe par le Gateway
+            String url = "http://localhost:8088/api/response/process"; // Appel direct au ResponseISOService
+            log.info("🚀 Tentative d'envoi au ResponseISOService : {}", url);
 
             Map<String, Object> payload = Map.of(
                     "isoMessage", isoMessage,
@@ -226,9 +227,13 @@ public class PackingISOService {
             String token = getAuthTokenFromRequest();
             if (token != null && !token.isEmpty()) {
                 headers.set("Authorization", token);
+                log.info("🔑 Token JWT présent dans la requête");
+            } else {
+                log.info("🔑 Aucun token JWT - appel sans authentification");
             }
 
             HttpEntity<Map<String, Object>> entity = new HttpEntity<>(payload, headers);
+            log.info("📤 Envoi de la requête avec payload : {}", payload);
 
             ResponseEntity<String> response = restTemplate.postForEntity(url, entity, String.class);
 
@@ -236,9 +241,29 @@ public class PackingISOService {
                 log.info("✅ Réponse reçue de ResponseISOService : {}", response.getBody());
             } else {
                 log.warn("❌ Erreur lors de l'appel à ResponseISOService : {}", response.getStatusCode());
+                log.warn("📄 Corps de la réponse : {}", response.getBody());
             }
         } catch (Exception e) {
             log.warn("⚠️ Impossible d'envoyer le message à ResponseISOService : {}", e.getMessage());
+            
+            // Log plus détaillé pour le debugging
+            if (e.getMessage() != null) {
+                if (e.getMessage().contains("403")) {
+                    log.error("🔐 Erreur 403 - Problème d'authentification/autorisation");
+                    log.error("🔑 Token utilisé : {}", getAuthTokenFromRequest() != null ? "Présent" : "Absent");
+                    log.error("🌐 URL appelée : http://localhost:8088/api/response/process");
+                    log.error("💡 Solution : Redémarrer ResponseISOService avec la nouvelle configuration de sécurité");
+                } else if (e.getMessage().contains("Connection refused")) {
+                    log.error("🔌 Erreur de connexion - ResponseISOService non démarré ou port incorrect");
+                    log.error("🌐 URL appelée : http://localhost:8088/api/response/process");
+                    log.error("💡 Solution : Vérifier que ResponseISOService tourne sur le port 8089");
+                } else if (e.getMessage().contains("timeout")) {
+                    log.error("⏰ Timeout - ResponseISOService trop lent à répondre");
+                }
+            }
+            
+            // Log de l'exception complète en mode debug
+            log.debug("🔍 Exception complète :", e);
         }
     }
 

@@ -74,6 +74,9 @@ spring:
           filters:
             - StripPrefix=1
             - JwtAuthentication
+            # Pas de JwtAuthentication pour permettre les appels inter-services
+
+
 
         - id: IncidentReportService
           uri: lb://IncidentReportService

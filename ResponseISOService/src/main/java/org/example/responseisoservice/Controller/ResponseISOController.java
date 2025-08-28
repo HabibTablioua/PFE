@@ -44,6 +44,18 @@ public class ResponseISOController {
         return responseISOService.processISO(request);
     }
 
+    // Endpoint de test pour vérifier la connectivité
+    @GetMapping("/health")
+    public String health() {
+        return "ResponseISOService is running!";
+    }
+
+    // Endpoint de test simple pour le processus
+    @PostMapping("/test")
+    public String testProcess(@RequestBody String request) {
+        return "Test endpoint accessible - Request reçu: " + request;
+    }
+
     @PostMapping(value = "/download/json", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
     public ResponseEntity<byte[]> downloadAsJson(@RequestBody ResponseISORequest request) {
         try {

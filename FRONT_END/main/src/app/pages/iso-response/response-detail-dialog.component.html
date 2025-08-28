@@ -1,0 +1,93 @@
+<div class="dialog-container">
+  <h2 mat-dialog-title class="dialog-title">
+    Détail de la réponse ISO
+  </h2>
+  
+  <mat-dialog-content>
+    <div style="display: flex; flex-direction: column; gap: 18px;">
+      <div><b>RRN :</b> {{ hasRRN() ? getRRNValue() : 'Non disponible' }}</div>
+      <div><b>MTI :</b> {{ data.mti }}</div>
+      <div><b>Status :</b> <span [ngStyle]="{color: data.status === 'SUCCESS' ? '#43a047' : '#e53935', fontWeight: 600}">{{ data.status }}</span></div>
+      <div><b>Date :</b> {{ data.createdAt | date:'short' }}</div>
+      
+      <!-- Alerte unique basée sur le statut -->
+      <div *ngIf="getAlertType() !== 'none'" [ngClass]="getAlertType() === 'success' ? 'alert-success' : 'alert-error'">
+        <mat-icon class="alert-icon">
+          {{ getAlertType() === 'success' ? 'check_circle' : 'error_outline' }}
+        </mat-icon>
+        {{ getAlertMessage() }}
+      </div>
+      
+      <div *ngIf="getDetailValue('action')" class="solution-section">
+        <h4 class="section-title">
+          <mat-icon class="section-icon">lightbulb</mat-icon>
+          Solution proposée
+        </h4>
+        <div class="solution-card">
+          {{ getDetailValue('action') }}
+        </div>
+      </div>
+      
+      <div *ngIf="parsedDetails && (detailsKeys().length > 0)">
+        <h4 class="section-title">
+          <mat-icon class="section-icon">build</mat-icon>
+          Détails techniques
+        </h4>
+        <div class="technical-details-container">
+          <div *ngFor="let key of detailsKeys()" class="detail-card">
+            <div class="detail-key">
+              <mat-icon class="detail-icon">info</mat-icon>
+              {{ getDisplayKey(key) }}
+            </div>
+            <div class="detail-value">{{ getDisplayValue(key, getDetailValue(key)) }}</div>
+          </div>
+        </div>
+      </div>
+      
+      <div *ngIf="data.messageIso">
+        <h4 class="section-title">
+          <mat-icon class="section-icon">code</mat-icon>
+          Message ISO généré
+        </h4>
+        <div class="message-iso-card">
+          <pre>{{ data.messageIso }}</pre>
+        </div>
+      </div>
+      
+      <div *ngIf="isoFields.length > 0">
+        <h4 class="section-title">
+          <mat-icon class="section-icon">table_chart</mat-icon>
+          Champs ISO
+        </h4>
+        <div class="iso-fields-table">
+          <table mat-table [dataSource]="isoFields" style="width: 100%;">
+            <ng-container matColumnDef="field">
+              <th mat-header-cell *matHeaderCellDef class="table-header">Champ</th>
+              <td mat-cell *matCellDef="let element" class="table-cell field-number">{{ element.field }}</td>
+            </ng-container>
+            
+            <ng-container matColumnDef="name">
+              <th mat-header-cell *matHeaderCellDef class="table-header">Nom du champ</th>
+              <td mat-cell *matCellDef="let element" class="table-cell field-name">{{ element.name }}</td>
+            </ng-container>
+            
+            <ng-container matColumnDef="value">
+              <th mat-header-cell *matHeaderCellDef class="table-header">Valeur</th>
+              <td mat-cell *matCellDef="let element" class="table-cell field-value">{{ element.value }}</td>
+            </ng-container>
+            
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </mat-dialog-content>
+  
+  <mat-dialog-actions align="center" style="margin-top: 32px;">
+    <button mat-raised-button mat-dialog-close class="close-button">
+      <span aria-hidden="true">&times;</span>
+      Fermer
+    </button>
+  </mat-dialog-actions>
+</div>

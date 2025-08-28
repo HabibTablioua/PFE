@@ -8,76 +8,8 @@ import { MatTableModule } from '@angular/material/table';
   selector: 'app-response-detail-dialog',
   standalone: true,
   imports: [CommonModule, MatDialogModule, MatIconModule, MatTableModule],
-  template: `
-    <div style="padding: 28px 16px 16px 16px; min-width: 340px; max-width: 800px; background: #f9fafb; border-radius: 14px;">
-      <h2 mat-dialog-title style="margin-bottom: 18px; font-size: 1.35rem; font-weight: 700; color: #2563eb; letter-spacing: 0.5px;">Détail de la réponse ISO</h2>
-      <mat-dialog-content>
-        <div style="display: flex; flex-direction: column; gap: 18px;">
-          <div><b>ID :</b> {{ data.id }}</div>
-          <div><b>MTI :</b> {{ data.mti }}</div>
-          <div><b>Status :</b> <span [ngStyle]="{color: data.status === 'SUCCESS' ? '#43a047' : '#e53935', fontWeight: 600}">{{ data.status }}</span></div>
-          <div><b>Date :</b> {{ data.createdAt | date:'short' }}</div>
-          <div *ngIf="data.cause" style="margin-bottom: 10px;">
-            <span style="color: #e53935; font-weight: 500; display: flex; align-items: center;">
-              <mat-icon style="vertical-align: middle; margin-right: 6px;">error_outline</mat-icon>
-              {{ data.cause }}
-            </span>
-          </div>
-          <div *ngIf="getDetailValue('action')" style="margin-bottom: 10px;">
-            <h4 style="margin: 10px 0 4px 0; color: #388e3c; display: flex; align-items: center; font-size: 1.08em;">
-              <mat-icon style="margin-right: 6px;">check_circle</mat-icon>
-              Solution proposée
-            </h4>
-            <div style="background: #e8f5e9; border-radius: 6px; padding: 10px 14px; color: #222; font-size: 1.08em;">
-              {{ getDetailValue('action') }}
-            </div>
-          </div>
-          <div *ngIf="parsedDetails && (detailsKeys().length > 0)">
-            <h4 style="margin: 10px 0 4px 0; color: #1976d2;">Détails techniques</h4>
-            <ul style="margin: 0 0 0 10px; padding: 0; list-style: disc;">
-              <li *ngFor="let key of detailsKeys()" style="margin-bottom: 6px;">
-                <span style="color: #1976d2; font-weight: 600;">{{ key }}</span>
-                <span style="color: #222;">: {{ getDetailValue(key) }}</span>
-              </li>
-            </ul>
-          </div>
-          <div *ngIf="data.messageIso">
-            <h4 style="margin: 10px 0 4px 0; color: #1976d2;">Message ISO généré</h4>
-            <pre style="background: #f4f6fa; border-radius: 8px; padding: 10px; font-size: 0.98em; color: #222; overflow-x: auto; white-space: pre-wrap;">
-{{ data.messageIso }}
-            </pre>
-          </div>
-          <div *ngIf="isoFields.length > 0">
-            <h4 style="margin: 10px 0 8px 0; color: #1976d2; font-size: 1.08em;">Champs ISO</h4>
-            <div style="background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-              <table mat-table [dataSource]="isoFields" style="width: 100%;">
-                <ng-container matColumnDef="field">
-                  <th mat-header-cell *matHeaderCellDef style="background: #f8f9fa; color: #495057; font-weight: 600; padding: 12px 16px; border-bottom: 2px solid #dee2e6;">Champ</th>
-                  <td mat-cell *matCellDef="let element" style="padding: 12px 16px; border-bottom: 1px solid #e9ecef; font-weight: 600; color: #2563eb;">{{ element.field }}</td>
-                </ng-container>
-                <ng-container matColumnDef="name">
-                  <th mat-header-cell *matHeaderCellDef style="background: #f8f9fa; color: #495057; font-weight: 600; padding: 12px 16px; border-bottom: 2px solid #dee2e6;">Nom du champ</th>
-                  <td mat-cell *matCellDef="let element" style="padding: 12px 16px; border-bottom: 1px solid #e9ecef; color: #6c757d;">{{ element.name }}</td>
-                </ng-container>
-                <ng-container matColumnDef="value">
-                  <th mat-header-cell *matHeaderCellDef style="background: #f8f9fa; color: #495057; font-weight: 600; padding: 12px 16px; border-bottom: 2px solid #dee2e6;">Valeur</th>
-                  <td mat-cell *matCellDef="let element" style="padding: 12px 16px; border-bottom: 1px solid #e9ecef; font-family: 'Courier New', monospace; background: #f8f9fa; color: #212529;">{{ element.value }}</td>
-                </ng-container>
-                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-                <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-              </table>
-            </div>
-          </div>
-        </div>
-      </mat-dialog-content>
-      <mat-dialog-actions align="center" style="margin-top: 32px;">
-        <button mat-raised-button mat-dialog-close class="close-btn-modern" style="background: #ef4444; color: #fff; border-radius: 8px; font-weight: 600; text-transform: uppercase; font-size: 0.95rem; box-shadow: 0 2px 8px #ef444422; padding: 7px 18px;">
-          <span class="close-icon" aria-hidden="true">&times;</span>
-          Fermer
-        </button>
-      </mat-dialog-actions>
-    </div>
-  `
+  templateUrl: './response-detail-dialog.component.html',
+  styleUrls: ['./response-detail-dialog.component.css']
 })
 export class ResponseDetailDialogComponent {
   parsedFields: any = {};
@@ -86,6 +18,11 @@ export class ResponseDetailDialogComponent {
   displayedColumns: string[] = ['field', 'name', 'value'];
 
   constructor(@Inject(MAT_DIALOG_DATA) public data: any) {
+    // Log pour déboguer
+    console.log('ResponseDetailDialog - Données reçues:', this.data);
+    console.log('Status:', this.data.status);
+    console.log('Cause:', this.data.cause);
+    
     try {
       this.parsedFields = data.fields ? JSON.parse(data.fields) : {};
     } catch {
@@ -193,5 +130,77 @@ export class ResponseDetailDialogComponent {
   
   getDetailValue(key: string): any {
     return this.parsedDetails ? this.parsedDetails[key] : '';
+  }
+  
+  // Méthode pour déterminer le type d'alerte à afficher
+  getAlertType(): 'success' | 'error' | 'none' {
+    // Priorité 1: SUCCESS = alerte verte
+    if (this.data.status === 'SUCCESS') {
+      return 'success';
+    }
+    // Priorité 2: FAILED ou cause d'erreur = alerte rouge
+    else if (this.data.status === 'FAILED' || this.data.cause) {
+      return 'error';
+    }
+    // Aucune alerte si ni SUCCESS ni erreur
+    return 'none';
+  }
+  
+  // Méthode pour obtenir le message d'alerte approprié
+  getAlertMessage(): string {
+    // SUCCESS = message de succès
+    if (this.data.status === 'SUCCESS') {
+      return 'Transaction approuvée';
+    }
+    // FAILED = message d'échec
+    else if (this.data.status === 'FAILED') {
+      return 'Transaction échouée';
+    }
+    // Cause d'erreur = afficher la cause
+    else if (this.data.cause) {
+      return this.data.cause;
+    }
+    return '';
+  }
+  
+  // Méthode pour extraire la valeur RRN des champs ISO
+  getRRNValue(): string {
+    if (this.parsedFields && this.parsedFields['37']) {
+      return this.parsedFields['37'];
+    }
+    return '';
+  }
+  
+  // Méthode pour vérifier si le RRN est disponible
+  hasRRN(): boolean {
+    return this.getRRNValue() !== '';
+  }
+  
+  // Méthode pour transformer les clés d'affichage
+  getDisplayKey(key: string): string {
+    const keyMappings: { [key: string]: string } = {
+      'isoCode': 'Response Code',
+      'isoField': 'ISO Field',
+      'pan': 'PAN',
+      'reason': 'Raison',
+      'action': 'Action'
+    };
+    
+    return keyMappings[key] || key;
+  }
+  
+  // Méthode pour formater les valeurs d'affichage
+  getDisplayValue(key: string, value: any): string {
+    if (key === 'pan' && value) {
+      // Formater le PAN pour une meilleure lisibilité
+      return value.toString().replace(/(\d{4})(?=\d)/g, '$1 ');
+    }
+    
+    if (key === 'isoCode' && value) {
+      // Formater le Response Code avec un préfixe
+      return `Code ${value}`;
+    }
+    
+    return value;
   }
 } 
