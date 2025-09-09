@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -97,7 +97,7 @@ import { trigger, state, style, transition, animate } from '@angular/animations'
       </div>
 
       <div class="filters-section">
-        <button mat-raised-button color="primary" class="add-card-button" (click)="openCardForm()">
+        <button mat-raised-button color="primary" class="add-card-button" (click)="navigateToNewCard()">
           <mat-icon>add</mat-icon>
           Ajouter une carte
         </button>
@@ -249,7 +249,7 @@ import { trigger, state, style, transition, animate } from '@angular/animations'
         <div *ngIf="dataSource.data.length === 0" class="no-data">
           <mat-icon>credit_card_off</mat-icon>
           <p>Aucune carte trouvée</p>
-          <button mat-raised-button color="primary" (click)="openCardForm()">
+          <button mat-raised-button color="primary" (click)="navigateToNewCard()">
             Créer votre première carte
           </button>
         </div>
@@ -801,7 +801,8 @@ export class CardListComponent implements OnInit {
     private cardService: CardService,
     private dialog: MatDialog,
     private snackBar: MatSnackBar,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -905,6 +906,10 @@ export class CardListComponent implements OnInit {
         console.error('❌ Erreur lors du chargement des statistiques:', error);
       }
     });
+  }
+
+  navigateToNewCard(): void {
+    this.router.navigate(['/cards/new']);
   }
 
   openCardForm(card?: any): void {

@@ -1,0 +1,84 @@
+\usepackage{varwidth}
+\usepackage{xcolor} % Add the xcolor package for color support
+
+\definecolor{darkgreen}{RGB}{0, 100, 0} % Define a dark green color
+
+\def\@makechapterhead#1{ 
+    \vspace*{\fill} % Push the chapter title to the top of the page
+    \parindent 0pt
+    {\color{darkgreen}\hrulefill} % Add a dark green horizontal line
+    \vspace{10pt} % Add vertical space after the first hr
+    \begin{center} % Center the chapter title
+        \fontseries{bx}
+        \fontsize{34pt}{14pt}\selectfont % Change the font size as desired (12pt in this example)
+        Chapitre
+        \thechapter
+        \vspace*{8pt}\\
+        \fontfamily{cmss}
+        \fontseries{bx}
+        \Huge #1
+        \vspace*{8pt} % Add some vertical space after the chapter title
+    \end{center}
+    {\color{darkgreen}\hrulefill} % Add a dark green horizontal line
+    \vspace{10pt} % Add vertical space after the second hr
+    \vspace*{\fill} % Push the chapter title to the bottom of the page
+    \pagebreak % Start a new page
+}
+
+
+\def\@makeschapterhead#1{ 
+    \vspace*{67pt} { 
+        \parindent 0pt
+        \begin{flushright}
+        \fontfamily{cmss}
+        \fontseries{bx}
+        \Huge #1
+        \end{flushright}
+        \par
+        \nobreak 
+        \vskip 50pt 
+    } 
+}
+
+\def\myheadstyle{\itshape\small}
+
+\def\ps@headings{
+       \let\@oddfoot\@empty
+       \let\@evenfoot\@empty
+       \def\@evenhead{
+            \makebox[0pt][l]{
+                \rule[-0.15cm]{
+                    \textwidth
+                }
+                {0.1mm}
+            }
+            \hbox{}
+            \thepage
+            \hfil
+            \myheadstyle
+            \leftmark
+}
+       \def\@oddhead{\makebox[0pt][l]{\rule[-0.15cm]{\textwidth}{0.1mm}}\hbox{}
+                 {\myheadstyle\rightmark}\hfil\thepage}
+       \let\@mkboth\markboth
+     \def\chaptermark##1{
+       \markboth {{
+         \ifnum \c@secnumdepth >\m@ne
+           \if@mainmatter
+             \@chapapp\ \thechapter. \ 
+           \fi
+         \fi
+         ##1}}{}}
+     \def\sectionmark##1{
+       \markright {{
+         \ifnum \c@secnumdepth >\z@
+           \thesection. \ 
+         \fi
+         ##1}}}
+
+    \def\@makefntext##1{
+        \parindent 0em
+        \parskip 1.3ex plus 0.3ex minus 0.2ex
+        \noindent
+        \hb@xt@0em{\hss\@makefnmark}##1}
+      }

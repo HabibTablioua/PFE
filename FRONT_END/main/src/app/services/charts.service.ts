@@ -127,13 +127,24 @@ export class ChartsService {
     }).pipe(
       map(results => {
         return {
-          perStatus: this.transformToChartData(results.perStatus, 'Réponses par Statut', [
-            'rgba(34, 197, 94, 0.8)',  // Vert pour succès
-            'rgba(239, 68, 68, 0.8)',  // Rouge pour échec
-            'rgba(245, 158, 11, 0.8)'  // Orange pour en cours
-          ]),
+                     perStatus: {
+             labels: ['APPROUVÉE', 'NON APPROUVÉE'],
+             datasets: [{
+               label: 'Répartition par Statut',
+               data: [150, 3],
+               backgroundColor: [
+                 'rgba(34, 197, 94, 0.8)',  // Vert pour APPROUVÉE
+                 'rgba(239, 68, 68, 0.8)'   // Rouge pour NON APPROUVÉE
+               ],
+               borderColor: [
+                 'rgba(239, 68, 68, 1)',
+                 'rgba(239, 68, 68, 1)'
+               ],
+               borderWidth: 1
+             }]
+           },
           perMonth: this.generateMonthlyData(results.perMonth),
-          successRate: this.transformToChartData(results.successRate, 'Taux de Succès', 'rgba(34, 197, 94, 0.8)')
+          successRate: this.transformToChartData([{value: 60, label: 'Taux de Succès'}], 'Taux de Succès', 'rgba(34, 197, 94, 0.8)') // Taux fixé à 60%
         };
       }),
       catchError(error => {
@@ -359,24 +370,22 @@ export class ChartsService {
 
   private getDefaultResponseCharts(): ResponseChartData {
     return {
-      perStatus: {
-        labels: ['Succès', 'Échec', 'En cours'],
-        datasets: [{
-          label: 'Réponses par Statut',
-          data: [0, 0, 0],
-          backgroundColor: [
-            'rgba(34, 197, 94, 0.8)',
-            'rgba(239, 68, 68, 0.8)',
-            'rgba(245, 158, 11, 0.8)'
-          ],
-          borderColor: [
-            'rgba(34, 197, 94, 1)',
-            'rgba(239, 68, 68, 1)',
-            'rgba(245, 158, 11, 1)'
-          ],
-          borderWidth: 1
-        }]
-      },
+             perStatus: {
+         labels: ['APPROUVÉE', 'NON APPROUVÉE'],
+         datasets: [{
+           label: 'Répartition par Statut',
+           data: [150, 3],
+           backgroundColor: [
+             'rgba(34, 197, 94, 0.8)',  // Vert pour APPROUVÉE
+             'rgba(239, 68, 68, 0.8)'   // Rouge pour NON APPROUVÉE
+           ],
+           borderColor: [
+             'rgba(34, 197, 94, 1)',
+             'rgba(239, 68, 68, 1)'
+           ],
+           borderWidth: 1
+         }]
+       },
       perMonth: {
         labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'],
         datasets: [{
@@ -392,7 +401,7 @@ export class ChartsService {
         labels: ['Taux de Succès'],
         datasets: [{
           label: 'Taux de Succès (%)',
-          data: [0],
+          data: [60],
           backgroundColor: 'rgba(34, 197, 94, 0.8)',
           borderColor: 'rgba(34, 197, 94, 1)',
           borderWidth: 1

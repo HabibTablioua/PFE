@@ -336,7 +336,7 @@ public class TransactionHistoryService {
     public List<TransactionHistory> getFilteredTransactions(
             String mti,
             String format,
-            String source,
+            String rrn,
             LocalDateTime startDate,
             LocalDateTime endDate,
             String searchTerm) {
@@ -350,8 +350,9 @@ public class TransactionHistoryService {
             if (format != null && !format.isEmpty()) {
                 predicates.add(criteriaBuilder.equal(root.get("format"), format));
             }
-            if (source != null && !source.isEmpty()) {
-                predicates.add(criteriaBuilder.equal(root.get("source"), source));
+            if (rrn != null && !rrn.isEmpty()) {
+                // Filtrage par RRN dans le champ fieldsJson
+                predicates.add(criteriaBuilder.like(root.get("fieldsJson"), "%\"37\":\"" + rrn + "\"%"));
             }
             if (startDate != null && endDate != null) {
                 predicates.add(criteriaBuilder.between(root.get("createdAt"), startDate, endDate));

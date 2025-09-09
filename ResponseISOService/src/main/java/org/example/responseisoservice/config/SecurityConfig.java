@@ -28,6 +28,8 @@ public class SecurityConfig {
                         .requestMatchers("/response/process").permitAll() // Permettre l'accès sans authentification
                         .requestMatchers("/response/health").permitAll() // Endpoint de santé
                         .requestMatchers("/response/test").permitAll() // Endpoint de test
+                        .requestMatchers("/accounts/**").permitAll() // Permettre l'accès aux comptes sans authentification
+                        .requestMatchers("/cards/**").permitAll() // Permettre l'accès aux cartes sans authentification
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session

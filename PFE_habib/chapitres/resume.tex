@@ -1,0 +1,16 @@
+\addcontentsline{toc}{chapter}{Résumé}
+\chapter*{Résumé}
+\justifying
+ans le cadre de notre projet de fin d’études, nous avons développé une plateforme de gestion et de simulation de transactions financières conforme à la norme ISO 8583, structurée autour d’une architecture microservices. Cette solution vise à offrir un environnement robuste et flexible pour simuler, superviser et analyser les échanges de messages financiers entre terminaux de paiement, distributeurs automatiques et systèmes bancaires.
+
+L’authentification et la sécurité des accès sont assurées grâce à l’utilisation de jetons \textit{JWT}. Les messages financiers sont automatiquement décodés et encodés selon les standards monétiques, garantissant leur conformité et leur intégrité tout au long du processus. La plateforme centralise la gestion des incidents, permettant de signaler, suivre et traiter efficacement tout problème survenu lors des échanges. Les utilisateurs et administrateurs sont informés en temps réel des événements importants grâce à un système de notifications intégré. 
+
+La supervision des logs offre une visibilité complète sur l’activité du système et facilite le diagnostic en cas d’anomalie. L’historique détaillé des transactions permet de consulter, filtrer et analyser l’ensemble des opérations simulées ou traitées, tandis que l’orchestration des requêtes et la centralisation des échanges assurent la fluidité et la cohérence de l’ensemble des interactions. La découverte dynamique des composants garantit enfin la résilience et la scalabilité de l’architecture.
+
+Le \textbf{backend}, développé en \textit{Java} avec \textit{Spring Boot} et \textit{Spring Cloud}, s’appuie sur \textit{MySQL} pour la persistance des données. Le \textbf{frontend}, réalisé en \textit{Angular}, propose une interface moderne et intuitive permettant de configurer les messages, simuler des transactions, consulter les incidents, surveiller les logs, accéder à l’historique et recevoir des notifications.
+
+Ce projet, mené selon une démarche \textit{Agile Scrum} et validé par des tests rigoureux, nous a permis de maîtriser les standards monétiques et de concevoir une architecture distribuée performante, répondant à un besoin critique de test, de validation et de supervision des systèmes financiers.
+
+\vspace{0.4cm}
+\noindent \textbf{Mots-clés :} Microservices, Java, Spring Boot, Spring Cloud, Angular, MySQL, ISO 8583, Authentification, Sécurité, Supervision, Notification, Gestion d’incidents, Historique, Agile Scrum.
+

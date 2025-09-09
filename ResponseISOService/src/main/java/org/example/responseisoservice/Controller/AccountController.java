@@ -52,6 +52,13 @@ public class AccountController {
     // POST - Créer un nouveau compte
     @PostMapping
     public ResponseEntity<Account> createAccount(@RequestBody Account account) {
+        System.out.println("=== DEBUG CREATE ACCOUNT ===");
+        System.out.println("Account reçu: " + account);
+        System.out.println("PAN: " + account.getPan());
+        System.out.println("Holder Name: " + account.getHolderName());
+        System.out.println("Email: " + account.getEmail());
+        System.out.println("Balance: " + account.getBalance());
+        System.out.println("=============================");
         // Validation du PAN
         if (account.getPan() == null || account.getPan().length() != 16) {
             return ResponseEntity.badRequest().build(); // PAN invalide

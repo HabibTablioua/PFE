@@ -1,0 +1,561 @@
+\chapter{Étude technique}
+
+\section*{Introduction}
+\addcontentsline{toc}{section}{Introduction}
+Ce chapitre explorera en détail les technologies variées que nous avons employées tout au long de la réalisation de notre projet. Nous décrirons en profondeur les outils, les langages de programmation et les frameworks que nous avons choisis, en mettant en évidence leur rôle central dans la conception et le développement de notre solution.
+
+En outre, nous discuterons des défis et des avantages liés à l'utilisation de ces technologies, ainsi que de leur adéquation avec les objectifs spécifiques de notre projet. En somme, ce chapitre constituera un guide exhaustif des fondements technologiques de notre réalisation.
+
+\section{Architecture du projet}
+L'architecture de ce projet repose sur le modèle des microservices, une approche robuste et évolutive, particulièrement adaptée au traitement des transactions financières conformes à la norme ISO 8583. Cette conception structure l'application en une collection de services indépendants et spécialisés, facilitant la maintenance, assurant une meilleure tolérance aux pannes et permettant des déploiements rapides et flexibles.
+
+\begin{figure}[H]
+  \centering
+  \makebox[\textwidth][c]{%
+    \includegraphics[width=1.2\textwidth]{figures/images/architerctureGlobal.png}
+  }
+  \caption{Architecture technique}
+  \label{fig:architecture-technique}
+\end{figure}
+
+Ce diagramme illustre l'architecture des microservices du simulateur \textbf{HPS (HighTech Payment Systems)}. Il met en évidence les différents composants et leurs interactions au sein du système de simulation des transactions financières ISO 8583.
+
+\subsection{Composants principaux}
+
+\begin{enumerate}[label=\alph*)]
+    \item \textbf{API Gateway} :
+    \begin{itemize}[label=\textbullet]
+        \item Point d'entrée unique pour les requêtes externes provenant du réseau public
+        \item Redirige les appels vers les microservices internes
+        \item Applique des politiques de sécurité, de routage et d'authentification JWT
+        \item Gère et redirige le trafic vers les microservices appropriés
+    \end{itemize}
+
+    \item \textbf{AuthService} :
+    \begin{itemize}[label=\textbullet]
+        \item Gère les opérations liées aux utilisateurs et l'authentification
+        \item Implémente la gestion des rôles (\textit{Admin/Testeur}) avec JWT
+        \item Connecté à sa base de données MySQL pour la persistance des utilisateurs
+        \item Fournit la sécurité centralisée pour tous les microservices
+    \end{itemize}
+
+    \item \textbf{PackingISOService} :
+    \begin{itemize}[label=\textbullet]
+        \item Responsable de la génération et du formatage des messages ISO 8583
+        \item Traite les 49 champs de données selon le standard international
+        \item Envoie les messages générés vers ResponseISOService via FeignClient
+        \item Connecté à sa base de données MySQL pour l'historique des générations
+    \end{itemize}
+
+    \item \textbf{DepackingISOService} :
+    \begin{itemize}[label=\textbullet]
+        \item Analyse et décompose les messages ISO 8583 reçus
+        \item Détecte automatiquement le format (ASCII ou HEX) des messages
+        \item Masque les données sensibles (PAN, Track Data) pour la sécurité
+        \item Envoie les résultats d'analyse vers NotificationService
+    \end{itemize}
+
+    \item \textbf{ResponseISOService} :
+    \begin{itemize}[label=\textbullet]
+        \item Traite et gère les réponses aux messages ISO
+        \item Stocke les statuts des transactions (\textit{SUCCESS/FAILED})
+        \item Envoie des notifications vers NotificationService
+        \item Connecté à sa base de données MySQL pour la persistance des réponses
+    \end{itemize}
+
+    \item \textbf{TransactionHistoryService} :
+    \begin{itemize}[label=\textbullet]
+        \item Gère l'historique complet des transactions traitées
+        \item Fournit les données pour les tableaux de bord et rapports
+        \item Centralise les métriques de performance du système
+        \item Connecté à sa base de données MySQL pour l'archivage
+    \end{itemize}
+
+    \item \textbf{IncidentReportService} :
+    \begin{itemize}[label=\textbullet]
+        \item Gère la déclaration, le suivi et la résolution des incidents
+        \item Détecte automatiquement les causes d'échec des transactions
+        \item Propose des solutions appropriées pour chaque type d'incident
+        \item Envoie des notifications d'incident vers NotificationService
+    \end{itemize}
+
+    \item \textbf{MonitoringService} :
+    \begin{itemize}[label=\textbullet]
+        \item Collecte et analyse les logs de tous les microservices
+        \item Fournit une vue centralisée de l'état du système
+        \item Permet le filtrage et la recherche dans les logs
+        \item Connecté à sa base de données MySQL pour la persistance des logs
+    \end{itemize}
+
+    \item \textbf{NotificationService} :
+    \begin{itemize}[label=\textbullet]
+        \item Service centralisé pour l'envoi de notifications
+        \item Reçoit les demandes de notification de tous les microservices
+        \item Gère l'envoi d'emails aux administrateurs
+        \item Connecté à sa base de données MySQL pour l'historique des notifications
+    \end{itemize}
+
+    \item \textbf{Serveur de découverte (Eureka)} :
+    \begin{itemize}[label=\textbullet]
+        \item Permet aux microservices de s'enregistrer et de se découvrir dynamiquement
+        \item Gère la découverte automatique des services dans l'architecture
+        \item Facilite la communication inter-services sans configuration statique
+    \end{itemize}
+\end{enumerate}
+
+\subsection{Outils de Communication}
+
+\begin{enumerate}[label=\alph*)]
+    \item \textbf{FeignClient} :
+    \begin{itemize}[label=\textbullet]
+        \item Gère la communication synchrone entre les microservices
+        \item Utilisé pour les appels inter-services directs
+        \item Permet l'échange de données en format JSON
+        \item Intégration native avec Eureka pour la découverte de services
+        \item Configuration déclarative des clients HTTP
+    \end{itemize}
+
+    \item \textbf{Service Email Externe} :
+    \begin{itemize}[label=\textbullet]
+        \item Gère l'envoi des notifications par email
+        \item Reçoit les demandes de notification du NotificationService
+        \item Assure la communication avec les administrateurs du système
+    \end{itemize}
+\end{enumerate}
+
+\subsection{Base de Données}
+Chaque microservice dispose de sa propre base de données MySQL, garantissant :
+\begin{itemize}[label=\textbullet]
+    \item L'indépendance des données entre services
+    \item La scalabilité horizontale de chaque service
+    \item La résilience en cas de panne d'un service
+    \item La conformité aux standards de sécurité bancaire
+    \item La traçabilité complète des opérations
+\end{itemize}
+
+Cette architecture microservices offre une solution robuste, scalable et maintenable pour la simulation des transactions financières ISO 8583, avec une séparation claire des responsabilités et une communication efficace entre les composants.
+
+\subsection{Les Composants Principaux de l'Architecture}
+
+L'écosystème est organisé autour de quatre grandes catégories de composants : la passerelle d'accès, l'infrastructure de communication, les services métier, et la couche de persistance des données.
+
+\begin{enumerate}[label=\textbf{\alph*.}]
+    \item \textbf{La Porte d'Entrée : \texttt{GatewayService} (Passerelle API)} 
+    
+    \begin{itemize}[label=\textbullet]
+        \item \textbf{Rôle :} Point d'entrée unique et sécurisé pour toutes les requêtes. 
+        \item \textbf{Fonctions principales :}
+        \begin{itemize}[label=$\triangleright$]
+            \item Routage intelligent des requêtes vers les microservices concernés.
+            \item Filtrage de sécurité centralisé (validation des jetons JWT).
+            \item Abstraction de l'architecture interne.
+        \end{itemize}
+        \item \textbf{Justification :} Simplifie la sécurité, réduit le couplage client-serveur et facilite l'évolution de l'architecture.
+    \end{itemize}
+
+    \item \textbf{Infrastructure de Communication et de Gestion}
+
+    \begin{table}[H]
+    \centering
+    \rowcolors{2}{blue!10!white}{white}
+    \renewcommand{\arraystretch}{1.5}
+    \begin{tabular}{|>{\bfseries}m{4cm}|m{9cm}|}
+    \hline
+    \rowcolor{blue!20}
+    \textbf{Composant} & \textbf{Fonctionnalités} \\
+    \hline
+    \texttt{eureka-server} (Service Discovery) & 
+    \begin{itemize}[label=\textbullet]
+        \item Sert d'annuaire dynamique pour enregistrer et localiser les microservices.
+        \item Permet la découverte automatique et l'équilibrage de charge.
+        \item Permet la tolérance aux pannes grâce à une résolution dynamique des services.
+    \end{itemize} \\
+    \hline
+    \texttt{FeignClient} (Client HTTP Interne) & 
+    \begin{itemize}[label=\textbullet]
+        \item Client HTTP déclaratif pour la communication REST entre microservices.
+        \item Utilise les identifiants logiques via Eureka pour localiser dynamiquement les services.
+        \item Applique un \textit{client-side load balancing} pour distribuer les requêtes entre instances.
+    \end{itemize} \\
+    \hline
+    API REST et JSON & 
+    \begin{itemize}[label=\textbullet]
+        \item Utilisation du style REST pour les communications interservices.
+        \item Format JSON pour l'échange de données : léger, lisible et largement supporté.
+    \end{itemize} \\
+    \hline
+    \end{tabular}
+    \caption{Composants et outils utilisés pour la communication entre microservices}
+    \label{tab:infrastructure-components}
+    \end{table}
+
+    \item \textbf{Les services métier : Le cœur du système}
+
+    \begin{itemize}[label=\textbullet]
+        \item \textbf{\texttt{auth-service2}} : Authentifie les utilisateurs et génère les jetons JWT.
+        \item \textbf{Services ISO 8583} : Traitement complet de la norme ISO :
+        \begin{itemize}[label=$\triangleright$]
+            \item \texttt{PackingISOService} : Encode les messages ISO.
+            \item \texttt{DepackingISOService} : Décode les messages ISO.
+            \item \texttt{ResponseISOService} : Valide les transactions et retourne la réponse.
+        \end{itemize}
+        \item \textbf{\texttt{TransactionHistoryService}} : Gère l'historique des opérations ISO pour audit et traçabilité.
+        \item \textbf{\texttt{NotificationService}} : Envoie des messages aux utilisateurs (email, etc.).
+        \item \textbf{\texttt{MonitoringService}} : Supervise la santé des microservices (logs, alertes, métriques).
+    \end{itemize}
+
+    \item \textbf{La couche de persistance des données}
+
+    \begin{itemize}[label=\textbullet]
+        \item \textbf{Technologie :} Base de données relationnelle \texttt{MySQL}.
+        \item \textbf{Approche :} Chaque microservice dispose de sa propre base de données MySQL pour garantir l'indépendance des données et la scalabilité.
+    \end{itemize}
+
+\end{enumerate}
+
+\section{Architectures : monolithique vs microservices}
+L'architecture logicielle peut être conçue selon différents paradigmes. Les deux approches les plus courantes sont l'architecture monolithique et l'architecture microservices. Chacune présente des avantages et des inconvénients selon le contexte et les besoins de l'application.
+
+\begin{table}[H]
+\centering
+\rowcolors{2}{blue!10!white}{white}
+\renewcommand{\arraystretch}{1.5}
+\begin{tabular}{|>{\bfseries}m{5cm}|m{10.5cm}|}
+\hline
+\rowcolor{blue!20}
+\textbf{Architecture Monolithique} & \textbf{Architecture Microservices} \\
+\hline
+Une seule application regroupant tous les modules & Application composée de plusieurs services indépendants \\
+\hline
+Déploiement unique & Déploiement indépendant de chaque service \\
+\hline
+Difficulté de mise à l'échelle sélective & Scalabilité fine selon les besoins de chaque service \\
+\hline
+Risque élevé de panne globale & Tolérance accrue grâce à l'isolation des services \\
+\hline
+Facile à développer et tester au début & Complexité initiale plus élevée (infrastructure, communication) \\
+\hline
+\end{tabular}
+\caption{Comparaison entre l'architecture monolithique et microservices}
+\label{tab:comparaison-architectures-simple}
+\end{table}
+
+\subsection{Comparaison entre l'architecture Monolithique et Microservices}
+
+\begin{figure}[H]
+  \centering
+     \includegraphics[width=1\textwidth]{figures/images/Microservices.png}
+  \caption{Illustration comparative des architectures Monolithique et Microservices. \cite{martin-fowler-microservices}}
+  \label{fig:microservices_vs_monolithique}
+\end{figure}
+
+L'image ci-dessus offre une représentation visuelle claire et pédagogique des deux grandes approches architecturales utilisées dans le développement d'applications : l'architecture \textbf{monolithique} (à gauche) et l'architecture \textbf{microservices} (à droite).
+
+\paragraph*{Architecture Monolithique} 
+Dans ce modèle traditionnel, l'ensemble des composants de l'application — \textit{interface utilisateur}, \textit{logique métier}, et \textit{couche d'accès aux données} — sont étroitement intégrés au sein d'un même bloc logiciel. L'application repose sur une base de données unique, partagée entre tous les modules. Cette architecture présente l'avantage d'être simple à développer et à déployer dans les premières phases du projet. Toutefois, elle présente plusieurs limites à mesure que l'application évolue : difficulté de mise à l'échelle, faible résilience, déploiement global en cas de modification mineure, et complexité de maintenance \cite{martin-fowler-microservices}.
+
+\paragraph*{Architecture Microservices}
+À l'inverse, l'architecture microservices adopte une approche distribuée. Chaque fonctionnalité de l'application est encapsulée dans un microservice indépendant, doté de sa propre base de données et capable de communiquer avec les autres via des interfaces bien définies (souvent des API REST). L'interface utilisateur centralise les échanges avec les différents services. Cette modularité offre de nombreux avantages : meilleure scalabilité, facilité de maintenance, indépendance des équipes de développement, et possibilité de déploiements continus \cite{martin-fowler-microservices}.
+
+\vspace{0.5cm}
+
+\subsection{Avantages et inconvénients}
+Afin de mieux appréhender les différences fondamentales entre ces deux approches, le tableau ci-dessous présente une comparaison synthétique des principaux avantages et inconvénients de l'architecture monolithique et de l'architecture microservices. Cette comparaison permet de mettre en lumière les atouts et les limites de chaque modèle selon les critères de maintenabilité, de scalabilité, de complexité et de flexibilité.
+
+\begin{table}[H]
+\centering
+\rowcolors{2}{blue!10!white}{white}
+\renewcommand{\arraystretch}{1.5}
+\begin{tabular}{|>{\bfseries}m{5.5cm}|m{8cm}|}
+\hline
+\rowcolor{blue!20}
+\textbf{Architecture Monolithique} & \textbf{Architecture Microservices} \\
+\hline
+\textbf{Avantages} & \textbf{Avantages} \\
+\hline
+$\bullet$ Développement initial plus rapide et simple. & $\bullet$ Haute scalabilité des composants. \\
+$\bullet$ Facilité de déploiement dans les petites équipes. & $\bullet$ Indépendance des services et des équipes. \\
+$\bullet$ Moins de complexité technique au départ. & $\bullet$ Meilleure tolérance aux pannes (isolation des erreurs). \\
+ & $\bullet$ Déploiement continu et évolutivité facilitée. \\
+\hline
+\textbf{Inconvénients} & \textbf{Inconvénients} \\
+\hline
+$\bullet$ Difficulté de maintenance à long terme. & $\bullet$ Complexité accrue en termes de gestion des services. \\
+$\bullet$ Impact global en cas de bug ou mise à jour. & $\bullet$ Nécessite une infrastructure plus élaborée (orchestration, monitoring). \\
+$\bullet$ Faible scalabilité horizontale. & $\bullet$ Gestion complexe des bases de données distribuées. \\
+$\bullet$ Rigidité de l'architecture avec la croissance du projet. & $\bullet$ Surcharge liée à la communication entre services. \\
+\hline
+\end{tabular}
+\caption{Comparaison des avantages et inconvénients des architectures monolithique et microservices \cite{martin-fowler-microservices}}
+\label{tab:comparaison_architectures}
+\end{table}
+
+\section{Langages de programmation}
+\subsection{Java Enterprise Edition}
+\textbf{JEE} est une extension de la plateforme standard Java SE principalement destinée au développement d'applications web. Elle permet de faciliter le développement d'applications d'entreprise en fournissant un environnement d'exécution et des composants sous forme d'API \cite{Jee}.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=5cm]{figures/images/javaee-logo-0729BC7470-seeklogo.com.png}
+\caption{Logo du Language JEE \cite{Jee}}
+\label{fig:javaee-logo}
+\end{figure}
+
+\section{Technologies côté serveur}
+
+Pour assurer la robustesse, la performance et la modularité de la couche serveur de notre architecture logicielle, nous avons opté pour des technologies éprouvées issues principalement de l'écosystème Java. Ces outils nous ont permis de mettre en place une application backend moderne, sécurisée et extensible, tout en facilitant le développement rapide et structuré des fonctionnalités. La présente section détaille les principaux frameworks, bibliothèques et composants techniques utilisés côté serveur.
+
+\subsection{Framework Spring Boot}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=5cm]{figures/spring.png}
+\caption{Logo de Spring Boot \cite{springboot}}
+\label{fig:spring-boot-logo}
+\end{figure}
+
+Spring Boot est un projet ou un micro Framework qui a notamment pour but de faciliter la configuration d'un projet Spring et de réduire le temps alloué au démarrage d'un projet. Spring a regroupé les dépendances Maven de Spring dans des « méga dépendances » afin de faciliter la gestion de celles-ci \cite{springboot}.
+
+\subsection{Spring Security}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=5cm]{figures/images/1_vQ5I4c8inMOoUfGB7BunCQ.png}
+\caption{Logo de Spring Security \cite{sprsec}}
+\label{fig:spring-security-logo}
+\end{figure}
+
+Spring Security est un framework puissant utilisé pour sécuriser les applications web et les services REST dans l'écosystème Spring. L'une de ses fonctionnalités clés est l'authentification avec JSON Web Tokens (JWT). Cette méthode d'authentification moderne permet de sécuriser les échanges d'informations entre un client et un serveur en utilisant des jetons cryptographiquement signés. Lorsqu'un utilisateur se connecte avec succès, le serveur génère un JWT contenant des données d'identification et de rôles. Ce jeton est ensuite envoyé au client qui l'inclut dans les en-têtes de chaque requête ultérieure. Le serveur peut ainsi vérifier l'intégrité du jeton et autoriser l'accès en fonction des informations qu'il contient. L'utilisation de JWT avec Spring Security offre une méthode robuste et efficace pour gérer l'authentification et l'autorisation, améliorant ainsi la sécurité globale des applications \cite{sprsec}.
+
+\subsection{Spring Data JPA}
+Spring Data JPA a pour mission de fournir un modèle de programmation Spring familier et cohérent pour l'accès aux données tout en conservant les caractéristiques spéciales du magasin de données sous-jacent. Il facilite l'utilisation des technologies d'accès aux données, des bases de données relationnelles et non relationnelles, des cadres de réduction de la carte et des services de données en nuage \cite{springdata}.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=4cm]{figures/images/spring-data.png}
+\caption{Logo de Spring Data \cite{springdata}}
+\label{fig:spring-data-logo}
+\end{figure}
+
+\subsection{Traitement du protocole à simuler : le Framework \texttt{JPOS}}
+
+\texttt{JPOS} est un framework open-source, conçu pour des systèmes d'entreprise critiques, qui implémente la norme ISO pour les messages de transactions par carte, notamment les protocoles \textbf{ISO-8583} et \textbf{ISO-20022} \cite{jpos}.
+
+Cette norme internationale définit :
+\begin{itemize}[label=\textbullet]
+    \item une interface commune permettant l'échange de messages de transaction financière entre acquéreurs et émetteurs de cartes ;
+    \item la structure des messages, le format et le contenu des éléments de données ;
+    \item ainsi que les valeurs possibles de ces éléments.
+\end{itemize}
+
+Basé sur la plateforme Java, \texttt{JPOS} fournit un pont logiciel entre les messages structurés selon la norme ISO 8583 et les systèmes internes de traitement des institutions financières. Il constitue ainsi une base de messagerie essentielle pour les systèmes qui traitent des transactions électroniques réalisées via des cartes de paiement.
+
+Que l'organisation traite des millions de transactions par jour ou quelques dizaines de milliers, \texttt{JPOS} peut être mis en œuvre pour concevoir une solution financière fiable, performante et capable de documenter précisément toutes les données liées aux transactions. Néanmoins, l'intégration de \texttt{JPOS} au sein d'un système existant peut représenter un effort de développement conséquent pour assurer une mise en œuvre efficace et fluide.
+
+\textbf{Dans notre projet}, nous avons fait le choix d'utiliser \texttt{JPOS} plutôt que de coder manuellement le traitement des messages ISO, car il s'agit du seul framework open-source spécialisé dans la gestion complète des protocoles \textbf{ISO 8583} et \textbf{ISO 20022}. Ce choix nous a permis de \textbf{gagner un temps précieux} tout en garantissant une conformité stricte aux spécifications du protocole \cite{jpos}.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=5cm]{figures/images/JPOS.png}
+\caption{Logo JPOS \cite{jpos}}
+\label{fig:jpos-logo}
+\end{figure}
+
+\subsection{JasperReports et JasperSoft Studio}
+
+JasperReports est une bibliothèque Java open-source dédiée à la génération de rapports \cite{jasperreports-official}. Elle permet de produire des documents riches et variés (PDF, HTML, XML, CSV, XLS, RTF, TXT) à partir de données issues de différentes sources. JasperSoft Studio, quant à lui, est un environnement graphique intégré offrant une interface intuitive de type \textit{drag-and-drop} pour concevoir et personnaliser ces rapports \cite{jasperreports-guide}.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=4cm]{figures/images/jaspersoft_studio_icon.jpg}
+\caption{JasperSoft Logo \cite{jasperreports-guide}}
+\label{fig:jaspersoft-logo}
+\end{figure}
+
+\subsection{Infrastructure (Architecture Microservices)}
+
+L'architecture de notre infrastructure repose sur plusieurs composants clés de l'écosystème \texttt{Spring Cloud}, chacun jouant un rôle bien défini dans le fonctionnement global du système. Voici les principaux éléments utilisés :
+
+\vspace{0.5cm}
+
+\begin{enumerate}[label=\textbf{\alph*.}]
+
+\item \textbf{Spring Cloud Gateway}
+
+\begin{figure}[H]
+  \centering
+\includegraphics[width=4cm]{figures/images/SpringCloud.png}
+  \caption{\textbf{Spring Cloud Gateway \cite{springcloudgateway}}}
+  \label{fig:spring-cloud-gateway}
+\end{figure}
+
+\textbf{Spring Cloud Gateway} constitue l'implémentation concrète du \textit{GatewayService}. Il agit comme un point d'entrée unique pour l'ensemble des microservices. Il est chargé du routage intelligent des requêtes HTTP, de l'application des règles de sécurité, ainsi que de la gestion des filtres (authentification, journalisation, etc.). Ce composant assure ainsi une couche d'abstraction entre les clients et les services internes \cite{springcloudgateway}.
+
+\vspace{0.4cm}
+
+\item \textbf{Spring Cloud Netflix Eureka}
+
+\begin{figure}[H]
+  \centering
+\includegraphics[width=4cm]{figures/images/Netflix.jpg}
+  \caption{\textbf{Spring Cloud Netflix Eureka \cite{springcloudeureka}}}
+  \label{fig:eureka-logo}
+\end{figure}
+
+\textbf{Eureka Server}, fourni par Spring Cloud Netflix, est utilisé comme registre de services. Il permet à chaque microservice de s'enregistrer dynamiquement et de découvrir les autres services sans connaissance préalable de leur emplacement physique. Cela permet une communication résiliente, une auto-réparation et une grande flexibilité dans l'évolution de l'infrastructure \cite{springcloudeureka}.
+
+\vspace{0.4cm}
+
+\item \textbf{JWT}
+
+\begin{figure}[H]
+  \centering
+\includegraphics[width=4cm]{figures/images/JWT.png}
+  \caption{\textbf{JWT - JSON Web Token} \cite{jwt_io}}
+  \label{fig:jwt-logo}
+\end{figure}
+
+\textbf{JWT} est une norme de tokenisation utilisée pour sécuriser les communications entre les microservices. Dans notre projet, c'est le service d'authentification (\texttt{auth-service2}) qui est responsable de la génération des tokens JWT. Ces jetons contiennent les informations d'identité de l'utilisateur et permettent une authentification stateless, sécurisée et compatible avec les architectures distribuées \cite{jwt_io}.
+
+\end{enumerate}
+
+\section{Technologies Frontend}
+
+Le frontend constitue la partie visible de l'application, celle avec laquelle interagit l'utilisateur. Dans ce projet, plusieurs technologies ont été utilisées pour construire une interface moderne, réactive et maintenable.
+
+\subsection{Angular}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=4cm]{figures/images/Angular.png}
+    \caption{Logo de Angular \cite{angular}}
+    \label{fig:angular-logo}
+\end{figure}
+
+Angular est un framework JavaScript open-source développé par Google, basé sur le langage TypeScript. Il permet de construire des applications web monopages (SPA) en offrant une structure robuste, une modularité poussée et un riche écosystème de composants réutilisables. Il facilite également la liaison de données (data binding), la navigation (routing) et la gestion des états \cite{angular}.
+
+\subsection{TypeScript}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=4cm]{figures/images/Typescript.png}
+    \caption{Logo de TypeScript \cite{typescript}}
+    \label{fig:typescript-logo}
+\end{figure}
+
+TypeScript est un sur-ensemble de JavaScript qui ajoute un typage statique au langage. Il a été conçu pour faciliter la détection d'erreurs à la compilation et pour améliorer la maintenabilité du code dans les grandes applications. Il est largement utilisé dans les projets Angular \cite{typescript}.
+
+\subsection{HTML5}
+
+HTML5 est la dernière version du langage de balisage utilisé pour structurer les pages web. Il permet d'incorporer du contenu multimédia (vidéos, audios, images), de définir des formulaires interactifs et de structurer le contenu de manière sémantique pour améliorer l'accessibilité et le référencement \cite{html5}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=4cm]{figures/images/html.png}
+    \caption{Logo de HTML5 \cite{html5}}
+    \label{fig:html5-logo}
+\end{figure}
+
+\subsection{CSS3 / Sass}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=3cm]{figures/images/CSS3.png}
+    \caption{Logo de CSS3 \cite{css3}}
+    \label{fig:css3-logo}
+\end{figure}
+
+CSS3 est un langage de feuille de style permettant de définir la présentation des documents HTML \cite{css3}. Il offre des fonctionnalités avancées telles que les animations, les transitions, les grilles (CSS Grid) et les flexbox. Sass, un préprocesseur CSS, améliore la productivité en introduisant des variables, des fonctions, et des modules réutilisables \cite{sass}.
+
+\subsection{Maven}
+\begin{figure}[H]
+\centering
+\includegraphics[width=4cm]{figures/maven.png}
+\caption{Logo Maven \cite{maven}}
+\label{fig:maven-logo}
+\end{figure}
+
+Maven utilise un modèle connu sous le nom de Project Object Model (POM) pour décrire l'ensemble de projet, ses dépendances et les plugins utilisés dans le projet. Il est livré avec un grand nombre de tâches prédéfinies, comme la compilation de code Java \cite{maven}.
+
+\subsection{Git}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=4cm]{figures/git.png}
+\caption{Logo de Git \cite{git}}
+\label{fig:git-logo}
+\end{figure}
+
+Git est un système de contrôle de version pour suivre les modifications apportées aux fichiers informatiques et coordonner le travail sur ces fichiers entre plusieurs personnes. Il est principalement utilisé pour le développement de logiciels, mais il peut être utilisé pour suivre les changements dans tout ensemble de fichiers.
+
+En tant que système de contrôle de révision distribué, il est destiné à la vitesse, l'intégrité des données et le support pour les développements non linéaires (milliers de branches parallèles) \cite{git}.
+
+\section{Outil de gestion de projet}
+\subsection{GitHub}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=4cm]{figures/téléchargement.png}
+\caption{Logo de GitHub \cite{github}}
+\label{fig:github-logo}
+\end{figure}
+
+Dans le cadre de la gestion de notre projet, nous avons eu recours à des outils de gestion de version et de collaboration afin d'assurer un suivi rigoureux du code, de faciliter le travail en équipe, et de maintenir un historique clair des modifications apportées. Ces outils jouent un rôle essentiel dans la coordination des tâches, le contrôle des versions du code source et la gestion des contributions. La section suivante détaille l'outil principal utilisé dans ce contexte. 
+
+GitHub est une plateforme de développement collaboratif basée sur Git, un système de contrôle de version. Elle permet aux développeurs de stocker, partager et collaborer sur du code source, en facilitant la gestion des versions, le suivi des problèmes, et la création de demandes de tirage pour proposer des modifications au code principal.
+
+GitHub est largement utilisé dans la communauté des développeurs pour son interface conviviale, ses fonctionnalités puissantes, et sa capacité à faciliter la collaboration et le partage de code \cite{github}.
+
+\section{Logiciels et IDE}
+
+Dans le cadre du développement de notre projet, plusieurs environnements de développement intégrés (IDE) et outils logiciels ont été utilisés afin de faciliter l'écriture, le test, le débogage et le déploiement des différentes composantes du système. Ces outils ont été choisis pour leur robustesse, leur convivialité, et leur compatibilité avec les technologies utilisées, notamment Java, Angular et les bases de données. La section suivante présente les principaux logiciels employés.
+
+\subsection{IntelliJ}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=3cm]{figures/IntelliJ.png}
+\caption{Logo de IntelliJ \cite{intellij}}
+\label{fig:intellij-logo}
+\end{figure}
+
+IntelliJ IDEA également appelé « IntelliJ », « IDEA » ou « IDJ » est un environnement de développement intégré, destiné au développement de logiciels informatiques reposant sur la technologie Java.
+
+Il est développé par JetBrains (anciennement « IntelliJ ») et disponible en deux versions, l'une communautaire, open source, sous licence Apache 2 et l'autre propriétaire, protégée par une licence commerciale. Tous deux supportent les langages de programmation Java, Kotlin, Groovy et Scala \cite{intellij}.
+
+\subsection{Postman}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=4cm]{figures/postman.png}
+\caption{Logo de Postman \cite{postman}}
+\label{fig:postman-logo}
+\end{figure}
+
+Postman est une application permettant de tester des API, créée en 2012 par Abhinav Asthana, Ankit Sobti et Abhijit Kane à Bangalore pour répondre à une problématique de test d'API partageable. D'abord module complémentaire de Google Chrome, puis client lourd, et finalement client léger \cite{postman}.
+
+\subsection{Visual Studio Code}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=5cm]{figures/raw.png}
+\caption{Logo de Visual Studio Code \cite{visualstudiocode}}
+\label{fig:vscode-logo}
+\end{figure}
+
+VS Code de Microsoft est un éditeur de code populaire depuis son lancement en 2015. Connu pour son interface intuitive et ses fonctionnalités puissantes, il offre une expérience de développement légère et rapide. Grâce à sa prise en charge étendue des langages de programmation et à sa richesse en extensions, il convient à tous les développeurs, quel que soit leur niveau d'expérience. Son intégration transparente avec Git simplifie le suivi des modifications et la collaboration sur les projets. Avec son écosystème dynamique d'extensions, VS Code permet une personnalisation facile selon les besoins spécifiques des développeurs. Disponible sur Windows, macOS et Linux, il offre une expérience de développement cohérente et productive sur toutes les plateformes \cite{visualstudiocode}.
+
+\subsection{MySQL Workbench}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=4cm]{figures/images/MySqlWorkbench.jpg}
+\caption{Logo de MySQL Workbench \cite{mysqlworkbench}}
+\label{fig:mysql_workbench}
+\end{figure}
+
+MySQL Workbench est un outil de modélisation de bases de données visuel qui permet aux développeurs de concevoir, de générer et de gérer des bases de données MySQL de manière efficace. Il offre une interface intuitive pour la création de schémas de base de données, la conception de tables, l'exécution de requêtes SQL et bien plus encore. Avec des fonctionnalités telles que la visualisation des schémas, la gestion des utilisateurs et les outils de sauvegarde, MySQL Workbench simplifie le processus de développement et de gestion des bases de données MySQL \cite{mysqlworkbench}.
+
+\section*{Conclusion}
+\addcontentsline{toc}{section}{Conclusion}
+Dans ce chapitre, nous avons pris le temps de vous présenter les outils et les technologies que nous avons soigneusement sélectionnés pour créer notre projet. Chacun de ces éléments a été choisi en fonction de son utilité pour atteindre notre objectif final. Ces ressources sont diverses, allant des langages de programmation aux outils informatiques spécialisés. Chacun d'eux a un rôle spécifique dans la construction, l'amélioration et la mise en place de notre solution.
+
+Dans le prochain chapitre, nous vous montrerons comment nous avons utilisé ces éléments pour concrétiser notre projet.

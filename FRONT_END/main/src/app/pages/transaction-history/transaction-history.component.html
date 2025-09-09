@@ -40,12 +40,8 @@
         </mat-form-field>
 
         <mat-form-field appearance="outline">
-          <mat-label>Source</mat-label>
-          <mat-select formControlName="source">
-            <mat-option *ngFor="let option of sourceOptions" [value]="option.value">
-              {{ option.viewValue }}
-            </mat-option>
-          </mat-select>
+          <mat-label>RRN</mat-label>
+          <input matInput formControlName="rrn" placeholder="Saisissez le RRN">
         </mat-form-field>
 
         <mat-form-field appearance="outline">

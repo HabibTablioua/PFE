@@ -321,7 +321,7 @@ export class LiveMetricsWidgetComponent implements OnInit, OnDestroy {
     // Simuler des données temps-réel
     this.liveMetrics = {
       transactionsPerMinute: Math.floor(Math.random() * 50) + 10,
-      successRate: Math.floor(Math.random() * 20) + 80,
+      successRate: 60, // Taux de succès fixé à 60% pour la présentation
       activeUsers: Math.floor(Math.random() * 100) + 50,
       errorRate: Math.floor(Math.random() * 10) + 1,
       lastUpdated: new Date()

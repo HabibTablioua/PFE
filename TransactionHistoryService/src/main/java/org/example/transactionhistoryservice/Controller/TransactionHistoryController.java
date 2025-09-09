@@ -46,12 +46,12 @@ public class TransactionHistoryController {
     public List<TransactionHistoryDTO> getAll(
             @RequestParam(required = false) String mti,
             @RequestParam(required = false) String format,
-            @RequestParam(required = false) String source,
+            @RequestParam(required = false) String rrn,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate,
             @RequestParam(required = false) String searchTerm
     ) {
-        List<TransactionHistory> transactions = historyService.getFilteredTransactions(mti, format, source, startDate, endDate, searchTerm);
+        List<TransactionHistory> transactions = historyService.getFilteredTransactions(mti, format, rrn, startDate, endDate, searchTerm);
         return transactions.stream().map(TransactionHistoryDTO::new).collect(Collectors.toList());
     }
 
@@ -273,12 +273,12 @@ public class TransactionHistoryController {
     public List<TransactionHistory> search(
             @RequestParam(required = false) String mti,
             @RequestParam(required = false) String format,
-            @RequestParam(required = false) String source,
+            @RequestParam(required = false) String rrn,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime start,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime end,
             @RequestParam(required = false) String searchTerm
     ) {
-        return historyService.getFilteredTransactions(mti, format, source, start, end, searchTerm);
+        return historyService.getFilteredTransactions(mti, format, rrn, start, end, searchTerm);
     }
 
     @GetMapping("/per-day")

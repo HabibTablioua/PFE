@@ -1,0 +1,81 @@
+\documentclass[12pt,a4paper,francais,oneside]{scrbook}
+\usepackage[utf8]{inputenc}
+
+\usepackage[style=ieee]{biblatex}
+\addbibresource{sources.bib} % Nom de ton fichier .bib
+
+\usepackage{acronym}
+\usepackage[french]{babel}
+\usepackage{styles/main}
+\usepackage{tabularray}
+\usepackage{tabularx}
+\usepackage{enumitem}
+\usepackage{float}
+\usepackage{tocloft} % for customizing ToC, LoF, and LoT
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+
+
+\begin{document}
+
+    \include{garde}
+\setcounter{page}{1}
+\pagenumbering{roman}
+
+   \include{chapitres/bismillah}
+
+    
+    \include{chapitres/dedicaces}
+    
+    \include{chapitres/remerciements}
+
+    \include{chapitres/resume}
+    
+    \include{chapitres/abstract}
+    
+    
+    
+
+\renewcommand{\cftchapleader}{\cftdotfill{\cftdotsep}}
+\renewcommand{\cftchapfont}{\bfseries}
+\renewcommand{\cftchappresnum}{Chapitre }
+\renewcommand{\cftchapaftersnum}{ : }
+\renewcommand{\cftchapnumwidth}{6em}
+\renewcommand{\contentsname}{Table des matières}
+\tableofcontents
+
+% Ajouter ici
+\include{chapitres/abreviations}
+
+
+\renewcommand{\cftafterloftitle}{\hfill}
+\renewcommand{\cftfigpresnum}{ Figure       } % put this before the number
+\renewcommand{\cftfigaftersnum}{ : } % put this after number
+\setlength{\cftfignumwidth}{5.5em} % need more space for changed number represenation
+\clearpage
+
+\include{chapitres/figure}
+
+\include{chapitres/Tables}
+
+
+
+\clearpage
+
+
+    
+    \setcounter{page}{1}
+    \pagenumbering{arabic}
+  \include{chapitres/introduction_generale}
+  \include{chapitres/context_general}
+  \include{chapitres/analyse_et_conception}
+  \include{chapitres/Étude_technique}
+  \include{chapitres/Realisation}
+  \include{chapitres/conclusion}
+
+   \addcontentsline{toc}{chapter}{Reference}
+    \adjustmtc
+    \renewcommand{\bibname}{Reference}
+    \printbibliography
+  
+\end{document}

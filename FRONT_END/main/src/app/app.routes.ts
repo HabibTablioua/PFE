@@ -101,6 +101,14 @@ export const routes: Routes = [
         canActivate: [AdminGuard], // Seuls les admins peuvent gérer les cartes
       },
       {
+        path: 'cards/new',
+        loadComponent: () =>
+          import('./pages/cards/card-form-fixed.component').then(
+            (m) => m.CardFormFixedComponent
+          ),
+        canActivate: [AdminGuard], // Seuls les admins peuvent créer des cartes
+      },
+      {
         path: 'ui-components',
         loadChildren: () =>
           import('./pages/ui-components/ui-components.routes').then(

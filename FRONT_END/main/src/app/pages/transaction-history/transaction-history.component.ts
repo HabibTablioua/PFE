@@ -538,10 +538,6 @@ export class TransactionHistoryComponent implements OnInit {
     { value: 'HEX', viewValue: 'HEX' },
   ];
 
-  sourceOptions = [
-    { value: 'FRONTEND', viewValue: 'FRONTEND' },
-    { value: 'BACKEND', viewValue: 'BACKEND' },
-  ];
 
   displayedColumns: string[] = ['select', 'id', 'mti', 'format', 'rrn', 'date', 'status', 'detail', 'actions'];
 
@@ -549,7 +545,7 @@ export class TransactionHistoryComponent implements OnInit {
     this.filterForm = this.fb.group({
       mti: [''],
       format: [''],
-      source: [''],
+      rrn: [''],
       startDate: [null],
       endDate: [null],
       searchTerm: [''],
@@ -581,7 +577,7 @@ export class TransactionHistoryComponent implements OnInit {
 
     if (formValue.mti) params = params.append('mti', formValue.mti);
     if (formValue.format) params = params.append('format', formValue.format);
-    if (formValue.source) params = params.append('source', formValue.source);
+    if (formValue.rrn) params = params.append('rrn', formValue.rrn);
     if (formValue.startDate) params = params.append('startDate', this.formatDateForApi(formValue.startDate));
     if (formValue.endDate) params = params.append('endDate', this.formatDateForApi(formValue.endDate));
     if (formValue.searchTerm) params = params.append('searchTerm', formValue.searchTerm);
@@ -619,7 +615,7 @@ export class TransactionHistoryComponent implements OnInit {
     const formValue = this.filterForm.value;
 
     // Check if all filter fields are empty (including new searchTerm)
-    const isFormEmpty = !formValue.mti && !formValue.format && !formValue.source && !formValue.startDate && !formValue.endDate && !formValue.searchTerm;
+    const isFormEmpty = !formValue.mti && !formValue.format && !formValue.rrn && !formValue.startDate && !formValue.endDate && !formValue.searchTerm;
 
     if (isFormEmpty) {
       this.snackBar.open('Veuillez spécifier au moins un critère de recherche.', 'Fermer', { duration: 3000 });
@@ -636,7 +632,7 @@ export class TransactionHistoryComponent implements OnInit {
     this.filterForm.patchValue({
       mti: '',
       format: '',
-      source: '',
+      rrn: '',
       startDate: null,
       endDate: null,
       searchTerm: '', // Reset search term

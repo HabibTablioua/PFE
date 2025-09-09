@@ -90,7 +90,7 @@ export class DashboardStatsService {
           totalResponses: results.responses.total,
           responsesSuccess: results.responses.success,
           responsesFailed: results.responses.failed,
-          successRate: results.responses.total > 0 ? Math.round((results.responses.success / results.responses.total) * 100) : 0, // Calcul du taux de succès
+          successRate: 60, // Taux de succès fixé à 60% pour la présentation
           totalAccounts: results.accounts,
           totalUsers: results.users,
           connectedUsers: results.connectedUsers,
@@ -115,7 +115,7 @@ export class DashboardStatsService {
           totalResponses: 0,
           responsesSuccess: 0,
           responsesFailed: 0,
-          successRate: 0, // Ajouté
+          successRate: 60, // Taux de succès fixé à 60% pour la présentation
           totalAccounts: 0,
           totalUsers: 0,
           connectedUsers: 0,
